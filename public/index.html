@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>霓裳 · 汉服妆造预约</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600&family=Noto+Sans+SC:wght@100;200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#FFF8F6;--white:#FFFFFF;
+  --ink:#2D2226;--ink-70:#6B5C62;--ink-50:#9B8A90;--ink-30:#C8B8BE;--ink-15:#E5D8DC;--ink-08:#F3ECF0;--ink-04:#FAF5F7;
+  --rose:#C4788A;--rose-light:#F2E0E6;--rose-lighter:#FAF0F3;--rose-dark:#A85A6C;
+  --gold:#C9A87C;--gold-light:#F5EDE0;
+  --green:#7BAF8A;
+  --serif:'Noto Serif SC','Cormorant Garamond',Georgia,serif;
+  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
+  --display:'Cormorant Garamond','Noto Serif SC',Georgia,serif;
+}
+
+html{font-size:16px}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--ink);
+  max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  font-weight:300;letter-spacing:.02em;
+}
+
+/* ── Navigation ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,248,246,.88);backdrop-filter:blur(20px);
+  border-bottom:.5px solid var(--ink-15);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;
+}
+.nav-title{
+  font-family:var(--serif);font-size:20px;font-weight:400;
+  letter-spacing:.2em;color:var(--ink);
+}
+.nav-sub{
+  font-family:var(--sans);font-size:9px;font-weight:300;
+  letter-spacing:.35em;color:var(--ink-30);text-transform:uppercase;
+  margin-top:2px;
+}
+.nav-back{
+  font-size:14px;cursor:pointer;color:var(--ink-50);
+  transition:color .3s;background:none;border:none;
+  font-family:var(--sans);font-weight:300;letter-spacing:.05em;
+  display:flex;align-items:center;gap:4px;
+}
+.nav-back:hover{color:var(--ink)}
+
+/* ── Tabs ── */
+.tabs{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:430px;
+  background:rgba(255,248,246,.92);backdrop-filter:blur(24px);
+  border-top:.5px solid var(--ink-15);
+  display:flex;z-index:100;
+  padding:6px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.tabs .tab{
+  flex:1;text-align:center;cursor:pointer;
+  transition:all .3s;padding:4px 0;
+}
+.tabs .tab-icon{
+  font-size:20px;display:block;margin-bottom:3px;
+  opacity:.3;transition:all .3s;
+}
+.tabs .tab-label{
+  font-size:9px;font-weight:300;letter-spacing:.15em;
+  color:var(--ink-30);transition:all .3s;
+}
+.tabs .tab.on .tab-icon{opacity:1}
+.tabs .tab.on .tab-label{color:var(--rose);font-weight:400}
+
+/* ── Page ── */
+.page{padding-bottom:80px;min-height:100vh}
+
+/* ── Hero Banner ── */
+.hero{
+  position:relative;height:200px;overflow:hidden;
+  margin:0 16px;border-radius:12px;margin-top:12px;
+}
+.hero-bg{
+  width:100%;height:100%;object-fit:cover;
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,248,246,0) 0%,rgba(45,34,38,.4) 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:20px;
+}
+.hero-tag{
+  font-size:9px;font-weight:300;letter-spacing:.3em;
+  color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:6px;
+}
+.hero-title{
+  font-family:var(--serif);font-size:22px;font-weight:400;
+  color:#fff;letter-spacing:.1em;
+}
+.hero-sub{
+  font-size:11px;font-weight:200;color:rgba(255,255,255,.8);
+  margin-top:4px;letter-spacing:.05em;
+}
+.hero-cta{
+  position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,.2);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.3);
+  padding:6px 14px;border-radius:20px;
+  font-size:10px;font-weight:300;color:#fff;
+  letter-spacing:.1em;cursor:pointer;
+  transition:all .3s;
+}
+.hero-cta:active{background:rgba(255,255,255,.3)}
+
+/* ── Section Heading ── */
+.heading{padding:24px 20px 12px;}
+.heading-row{
+  display:flex;align-items:baseline;justify-content:space-between;
+}
+.heading-en{
+  font-family:var(--display);font-size:10px;font-weight:300;
+  letter-spacing:.4em;color:var(--ink-30);
+  text-transform:uppercase;margin-bottom:4px;
+}
+.heading-cn{
+  font-family:var(--serif);font-size:17px;font-weight:400;
+  letter-spacing:.1em;color:var(--ink);
+}
+.heading-more{
+  font-size:11px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;cursor:pointer;
+  transition:color .3s;
+}
+.heading-more:hover{color:var(--rose)}
+.heading-line{
+  width:20px;height:1.5px;background:var(--rose-light);
+  margin-top:10px;border-radius:1px;
+}
+
+/* ── Category Pills ── */
+.pills{
+  display:flex;gap:8px;padding:0 20px 16px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  white-space:nowrap;padding:7px 16px;border-radius:20px;
+  font-size:12px;font-weight:300;letter-spacing:.08em;
+  color:var(--ink-50);cursor:pointer;
+  background:var(--ink-04);border:1px solid transparent;
+  transition:all .3s;
+}
+.pill.on{
+  color:var(--rose-dark);background:var(--rose-lighter);
+  border-color:var(--rose-light);
+}
+
+/* ── Photo Grid ── */
+.grid{
+  column-count:2;column-gap:12px;padding:0 16px;
+}
+.card{
+  break-inside:avoid;margin-bottom:12px;
+  cursor:pointer;border-radius:10px;overflow:hidden;
+  background:var(--white);
+  box-shadow:0 1px 8px rgba(45,34,38,.06);
+  transition:transform .3s,box-shadow .3s;
+}
+.card:active{transform:scale(.97)}
+.card img{
+  width:100%;display:block;
+  transition:opacity .4s;
+}
+.card-meta{padding:10px 12px 12px;}
+.card-title{
+  font-family:var(--serif);font-size:13px;font-weight:400;
+  letter-spacing:.06em;color:var(--ink);
+}
+.card-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:8px;
+}
+.card-tags{display:flex;gap:6px;flex:1;overflow:hidden;}
+.card-tag{
+  font-size:10px;font-weight:300;letter-spacing:.05em;
+  color:var(--ink-50);background:var(--ink-04);
+  padding:2px 8px;border-radius:10px;
+}
+.card-heart{
+  font-size:16px;cursor:pointer;transition:transform .3s;
+  opacity:.4;flex-shrink:0;
+}
+.card-heart.liked{opacity:1;transform:scale(1.2);}
+.card-heart:active{transform:scale(1.3)}
+
+/* ── Package List ── */
+.pkg{padding:0 16px;}
+.pkg-item{
+  background:var(--white);border-radius:12px;
+  margin-bottom:16px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(45,34,38,.06);
+  transition:transform .3s;
+}
+.pkg-item:active{transform:scale(.98)}
+.pkg-cover-wrap{position:relative;overflow:hidden;}
+.pkg-cover{
+  width:100%;height:180px;object-fit:cover;
+  display:block;
+}
+.pkg-badge{
+  position:absolute;top:12px;right:12px;
+  font-size:9px;font-weight:400;letter-spacing:.15em;
+  color:#fff;background:var(--rose);
+  padding:4px 12px;border-radius:12px;
+}
+.pkg-fav{
+  position:absolute;top:12px;left:12px;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.8);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;border:none;
+  transition:all .3s;
+}
+.pkg-fav:active{transform:scale(1.2)}
+.pkg-body{padding:16px 16px 4px;}
+.pkg-name{
+  font-family:var(--serif);font-size:16px;font-weight:500;
+  letter-spacing:.08em;
+}
+.pkg-desc{
+  font-size:12px;font-weight:300;color:var(--ink-70);
+  margin-top:6px;line-height:1.7;letter-spacing:.02em;
+}
+.pkg-tags{
+  display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;
+}
+.pkg-tag{
+  font-size:10px;font-weight:300;color:var(--rose);
+  background:var(--rose-lighter);padding:3px 10px;
+  border-radius:10px;letter-spacing:.03em;
+}
+.pkg-bottom{
+  display:flex;justify-content:space-between;
+  align-items:center;padding:12px 16px 16px;
+}
+.pkg-price{
+  font-family:var(--display);font-size:26px;font-weight:400;
+  color:var(--rose-dark);
+}
+.pkg-price .yuan{
+  font-size:14px;font-weight:300;
+}
+.pkg-info{
+  font-size:10px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;margin-top:2px;
+}
+.btn-book{
+  background:var(--ink);color:var(--bg);
+  border:none;border-radius:20px;
+  padding:10px 20px;font-size:12px;font-weight:300;
+  letter-spacing:.1em;cursor:pointer;
+  font-family:var(--sans);
+  transition:all .3s;
+}
+.btn-book:active{opacity:.8;transform:scale(.96)}
+.btn-detail{
+  font-size:11px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;cursor:pointer;
+  background:none;border:none;font-family:var(--sans);
+  padding:10px 16px;display:block;width:100%;
+  text-align:center;border-top:.5px solid var(--ink-08);
+  transition:color .3s;
+}
+.btn-detail:hover{color:var(--rose)}
+
+/* ── Buttons ── */
+.btn{
+  display:block;width:100%;
+  padding:15px;text-align:center;
+  font-family:var(--sans);font-size:13px;font-weight:400;
+  letter-spacing:.15em;color:var(--white);
+  background:var(--ink);border:none;border-radius:24px;
+  cursor:pointer;transition:all .3s;
+}
+.btn:active{opacity:.85;transform:scale(.98)}
+.btn:disabled{background:var(--ink-15);color:var(--ink-30);transform:none}
+.btn-outline{
+  background:transparent;color:var(--ink);
+  border:1px solid var(--ink-15);
+}
+.btn-outline:active{border-color:var(--ink-30)}
+.btn-sm{
+  display:inline-block;width:auto;
+  padding:8px 20px;font-size:11px;border-radius:20px;
+}
+.btn-ghost{
+  background:transparent;color:var(--ink-50);
+  border:1px solid var(--ink-08);
+}
+.btn-rose{
+  background:var(--rose);color:var(--white);
+}
+.btn-rose:active{background:var(--rose-dark)}
+
+/* ── Booking Steps ── */
+.steps{
+  display:flex;align-items:center;justify-content:center;
+  padding:20px 24px 8px;gap:12px;
+}
+.step-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--ink-15);transition:all .4s;
+}
+.step-dot.on{background:var(--rose);transform:scale(1.2)}
+.step-dot.done{background:var(--ink-30)}
+.step-label{
+  font-size:9px;font-weight:300;letter-spacing:.15em;
+  color:var(--ink-30);transition:all .3s;
+}
+.step-label.on{color:var(--rose);font-weight:400}
+.step-label.done{color:var(--ink-50)}
+.step-line{
+  width:32px;height:1.5px;background:var(--ink-15);
+  transition:background .4s;border-radius:1px;
+}
+.step-line.done{background:var(--rose-light)}
+
+/* ── Calendar ── */
+.cal{padding:20px;}
+.cal-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;
+}
+.cal-head button{
+  background:none;border:none;cursor:pointer;
+  color:var(--ink-50);font-size:20px;
+  transition:color .3s;font-family:var(--sans);font-weight:200;
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+}
+.cal-head button:active{background:var(--ink-04)}
+.cal-month{
+  font-family:var(--serif);font-size:17px;font-weight:400;
+  letter-spacing:.08em;
+}
+.cal-week{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  text-align:center;font-size:10px;font-weight:300;
+  color:var(--ink-30);letter-spacing:.1em;
+  margin-bottom:8px;
+}
+.cal-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  text-align:center;gap:2px;
+}
+.cal-day{
+  padding:10px 0;font-size:14px;font-weight:300;
+  cursor:pointer;transition:all .2s;
+  font-family:var(--display);border-radius:50%;
+}
+.cal-day:hover:not(.off):not(.empty){background:var(--rose-lighter);color:var(--rose)}
+.cal-day.off{color:var(--ink-15);cursor:default}
+.cal-day.today{color:var(--rose);font-weight:500}
+.cal-day.sel{
+  background:var(--rose);color:#fff !important;
+}
+.cal-day.empty{cursor:default}
+
+/* ── Time Slots ── */
+.slots{padding:0 20px;}
+.slots-title{
+  font-size:11px;font-weight:300;letter-spacing:.15em;
+  color:var(--ink-50);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.slots-date{
+  font-size:10px;color:var(--rose);
+  font-family:var(--serif);letter-spacing:.05em;
+}
+.slot-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+.slot{
+  padding:13px 0;text-align:center;
+  font-size:13px;font-weight:300;letter-spacing:.05em;
+  border:1px solid var(--ink-08);border-radius:10px;
+  cursor:pointer;transition:all .3s;
+  color:var(--ink-70);background:var(--white);
+}
+.slot:active:not(.gone){transform:scale(.96)}
+.slot.on{
+  background:var(--rose);color:#fff;
+  border-color:var(--rose);
+}
+.slot.gone{
+  color:var(--ink-15);cursor:not-allowed;
+  text-decoration:line-through;border-color:transparent;
+  background:var(--ink-04);
+}
+
+/* ── Form ── */
+.field{padding:0 20px;margin-bottom:18px;}
+.field-label{
+  font-size:10px;font-weight:300;letter-spacing:.15em;
+  color:var(--ink-50);margin-bottom:6px;
+}
+.field-value{
+  font-size:14px;font-weight:300;letter-spacing:.03em;
+  padding:12px 14px;background:var(--ink-04);border-radius:10px;
+}
+.field input{
+  width:100%;border:1px solid var(--ink-08);outline:none;
+  font-size:14px;font-weight:300;letter-spacing:.03em;
+  padding:12px 14px;font-family:var(--sans);
+  background:var(--white);color:var(--ink);
+  border-radius:10px;transition:border-color .3s;
+}
+.field input::placeholder{color:var(--ink-30);font-weight:200}
+.field input:focus{border-color:var(--rose)}
+.field-hint{
+  font-size:10px;font-weight:300;color:var(--ink-50);
+  margin-top:6px;letter-spacing:.03em;
+}
+
+/* ── Cancel Policy Banner ── */
+.policy-banner{
+  margin:0 20px;padding:12px 16px;
+  background:var(--rose-lighter);border-radius:10px;
+  display:flex;gap:10px;align-items:flex-start;
+  margin-bottom:20px;
+}
+.policy-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.policy-text{
+  font-size:11px;font-weight:300;color:var(--ink-70);
+  line-height:1.6;letter-spacing:.02em;
+}
+.policy-text b{color:var(--rose-dark);font-weight:500}
+
+/* ── Pay Summary ── */
+.summary{margin:0 20px;}
+.summary-row{
+  display:flex;justify-content:space-between;
+  padding:13px 0;border-bottom:.5px solid var(--ink-08);
+  font-size:13px;font-weight:300;
+}
+.summary-row .k{color:var(--ink-50)}
+.summary-total{
+  display:flex;justify-content:space-between;
+  padding:16px 0;font-family:var(--serif);font-size:22px;font-weight:400;
+  color:var(--rose-dark);
+}
+.pay-note{
+  text-align:center;padding:12px 20px;
+  font-size:10px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;
+}
+
+/* ── Order Card ── */
+.ord{
+  margin:0 16px;background:var(--white);
+  border-radius:12px;overflow:hidden;margin-bottom:14px;
+  box-shadow:0 1px 8px rgba(45,34,38,.05);
+}
+.ord-head{
+  padding:10px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:.5px solid var(--ink-08);
+}
+.ord-no{
+  font-size:10px;font-weight:300;color:var(--ink-50);
+  font-family:'SF Mono',monospace;letter-spacing:.03em;
+}
+.ord-status{
+  font-size:9px;font-weight:400;letter-spacing:.1em;
+  padding:3px 10px;border-radius:10px;
+}
+.ord-status-pending{color:var(--rose);background:var(--rose-lighter)}
+.ord-status-booked{color:var(--green);background:rgba(123,175,138,.1)}
+.ord-status-completed{color:var(--ink-50);background:var(--ink-04)}
+.ord-status-cancelled{color:var(--ink-30);background:var(--ink-04)}
+.ord-body{padding:14px 16px}
+.ord-pkg{
+  font-family:var(--serif);font-size:14px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:8px;
+}
+.ord-detail{
+  font-size:12px;font-weight:300;color:var(--ink-70);
+  line-height:1.9;letter-spacing:.02em;
+}
+.ord-detail b{color:var(--ink);font-weight:400}
+.ord-foot{
+  padding:10px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:.5px solid var(--ink-08);
+}
+.ord-amount{
+  font-family:var(--display);font-size:20px;font-weight:400;
+  color:var(--rose-dark);
+}
+.ord-actions{display:flex;gap:8px}
+
+/* ── My Page ── */
+.my-head{
+  padding:36px 20px 28px;text-align:center;
+  background:linear-gradient(180deg,var(--rose-lighter) 0%,var(--bg) 100%);
+}
+.my-avatar{
+  width:68px;height:68px;border-radius:50%;
+  background:var(--white);
+  box-shadow:0 2px 12px rgba(196,120,138,.15);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;
+  font-family:var(--serif);font-size:22px;font-weight:400;
+  color:var(--rose);
+}
+.my-name{
+  font-family:var(--serif);font-size:17px;font-weight:500;
+  letter-spacing:.12em;
+}
+.my-role{
+  font-size:9px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.25em;margin-top:4px;text-transform:uppercase;
+}
+.my-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  margin:20px 16px 0;background:var(--white);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 8px rgba(45,34,38,.05);
+}
+.my-stat{
+  text-align:center;padding:18px 0;cursor:pointer;
+  border-right:.5px solid var(--ink-08);
+  transition:background .2s;
+}
+.my-stat:last-child{border:none}
+.my-stat:active{background:var(--ink-04)}
+.my-stat-num{
+  font-family:var(--display);font-size:22px;font-weight:400;
+  color:var(--rose-dark);
+}
+.my-stat-lbl{
+  font-size:9px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.12em;margin-top:3px;
+}
+.my-links{
+  margin:16px;background:var(--white);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 8px rgba(45,34,38,.05);
+}
+.my-link{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:.5px solid var(--ink-08);
+  cursor:pointer;transition:background .2s;
+  font-size:13px;font-weight:300;letter-spacing:.05em;
+}
+.my-link:last-child{border:none}
+.my-link:active{background:var(--ink-04)}
+.my-link-icon{font-size:16px;margin-right:10px;opacity:.5}
+.my-link-arrow{color:var(--ink-30);font-size:12px}
+
+/* ── Success ── */
+.ok{text-align:center;padding:60px 24px;}
+.ok-icon{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,var(--rose-light),var(--rose));
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;font-size:28px;color:#fff;
+  animation:pop .6s cubic-bezier(.68,-.55,.27,1.55);
+}
+.ok h2{
+  font-family:var(--serif);font-size:22px;font-weight:500;
+  letter-spacing:.08em;margin-bottom:8px;
+}
+.ok-sub{
+  font-size:12px;font-weight:300;color:var(--ink-50);
+  margin-bottom:24px;letter-spacing:.05em;
+}
+.ok-detail{
+  background:var(--white);border-radius:12px;
+  padding:20px;margin:0 auto;max-width:280px;
+  box-shadow:0 1px 8px rgba(45,34,38,.05);
+  text-align:left;
+}
+.ok-row{
+  display:flex;justify-content:space-between;
+  padding:8px 0;font-size:12px;font-weight:300;
+  border-bottom:.5px solid var(--ink-08);
+}
+.ok-row:last-child{border:none}
+.ok-row .k{color:var(--ink-50)}
+.ok-row .v{color:var(--ink);font-weight:400}
+.ok-actions{
+  display:flex;gap:12px;justify-content:center;margin-top:28px;
+}
+.ok-share{
+  margin-top:20px;font-size:11px;font-weight:300;
+  color:var(--ink-50);letter-spacing:.05em;
+  cursor:pointer;
+}
+.ok-share:hover{color:var(--rose)}
+
+/* ── Empty ── */
+.empty{text-align:center;padding:60px 24px}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.empty-title{
+  font-family:var(--serif);font-size:15px;font-weight:400;
+  color:var(--ink);letter-spacing:.08em;margin-bottom:6px;
+}
+.empty-text{
+  font-size:12px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;line-height:1.6;
+}
+.empty-cta{
+  display:inline-block;margin-top:16px;
+  font-size:11px;font-weight:300;color:var(--rose);
+  letter-spacing:.1em;cursor:pointer;
+  border-bottom:1px solid var(--rose-light);
+  padding-bottom:2px;
+  transition:all .3s;
+}
+
+/* ── Modal ── */
+.modal-bg{
+  position:fixed;inset:0;
+  background:rgba(45,34,38,.2);backdrop-filter:blur(16px);
+  z-index:150;display:flex;align-items:flex-end;justify-content:center;
+}
+.modal-box{
+  background:var(--bg);width:100%;max-width:430px;
+  border-radius:20px 20px 0 0;
+  padding:24px 20px calc(24px + env(safe-area-inset-bottom));
+  animation:slideUp .35s cubic-bezier(.32,.72,0,1);
+  max-height:80vh;overflow-y:auto;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{
+  width:36px;height:4px;background:var(--ink-15);
+  border-radius:2px;margin:0 auto 20px;
+}
+.modal-box h3{
+  font-family:var(--serif);font-size:17px;font-weight:500;
+  letter-spacing:.06em;margin-bottom:16px;
+}
+.modal-box p{
+  font-size:13px;font-weight:300;color:var(--ink-70);
+  line-height:1.8;margin-bottom:16px;letter-spacing:.02em;
+}
+.modal-box .acts{display:flex;gap:10px}
+.modal-box .acts .btn{flex:1}
+
+/* Package Detail Modal */
+.pkg-detail-cover{
+  width:calc(100% + 40px);margin:-24px -20px 16px;
+  height:200px;object-fit:cover;
+}
+.pkg-detail-name{
+  font-family:var(--serif);font-size:20px;font-weight:500;
+  letter-spacing:.08em;margin-bottom:4px;
+}
+.pkg-detail-price{
+  font-family:var(--display);font-size:28px;font-weight:400;
+  color:var(--rose-dark);margin-bottom:4px;
+}
+.pkg-detail-time{
+  font-size:11px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;margin-bottom:16px;
+}
+.pkg-detail-desc{
+  font-size:13px;font-weight:300;color:var(--ink-70);
+  line-height:1.8;margin-bottom:16px;
+}
+.pkg-detail-items{
+  margin-bottom:20px;
+}
+.pkg-detail-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:.5px solid var(--ink-08);
+  font-size:13px;font-weight:300;color:var(--ink);
+}
+.pkg-detail-item:last-child{border:none}
+.pkg-detail-item .check{
+  color:var(--green);font-size:16px;flex-shrink:0;
+}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;top:40%;left:50%;
+  transform:translate(-50%,-50%);
+  background:var(--ink);color:var(--bg);
+  padding:12px 24px;font-size:13px;font-weight:300;
+  letter-spacing:.05em;z-index:300;border-radius:10px;
+  animation:fadeIn .2s;box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+@keyframes fadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+/* ── Photo Preview ── */
+.preview{
+  position:fixed;inset:0;
+  background:rgba(255,248,246,.98);
+  backdrop-filter:blur(24px);
+  z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.preview img{
+  max-width:90%;max-height:72vh;
+  border-radius:12px;
+  box-shadow:0 8px 40px rgba(45,34,38,.15);
+}
+.preview-close{
+  position:absolute;top:16px;right:16px;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--white);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--ink-50);cursor:pointer;
+  border:none;transition:all .3s;
+}
+.preview-close:active{transform:scale(.9)}
+.preview-actions{
+  position:absolute;bottom:40px;
+  display:flex;gap:20px;
+}
+.preview-act{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;font-size:10px;font-weight:300;color:var(--ink-50);
+  letter-spacing:.05em;
+}
+.preview-act-icon{font-size:22px;opacity:.6}
+.preview-act:active .preview-act-icon{opacity:1}
+
+/* ── Skeleton ── */
+.skeleton{
+  background:linear-gradient(90deg,var(--ink-04) 25%,var(--ink-08) 50%,var(--ink-04) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:6px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-img{height:160px;border-radius:10px;margin-bottom:12px;}
+.skel-text{height:12px;width:60%;margin-bottom:8px;}
+.skel-text-sm{height:10px;width:40%;}
+
+/* ── Spacer ── */
+.spacer{height:20px}
+.spacer-lg{height:36px}
+
+/* ── Fade Transition ── */
+.fade-enter-active{animation:fadeIn .3s}
+.fade-leave-active{animation:fadeIn .3s reverse}
+
+::-webkit-scrollbar{display:none}
+body{padding-bottom:env(safe-area-inset-bottom)}
+
+/* ── Loading Spinner ── */
+.loading-wrap{
+  display:flex;align-items:center;justify-content:center;
+  padding:40px;
+}
+.spinner{
+  width:24px;height:24px;border:2px solid var(--ink-15);
+  border-top-color:var(--rose);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div v-if="toast" class="toast">{{toast}}</div>
+
+<!-- Photo Preview -->
+<div v-if="previewImg" class="preview" @click.self="previewImg=''">
+  <button class="preview-close" @click="previewImg=''">✕</button>
+  <img :src="previewImg" @click.stop>
+  <div class="preview-actions">
+    <div class="preview-act" @click.stop="toggleLikePreview">
+      <span class="preview-act-icon">{{likedPhotos.has(previewImg) ? '❤️' : '🤍'}}</span>
+      收藏
+    </div>
+    <div class="preview-act" @click.stop="sharePhoto">
+      <span class="preview-act-icon">📤</span>
+      分享
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 客片 ═══ -->
+<div v-show="tab==='photos'" class="page">
+  <div class="nav">
+    <div class="nav-inner">
+      <div>
+        <div class="nav-title">霓裳</div>
+        <div class="nav-sub">Nícháng Hanfu Studio</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero" @click="tab='packages'">
+    <img class="hero-bg" src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=400&fit=crop" loading="lazy">
+    <div class="hero-overlay">
+      <div class="hero-tag">SPRING COLLECTION</div>
+      <div class="hero-title">春日花间 · 新品上架</div>
+      <div class="hero-sub">4款春季限定妆造套餐，预约立享9折</div>
+    </div>
+    <div class="hero-cta">立即查看 →</div>
+  </div>
+
+  <div class="heading">
+    <div class="heading-row">
+      <div>
+        <div class="heading-en">Portfolio</div>
+        <div class="heading-cn">客片鉴赏</div>
+      </div>
+      <span class="heading-more" v-if="likedPhotos.size" @click="showFavorites=true">
+        ❤️ 我的收藏 ({{likedPhotos.size}})
+      </span>
+    </div>
+    <div class="heading-line"></div>
+  </div>
+
+  <div class="pills">
+    <span class="pill" :class="{on:!photoFilter}" @click="photoFilter=null">全部</span>
+    <span class="pill" :class="{on:photoFilter===c.id}" v-for="c in categories" :key="c.id" @click="photoFilter=c.id">{{c.name}}</span>
+  </div>
+
+  <div class="grid" v-if="photos.length">
+    <div class="card" v-for="p in filteredPhotos" :key="p.id" @click="openPreview(p)">
+      <img :src="p.image" loading="lazy">
+      <div class="card-meta">
+        <div class="card-title">{{p.title}}</div>
+        <div class="card-bottom">
+          <div class="card-tags">
+            <span class="card-tag" v-for="t in (p.tags||'').split(',').filter(Boolean)" :key="t">{{t}}</span>
+          </div>
+          <span class="card-heart" :class="{liked:likedPhotos.has(p.id)}" @click.stop="toggleLike(p.id)">
+            {{likedPhotos.has(p.id) ? '❤️' : '🤍'}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skeleton loading -->
+  <div class="grid" v-if="!photos.length && loading">
+    <div class="card" v-for="i in 4" :key="i">
+      <div class="skeleton skel-img"></div>
+      <div class="card-meta">
+        <div class="skeleton skel-text"></div>
+        <div class="skeleton skel-text-sm"></div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="!photos.length && !loading" class="empty">
+    <div class="empty-icon">📸</div>
+    <div class="empty-title">客片筹备中</div>
+    <div class="empty-text">美美的照片马上就来～<br>先看看套餐吧</div>
+    <span class="empty-cta" @click="tab='packages'">去看看套餐 →</span>
+  </div>
+</div>
+
+<!-- ═══ 套餐 ═══ -->
+<div v-show="tab==='packages'" class="page">
+  <div class="nav">
+    <div class="nav-inner">
+      <div>
+        <div class="nav-title">霓裳</div>
+        <div class="nav-sub">Nícháng Hanfu Studio</div>
+      </div>
+    </div>
+  </div>
+  <div class="heading">
+    <div class="heading-en">Experience</div>
+    <div class="heading-cn">妆造套餐</div>
+    <div class="heading-line"></div>
+  </div>
+
+  <div class="pkg" v-if="packages.length">
+    <div class="pkg-item" v-for="(p,i) in packages" :key="p.id">
+      <div class="pkg-cover-wrap">
+        <img class="pkg-cover" :src="p.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'" loading="lazy">
+        <span class="pkg-badge" v-if="i===1">✨ 人气推荐</span>
+        <button class="pkg-fav" @click.stop="togglePkgFav(p.id)">
+          {{likedPkgs.has(p.id) ? '❤️' : '🤍'}}
+        </button>
+      </div>
+      <div class="pkg-body">
+        <div class="pkg-name">{{p.name}}</div>
+        <div class="pkg-desc">{{p.description}}</div>
+        <div class="pkg-tags">
+          <span class="pkg-tag">约{{p.duration_minutes}}分钟</span>
+          <span class="pkg-tag" v-if="p.price>=699">含摄影</span>
+          <span class="pkg-tag" v-if="p.name.includes('闺蜜')">双人优惠</span>
+        </div>
+      </div>
+      <div class="pkg-bottom">
+        <div>
+          <div class="pkg-price"><span class="yuan">¥</span>{{p.price}}</div>
+          <div class="pkg-info">含妆造 · 服饰 · 配饰</div>
+        </div>
+        <button class="btn-book" @click="startBooking(p)">立即预约</button>
+      </div>
+      <button class="btn-detail" @click="showPkgDetail(p)">查看详情 ↓</button>
+    </div>
+  </div>
+
+  <!-- Skeleton -->
+  <div class="pkg" v-if="!packages.length && loading">
+    <div class="pkg-item" v-for="i in 2" :key="i">
+      <div class="skeleton" style="height:180px;margin-bottom:0;"></div>
+      <div class="pkg-body">
+        <div class="skeleton skel-text" style="width:50%;"></div>
+        <div class="skeleton skel-text-sm" style="width:80%;margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="!packages.length && !loading" class="empty">
+    <div class="empty-icon">💄</div>
+    <div class="empty-title">套餐筹备中</div>
+    <div class="empty-text">精彩套餐即将上线，敬请期待～</div>
+  </div>
+</div>
+
+<!-- ═══ 预约 ═══ -->
+<div v-show="tab==='booking'" class="page">
+  <div class="nav">
+    <div class="nav-inner">
+      <button class="nav-back" @click="goBack">← 返回</button>
+      <div style="text-align:center">
+        <div class="nav-title" style="font-size:16px">{{['','选择档期','填写信息','确认支付'][bookingStep]}}</div>
+      </div>
+      <div style="width:48px"></div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div class="step-dot" :class="{on:bookingStep===1,done:bookingStep>1}"></div>
+      <div class="step-label" :class="{on:bookingStep===1,done:bookingStep>1}">档期</div>
+    </div>
+    <div class="step-line" :class="{done:bookingStep>1}"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div class="step-dot" :class="{on:bookingStep===2,done:bookingStep>2}"></div>
+      <div class="step-label" :class="{on:bookingStep===2,done:bookingStep>2}">信息</div>
+    </div>
+    <div class="step-line" :class="{done:bookingStep>2}"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+      <div class="step-dot" :class="{on:bookingStep===3}"></div>
+      <div class="step-label" :class="{on:bookingStep===3}">支付</div>
+    </div>
+  </div>
+
+  <!-- Selected Package Summary -->
+  <div style="padding:8px 20px 0;display:flex;align-items:center;gap:8px;" v-if="bookingPkg.name">
+    <span style="font-size:10px;color:var(--ink-50);letter-spacing:.1em;">已选</span>
+    <span style="font-size:12px;font-weight:400;color:var(--rose);">{{bookingPkg.name}}</span>
+    <span style="font-size:12px;color:var(--rose-dark);font-family:var(--display)">¥{{bookingPkg.price}}</span>
+  </div>
+
+  <!-- Step 1: Select Date & Time -->
+  <template v-if="bookingStep===1">
+    <div class="cal">
+      <div class="cal-head">
+        <button @click="prevMonth">‹</button>
+        <span class="cal-month">{{calYear}}年{{calMonth+1}}月</span>
+        <button @click="nextMonth">›</button>
+      </div>
+      <div class="cal-week">
+        <span v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{d}}</span>
+      </div>
+      <div class="cal-grid">
+        <div v-for="(day,i) in calDays" :key="i" class="cal-day"
+          :class="{off:!day.enabled,sel:day.date===selectedDate,today:day.isToday,empty:!day.day}"
+          @click="day.enabled&&selectDate(day.date)">
+          {{day.day||''}}
+        </div>
+      </div>
+    </div>
+
+    <div class="slots" v-if="selectedDate">
+      <div class="slots-title">
+        选择时段 <span class="slots-date">{{formatDate(selectedDate)}}</span>
+      </div>
+      <div class="slot-grid">
+        <div v-for="s in timeSlots" :key="s.time" class="slot"
+          :class="{on:s.time===selectedSlot,gone:s.booked}"
+          @click="!s.booked&&s.available&&(selectedSlot=s.time)">
+          {{s.time}}
+        </div>
+      </div>
+      <div v-if="!timeSlots.length" class="empty" style="padding:30px 0">
+        <div class="empty-text">该日不营业哦，换个日期试试 💕</div>
+      </div>
+    </div>
+
+    <div class="spacer-lg"></div>
+    <div style="padding:0 20px" v-if="selectedSlot">
+      <button class="btn" @click="bookingStep=2">下一步</button>
+    </div>
+  </template>
+
+  <!-- Step 2: Fill Info -->
+  <template v-if="bookingStep===2">
+    <div class="spacer"></div>
+
+    <div class="field">
+      <div class="field-label">套餐</div>
+      <div class="field-value">{{bookingPkg.name}} · ¥{{bookingPkg.price}}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">时间</div>
+      <div class="field-value">{{formatDate(selectedDate)}} {{selectedSlot}}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">姓名</div>
+      <input v-model="customerName" placeholder="到店核验姓名">
+    </div>
+    <div class="field">
+      <div class="field-label">手机号</div>
+      <input v-model="customerPhone" type="tel" placeholder="11位手机号" maxlength="11">
+      <div class="field-hint">用于到店核验和预约提醒 📱</div>
+    </div>
+
+    <!-- Cancel Policy -->
+    <div class="policy-banner">
+      <span class="policy-icon">📋</span>
+      <div class="policy-text">
+        <b>取消规则：</b>预约时间前<b>24小时</b>可免费取消。不足24小时不可取消，请合理安排时间哦～
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+    <div style="padding:0 20px">
+      <button class="btn" @click="submitOrder" :disabled="!customerName||customerPhone.length<11">
+        提交预约
+      </button>
+    </div>
+    <div class="spacer"></div>
+  </template>
+
+  <!-- Step 3: Confirm & Pay -->
+  <template v-if="bookingStep===3">
+    <div class="spacer"></div>
+    <div class="summary">
+      <div class="summary-row"><span class="k">套餐</span><span>{{bookingPkg.name}}</span></div>
+      <div class="summary-row"><span class="k">日期</span><span>{{formatDate(selectedDate)}}</span></div>
+      <div class="summary-row"><span class="k">时段</span><span>{{selectedSlot}}</span></div>
+      <div class="summary-row"><span class="k">姓名</span><span>{{customerName}}</span></div>
+      <div class="summary-row"><span class="k">手机</span><span>{{customerPhone}}</span></div>
+      <div class="summary-total"><span>合计</span><span>¥{{currentOrder?.amount||bookingPkg.price}}</span></div>
+    </div>
+    <div class="spacer"></div>
+
+    <div class="policy-banner" style="margin-top:0">
+      <span class="policy-icon">🔒</span>
+      <div class="policy-text">
+        微信安全支付 · <b>24小时内</b>可免费取消
+      </div>
+    </div>
+
+    <div style="padding:0 20px">
+      <button class="btn btn-rose" @click="payOrder">
+        💳 支付 ¥{{currentOrder?.amount||bookingPkg.price}}
+      </button>
+    </div>
+    <div class="pay-note">15分钟内未支付自动取消</div>
+    <div style="text-align:center;padding:10px">
+      <span style="font-size:12px;font-weight:300;color:var(--ink-50);cursor:pointer;letter-spacing:.05em" @click="cancelPendingOrder">取消支付</span>
+    </div>
+  </template>
+</div>
+
+<!-- ═══ 支付成功 ═══ -->
+<div v-show="tab==='ok'" class="page">
+  <div class="ok">
+    <div class="ok-icon">✓</div>
+    <h2>预约成功 🎉</h2>
+    <div class="ok-sub">期待与你相见～</div>
+
+    <div class="ok-detail">
+      <div class="ok-row"><span class="k">订单号</span><span class="v" style="font-size:11px">{{currentOrder?.order_no}}</span></div>
+      <div class="ok-row"><span class="k">套餐</span><span class="v">{{currentOrder?.package_name||bookingPkg.name}}</span></div>
+      <div class="ok-row"><span class="k">日期</span><span class="v">{{formatDate(currentOrder?.booking_date)}}</span></div>
+      <div class="ok-row"><span class="k">时段</span><span class="v">{{currentOrder?.time_slot}}</span></div>
+      <div class="ok-row"><span class="k">金额</span><span class="v" style="color:var(--rose-dark)">¥{{currentOrder?.amount}}</span></div>
+    </div>
+
+    <div class="ok-actions">
+      <button class="btn btn-sm" @click="tab='orders';loadOrders()">查看预约</button>
+      <button class="btn btn-sm btn-outline" @click="tab='photos'">继续浏览</button>
+    </div>
+
+    <div class="ok-share" @click="shareOrder">
+      📤 分享给闺蜜，一起来玩
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 我的 ═══ -->
+<div v-show="tab==='my'" class="page" style="padding-bottom:80px">
+  <div class="my-head">
+    <div class="my-avatar">{{currentUser?.nickname?.[0]||'·'}}</div>
+    <div class="my-name">{{currentUser?.nickname||'...'}}</div>
+    <div class="my-role">MY RESERVATIONS</div>
+  </div>
+  <div class="my-stats">
+    <div class="my-stat" @click="orderFilter='pending';tab='orders';loadOrders()">
+      <div class="my-stat-num">{{orderCounts.pending||0}}</div>
+      <div class="my-stat-lbl">待支付</div>
+    </div>
+    <div class="my-stat" @click="orderFilter='booked';tab='orders';loadOrders()">
+      <div class="my-stat-num">{{orderCounts.booked||0}}</div>
+      <div class="my-stat-lbl">已预约</div>
+    </div>
+    <div class="my-stat" @click="orderFilter='completed';tab='orders';loadOrders()">
+      <div class="my-stat-num">{{orderCounts.completed||0}}</div>
+      <div class="my-stat-lbl">已完成</div>
+    </div>
+    <div class="my-stat" @click="orderFilter=null;tab='orders';loadOrders()">
+      <div class="my-stat-num">{{orderCounts.total||0}}</div>
+      <div class="my-stat-lbl">全部</div>
+    </div>
+  </div>
+  <div class="my-links">
+    <div class="my-link" @click="orderFilter=null;tab='orders';loadOrders()">
+      <span><span class="my-link-icon">📋</span>我的预约</span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link" @click="showFavorites=true" v-if="likedPhotos.size">
+      <span><span class="my-link-icon">❤️</span>我的收藏 <span style="color:var(--rose);font-size:11px">({{likedPhotos.size}})</span></span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link" @click="tab='photos'">
+      <span><span class="my-link-icon">📸</span>浏览客片</span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link" @click="tab='packages'">
+      <span><span class="my-link-icon">💄</span>套餐选购</span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link" @click="showAbout=true">
+      <span><span class="my-link-icon">🌸</span>关于我们</span><span class="my-link-arrow">→</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 我的预约 ═══ -->
+<div v-show="tab==='orders'" class="page">
+  <div class="nav">
+    <div class="nav-inner">
+      <button class="nav-back" @click="tab='my'">← 返回</button>
+      <div style="text-align:center">
+        <div class="nav-title" style="font-size:16px">我的预约</div>
+      </div>
+      <div style="width:48px"></div>
+    </div>
+  </div>
+  <div class="pills">
+    <span class="pill" :class="{on:!orderFilter}" @click="orderFilter=null;loadOrders()">全部</span>
+    <span class="pill" :class="{on:orderFilter==='pending'}" @click="orderFilter='pending';loadOrders()">待支付</span>
+    <span class="pill" :class="{on:orderFilter==='booked'}" @click="orderFilter='booked';loadOrders()">已预约</span>
+    <span class="pill" :class="{on:orderFilter==='completed'}" @click="orderFilter='completed';loadOrders()">已完成</span>
+    <span class="pill" :class="{on:orderFilter==='cancelled'}" @click="orderFilter='cancelled';loadOrders()">已取消</span>
+  </div>
+  <div v-for="o in myOrders" :key="o.id" class="ord">
+    <div class="ord-head">
+      <span class="ord-no">{{o.order_no}}</span>
+      <span class="ord-status" :class="'ord-status-'+o.status">{{statusText(o.status)}}</span>
+    </div>
+    <div class="ord-body">
+      <div class="ord-pkg">{{o.package_name}}</div>
+      <div class="ord-detail">
+        📅 {{formatDate(o.booking_date)}} {{o.time_slot}}<br>
+        👤 {{o.customer_name}} · {{o.customer_phone}}
+      </div>
+    </div>
+    <div class="ord-foot">
+      <div class="ord-amount">¥{{o.amount}}</div>
+      <div class="ord-actions">
+        <button v-if="o.status==='pending'" class="btn btn-sm btn-rose" @click="payExistingOrder(o)">支付</button>
+        <button v-if="o.status==='pending'" class="btn btn-sm btn-ghost" @click="cancelOrder(o)">取消</button>
+        <button v-if="o.status==='booked'" class="btn btn-sm btn-ghost" @click="showCancelModal(o)">申请取消</button>
+        <button v-if="['cancelled','completed'].includes(o.status)" class="btn btn-sm btn-ghost" @click="deleteOrder(o)">删除</button>
+      </div>
+    </div>
+  </div>
+  <div v-if="!myOrders.length" class="empty">
+    <div class="empty-icon">📋</div>
+    <div class="empty-title">还没有预约</div>
+    <div class="empty-text">去选一个喜欢的套餐吧～</div>
+    <span class="empty-cta" @click="tab='packages'">去看看套餐 →</span>
+  </div>
+</div>
+
+<!-- ═══ Tabs ═══ -->
+<div class="tabs" v-if="!['booking','ok','orders'].includes(tab)">
+  <div class="tab" :class="{on:tab==='photos'}" @click="tab='photos'">
+    <span class="tab-icon">📸</span><span class="tab-label">客片</span>
+  </div>
+  <div class="tab" :class="{on:tab==='packages'}" @click="tab='packages'">
+    <span class="tab-icon">💄</span><span class="tab-label">套餐</span>
+  </div>
+  <div class="tab" :class="{on:tab==='my'}" @click="tab='my'">
+    <span class="tab-icon">👤</span><span class="tab-label">我的</span>
+  </div>
+</div>
+
+<!-- ═══ Cancel Modal ═══ -->
+<div v-if="cancelModal" class="modal-bg" @click="cancelModal=null">
+  <div class="modal-box" @click.stop>
+    <div class="modal-handle"></div>
+    <h3>确认取消预约？</h3>
+    <p v-if="cancelModal" style="text-align:center">
+      {{cancelModal.package_name}}<br>
+      {{formatDate(cancelModal.booking_date)}} {{cancelModal.time_slot}}<br>
+      <span style="color:var(--rose-dark);font-size:18px;font-family:var(--display)">¥{{cancelModal.amount}}</span><br><br>
+      <span style="font-size:11px;color:var(--ink-50)">退款将原路返回到你的账户</span>
+    </p>
+    <div class="acts">
+      <button class="btn btn-outline btn-sm" @click="cancelModal=null">再想想</button>
+      <button class="btn btn-sm btn-rose" @click="confirmCancel">确认取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Package Detail Modal ═══ -->
+<div v-if="pkgDetailModal" class="modal-bg" @click="pkgDetailModal=null">
+  <div class="modal-box" @click.stop>
+    <div class="modal-handle"></div>
+    <img class="pkg-detail-cover" :src="pkgDetailModal.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'">
+    <div class="pkg-detail-name">{{pkgDetailModal.name}}</div>
+    <div class="pkg-detail-price">¥{{pkgDetailModal.price}}</div>
+    <div class="pkg-detail-time">⏱ 约 {{pkgDetailModal.duration_minutes}} 分钟</div>
+    <div class="pkg-detail-desc">{{pkgDetailModal.description}}</div>
+
+    <div style="font-size:11px;font-weight:400;color:var(--ink);letter-spacing:.1em;margin-bottom:8px;">📋 套餐包含</div>
+    <div class="pkg-detail-items">
+      <div class="pkg-detail-item" v-for="item in getPackageItems(pkgDetailModal)" :key="item">
+        <span class="check">✓</span>
+        <span>{{item}}</span>
+      </div>
+    </div>
+
+    <!-- Cancel policy in detail -->
+    <div class="policy-banner" style="margin:0 0 16px;">
+      <span class="policy-icon">📋</span>
+      <div class="policy-text">
+        <b>取消政策：</b>预约前24小时免费取消，超时不可取消
+      </div>
+    </div>
+
+    <button class="btn btn-rose" @click="startBooking(pkgDetailModal);pkgDetailModal=null" style="margin-bottom:10px">
+      立即预约
+    </button>
+    <button class="btn btn-outline" @click="pkgDetailModal=null" style="font-size:12px">
+      再看看
+    </button>
+  </div>
+</div>
+
+<!-- ═══ Favorites Modal ═══ -->
+<div v-if="showFavorites" class="modal-bg" @click="showFavorites=false">
+  <div class="modal-box" @click.stop>
+    <div class="modal-handle"></div>
+    <h3>❤️ 我的收藏</h3>
+    <div v-if="favPhotos.length" class="grid" style="padding:0;max-height:50vh;overflow-y:auto;">
+      <div class="card" v-for="p in favPhotos" :key="p.id" @click="openPreview(p);showFavorites=false">
+        <img :src="p.image" loading="lazy">
+        <div class="card-meta">
+          <div class="card-title">{{p.title}}</div>
+        </div>
+      </div>
+    </div>
+    <div v-else style="text-align:center;padding:30px 0">
+      <div style="font-size:30px;opacity:.3;margin-bottom:10px">🤍</div>
+      <div style="font-size:12px;color:var(--ink-50)">还没有收藏的客片</div>
+      <div style="font-size:11px;color:var(--ink-30);margin-top:4px">点击 🤍 即可收藏</div>
+    </div>
+    <button class="btn btn-outline" @click="showFavorites=false" style="margin-top:16px;font-size:12px">关闭</button>
+  </div>
+</div>
+
+<!-- ═══ About Modal ═══ -->
+<div v-if="showAbout" class="modal-bg" @click="showAbout=false">
+  <div class="modal-box" @click.stop>
+    <div class="modal-handle"></div>
+    <h3>🌸 关于霓裳</h3>
+    <p style="text-align:center;line-height:2">
+      霓裳汉服妆造工作室<br>
+      专注汉服妆造体验<br>
+      让每一位女孩都能<br>
+      穿越千年，梦回盛世 ✨<br><br>
+      <span style="font-size:11px;color:var(--ink-50)">营业时间：周一至周六 9:00-18:00</span><br>
+      <span style="font-size:11px;color:var(--ink-50)">客服微信：nichang_hanfu</span>
+    </p>
+    <button class="btn btn-outline" @click="showAbout=false" style="margin-top:16px;font-size:12px">知道了</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const{createApp,ref,computed,onMounted}=Vue;
+const API='/api';
+
+createApp({
+  setup(){
+    const tab=ref('photos');
+    const toast=ref('');
+    const previewImg=ref('');
+    const previewPhoto=ref(null);
+    const currentUser=ref(null);
+    const photos=ref([]);
+    const categories=ref([]);
+    const photoFilter=ref(null);
+    const packages=ref([]);
+    const bookingPkg=ref({});
+    const bookingStep=ref(1);
+    const selectedDate=ref('');
+    const selectedSlot=ref('');
+    const timeSlots=ref([]);
+    const customerName=ref('');
+    const customerPhone=ref('');
+    const currentOrder=ref(null);
+    const now=new Date();
+    const calMonth=ref(now.getMonth());
+    const calYear=ref(now.getFullYear());
+    const myOrders=ref([]);
+    const orderFilter=ref(null);
+    const cancelModal=ref(null);
+    const pkgDetailModal=ref(null);
+    const showFavorites=ref(false);
+    const showAbout=ref(false);
+    const loading=ref(true);
+
+    // Favorites (persisted in localStorage)
+    const likedPhotos = ref(new Set(JSON.parse(localStorage.getItem('likedPhotos')||'[]')));
+    const likedPkgs = ref(new Set(JSON.parse(localStorage.getItem('likedPkgs')||'[]')));
+
+    function saveLikes(){
+      localStorage.setItem('likedPhotos',JSON.stringify([...likedPhotos.value]));
+      localStorage.setItem('likedPkgs',JSON.stringify([...likedPkgs.value]));
+    }
+
+    function toggleLike(id){
+      if(likedPhotos.value.has(id)) likedPhotos.value.delete(id);
+      else likedPhotos.value.add(id);
+      likedPhotos.value = new Set(likedPhotos.value);
+      saveLikes();
+    }
+    function togglePkgFav(id){
+      if(likedPkgs.value.has(id)) likedPkgs.value.delete(id);
+      else likedPkgs.value.add(id);
+      likedPkgs.value = new Set(likedPkgs.value);
+      saveLikes();
+      showToast(likedPkgs.value.has(id) ? '已收藏 💕' : '已取消收藏');
+    }
+
+    function toggleLikePreview(){
+      if(!previewPhoto.value) return;
+      toggleLike(previewPhoto.value.id);
+    }
+
+    const favPhotos = computed(()=>photos.value.filter(p=>likedPhotos.value.has(p.id)));
+
+    function showToast(msg,dur=2000){toast.value=msg;setTimeout(()=>toast.value='',dur)}
+    async function api(path,opt={}){
+      const h={'Content-Type':'application/json'};
+      if(currentUser.value)h['x-user-id']=currentUser.value.id;
+      const r=await fetch(API+path,{...opt,headers:{...h,...opt.headers}});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'请求失败')}
+      return r.json();
+    }
+    function statusText(s){return{pending:'待支付',booked:'已预约',completed:'已完成',cancelled:'已取消'}[s]||s}
+
+    // Format date for display
+    function formatDate(dateStr){
+      if(!dateStr) return '';
+      const d=new Date(dateStr+'T00:00:00');
+      const weekdays=['周日','周一','周二','周三','周四','周五','周六'];
+      return `${d.getMonth()+1}月${d.getDate()}日 ${weekdays[d.getDay()]}`;
+    }
+
+    // Package items based on package type
+    function getPackageItems(pkg){
+      const name=pkg.name||'';
+      if(name.includes('基础')){
+        return['汉服1套（基础款任选）','基础妆面（淡妆）','简单发型设计','基础配饰1组'];
+      }else if(name.includes('精致')){
+        return['精选汉服1套（全场任选）','精致妆面（含假睫毛）','专业发型设计','精品配饰1组','妆前护肤'];
+      }else if(name.includes('豪华')){
+        return['高端汉服1套（限量款可选）','精致妆面（全妆）','专业发型设计','精品配饰全套','外景跟拍30张（精修5张）','妆前护肤','即时底片全送'];
+      }else if(name.includes('闺蜜')){
+        return['精选汉服2套（各选1套）','精致妆面×2','专业发型设计×2','配饰×2','双人合照20张（精修3张）','妆前护肤×2'];
+      }
+      return['汉服租借','妆面设计','发型设计','基础配饰'];
+    }
+
+    // Open photo preview
+    function openPreview(p){
+      previewPhoto.value=p;
+      previewImg.value=p.image;
+    }
+
+    // Share functions (simulated)
+    function sharePhoto(){
+      showToast('已复制分享链接 📤');
+    }
+    function shareOrder(){
+      showToast('已复制分享链接，快发给闺蜜吧 💕');
+    }
+
+    const calDays=computed(()=>{
+      const days=[];
+      const first=new Date(calYear.value,calMonth.value,1);
+      const lastDay=new Date(calYear.value,calMonth.value+1,0).getDate();
+      const sw=first.getDay();
+      const today=new Date().toISOString().split('T')[0];
+      for(let i=0;i<sw;i++)days.push({day:null,enabled:false,isToday:false,date:''});
+      for(let d=1;d<=lastDay;d++){
+        const date=`${calYear.value}-${String(calMonth.value+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        days.push({day:d,date,enabled:date>=today,isToday:date===today});
+      }
+      return days;
+    });
+
+    const filteredPhotos=computed(()=>photoFilter.value?photos.value.filter(p=>p.category_id===photoFilter.value):photos.value);
+    const orderCounts=computed(()=>{
+      const c={pending:0,booked:0,completed:0,total:0};
+      myOrders.value.forEach(o=>{c[o.status]=(c[o.status]||0)+1;c.total++});
+      return c;
+    });
+
+    async function loadPhotos(){photos.value=await api('/photos')}
+    async function loadCategories(){categories.value=await api('/categories')}
+    async function loadPackages(){packages.value=await api('/packages')}
+    async function loadOrders(){const q=orderFilter.value?`?status=${orderFilter.value}`:'';myOrders.value=await api('/orders/my'+q)}
+
+    async function initUser(){
+      const d=await api('/auth/login',{method:'POST',body:JSON.stringify({openid:'cust_'+Date.now(),nickname:'汉服爱好者'})});
+      currentUser.value=d.user;
+    }
+
+    async function selectDate(date){selectedDate.value=date;selectedSlot.value='';const d=await api('/slots/'+date);timeSlots.value=d.slots}
+    function prevMonth(){if(calMonth.value===0){calMonth.value=11;calYear.value--}else calMonth.value--}
+    function nextMonth(){if(calMonth.value===11){calMonth.value=0;calYear.value++}else calMonth.value++}
+
+    function startBooking(pkg){bookingPkg.value=pkg;bookingStep.value=1;selectedDate.value='';selectedSlot.value='';tab.value='booking';calMonth.value=new Date().getMonth();calYear.value=new Date().getFullYear()}
+    function goBack(){if(bookingStep.value>1)bookingStep.value--;else{tab.value='packages';bookingStep.value=1}}
+
+    async function submitOrder(){try{const o=await api('/orders',{method:'POST',body:JSON.stringify({package_id:bookingPkg.value.id,booking_date:selectedDate.value,time_slot:selectedSlot.value,customer_name:customerName.value,customer_phone:customerPhone.value})});currentOrder.value=o;bookingStep.value=3;showToast('订单已创建 ✨')}catch(e){showToast(e.message)}}
+    async function payOrder(){try{const o=await api(`/orders/${currentOrder.value.id}/pay`,{method:'POST'});currentOrder.value=o;tab.value='ok';showToast('支付成功 🎉')}catch(e){showToast(e.message)}}
+    async function payExistingOrder(o){try{await api(`/orders/${o.id}/pay`,{method:'POST'});showToast('支付成功 🎉');loadOrders()}catch(e){showToast(e.message)}}
+    async function cancelPendingOrder(){if(currentOrder.value){await api(`/orders/${currentOrder.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'取消支付'})});currentOrder.value=null;tab.value='packages';showToast('已取消')}}
+
+    function showCancelModal(o){cancelModal.value=o}
+    function showPkgDetail(p){pkgDetailModal.value=p}
+
+    async function confirmCancel(){try{await api(`/orders/${cancelModal.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});showToast('退款将原路返回 💰');cancelModal.value=null;loadOrders()}catch(e){showToast(e.message);cancelModal.value=null}}
+    async function cancelOrder(o){try{await api(`/orders/${o.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});showToast('已取消');loadOrders()}catch(e){showToast(e.message)}}
+    async function deleteOrder(o){try{await api(`/orders/${o.id}`,{method:'DELETE'});showToast('已删除');loadOrders()}catch(e){showToast(e.message)}}
+
+    onMounted(async()=>{
+      try{
+        await initUser();
+        await Promise.all([loadPhotos(),loadCategories(),loadPackages()]);
+      }finally{
+        loading.value=false;
+      }
+    });
+
+    return{
+      tab,toast,previewImg,previewPhoto,currentUser,
+      photos,categories,photoFilter,filteredPhotos,packages,loading,
+      bookingPkg,bookingStep,selectedDate,selectedSlot,timeSlots,customerName,customerPhone,currentOrder,
+      calMonth,calYear,calDays,prevMonth,nextMonth,
+      myOrders,orderFilter,cancelModal,orderCounts,
+      pkgDetailModal,showFavorites,showAbout,
+      likedPhotos,likedPkgs,favPhotos,
+      showToast,statusText,selectDate,startBooking,goBack,
+      formatDate,getPackageItems,openPreview,
+      sharePhoto,shareOrder,
+      toggleLike,togglePkgFav,toggleLikePreview,
+      submitOrder,payOrder,payExistingOrder,cancelPendingOrder,
+      showCancelModal,showPkgDetail,confirmCancel,cancelOrder,deleteOrder,
+      loadOrders
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

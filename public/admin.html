@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>霓裳汉服 · 商家管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --rose:#C4868C;--rose-l:#D9A5AA;--rose-ll:#F2E0E2;--rose-lll:#FBF3F4;
+  --gold:#C9A87C;--gold-l:#E8D5B5;
+  --ink:#3D3230;--ink-l:#7A6B66;--ink-ll:#B5A8A3;--ink-lll:#DDD5D2;
+  --bg:#FDFBF9;--card:#FFFFFF;
+  --ok:#7BAF85;--warn:#D4A54A;--err:#C97070;
+  --r:16px;--rs:12px;
+  --shadow:0 1px 8px rgba(61,50,48,.05);
+  --shadow-lg:0 4px 24px rgba(61,50,48,.08);
+}
+html{font-size:16px}
+body{font-family:'Noto Sans SC','PingFang SC','Helvetica Neue',sans-serif;background:var(--bg);color:var(--ink);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ═══════ Header ═══════ */
+.hdr{background:var(--bg);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(221,213,210,.5);backdrop-filter:blur(16px)}
+.hdr h1{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:600;letter-spacing:1.5px}
+.hdr .back{font-size:18px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--rose-lll);color:var(--rose);transition:.2s;border:none}
+.hdr .back:active{background:var(--rose-ll)}
+.hdr .right{width:34px}
+
+/* ═══════ Page ═══════ */
+.page{padding-bottom:24px;min-height:100vh}
+
+/* ═══════ Section Titles ═══════ */
+.sec-title{font-size:13px;font-weight:500;padding:20px 20px 10px;color:var(--ink-l);letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';width:2px;height:14px;background:linear-gradient(180deg,var(--rose),var(--rose-l));border-radius:1px}
+
+/* ═══════ Category Tabs ═══════ */
+.cat-tabs{display:flex;gap:10px;padding:10px 20px;overflow-x:auto;scrollbar-width:none}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{white-space:nowrap;padding:7px 18px;border-radius:20px;font-size:13px;background:transparent;color:var(--ink-l);cursor:pointer;transition:.25s;font-weight:400;border:1px solid var(--ink-lll)}
+.cat-tab.active{background:var(--rose);color:#fff;border-color:var(--rose)}
+
+/* ═══════ Buttons ═══════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--rose);color:#fff;border:none;border-radius:24px;padding:10px 24px;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;font-family:inherit;letter-spacing:.5px}
+.btn:active{transform:scale(.96);opacity:.9}
+.btn:disabled{background:var(--ink-lll);color:var(--ink-ll);cursor:not-allowed;transform:none}
+.btn-sm{padding:7px 16px;font-size:12px}
+.btn-outline{background:transparent;border:1px solid var(--rose);color:var(--rose)}
+.btn-ghost{background:var(--rose-lll);color:var(--rose)}
+.btn-ok{background:var(--ok)}
+.btn-err{background:var(--err)}
+.btn-block{width:100%;padding:14px;font-size:15px;border-radius:28px}
+
+/* ═══════ Admin Grid ═══════ */
+.adm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px 16px}
+.adm-card{background:var(--card);border-radius:var(--r);padding:24px 16px;text-align:center;box-shadow:var(--shadow);cursor:pointer;transition:.2s;border:1px solid transparent}
+.adm-card:active{transform:scale(.96);border-color:var(--rose-l)}
+.adm-card .ai{font-size:32px;margin-bottom:10px;opacity:.8}
+.adm-card .al{font-size:14px;font-weight:500;color:var(--ink);letter-spacing:.5px}
+.adm-card .ad{font-size:11px;color:var(--ink-ll);margin-top:4px;font-weight:300}
+
+/* ═══════ Order Cards ═══════ */
+.order-card{background:var(--card);border-radius:var(--r);margin:10px 16px;overflow:hidden;box-shadow:var(--shadow)}
+.order-card .top{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;background:var(--rose-lll)}
+.order-card .order-no{font-size:11px;color:var(--ink-ll);font-family:'SF Mono',monospace;letter-spacing:.5px}
+.badge{display:inline-block;padding:3px 12px;border-radius:12px;font-size:10px;font-weight:500;letter-spacing:.3px}
+.badge-pending{background:#FFF8ED;color:var(--warn)}
+.badge-booked{background:#EFF7F1;color:var(--ok)}
+.badge-completed{background:var(--ink-lll);color:var(--ink-l)}
+.badge-cancelled{background:#FDF2F2;color:var(--err)}
+.order-card .body{padding:18px}
+.order-card .pkg-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:600;margin-bottom:12px;letter-spacing:.5px}
+.order-card .detail{font-size:13px;color:var(--ink-l);line-height:2.1;font-weight:300}
+.order-card .detail .v{color:var(--ink);font-weight:400}
+.order-card .footer{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(221,213,210,.5)}
+.order-card .amount{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:600;color:var(--rose)}
+
+/* ═══════ Admin Lists ═══════ */
+.adm-list{padding:10px 16px}
+.adm-item{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px}
+.adm-item img{width:52px;height:52px;object-fit:cover;border-radius:var(--rs);flex-shrink:0}
+.adm-item .info{flex:1;min-width:0}
+.adm-item .info .name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.adm-item .info .sub{font-size:11px;color:var(--ink-ll);margin-top:3px;font-weight:300}
+
+/* ═══════ Forms ═══════ */
+.form{padding:10px 16px}
+.form-group{background:var(--card);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.form-group label{font-size:11px;color:var(--ink-ll);display:block;margin-bottom:8px;font-weight:400;letter-spacing:1px;text-transform:uppercase}
+.form-group .val{font-size:15px;font-weight:500;letter-spacing:.3px}
+.form-group input,.form-group select,.form-group textarea{width:100%;border:none;outline:none;font-size:15px;padding:2px 0;font-family:inherit;background:transparent;color:var(--ink)}
+.form-group input::placeholder{color:var(--ink-lll)}
+.form-hint{font-size:11px;color:var(--ink-ll);margin-top:6px;font-weight:300}
+
+/* ═══════ Tags ═══════ */
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:400;letter-spacing:.3px}
+.tag-rose{background:var(--rose-lll);color:var(--rose)}
+.tag-gold{background:#F8F0E4;color:var(--gold)}
+
+/* ═══════ Switch ═══════ */
+.switch{position:relative;width:42px;height:22px;cursor:pointer;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch .slider{position:absolute;inset:0;background:var(--ink-lll);border-radius:22px;transition:.3s}
+.switch .slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;left:2px;top:2px;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.switch input:checked+.slider{background:var(--rose)}
+.switch input:checked+.slider::before{transform:translateX(20px)}
+
+/* ═══════ Toast ═══════ */
+.toast{position:fixed;top:45%;left:50%;transform:translate(-50%,-50%);background:rgba(61,50,48,.8);color:#fff;padding:14px 28px;border-radius:14px;font-size:14px;z-index:300;animation:fadeIn .2s;backdrop-filter:blur(12px);display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,.12);font-weight:400;letter-spacing:.3px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ═══════ Image Preview ═══════ */
+.preview{position:fixed;inset:0;background:rgba(253,251,249,.96);backdrop-filter:blur(20px);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:fadeIn .2s}
+.preview img{max-width:90%;max-height:78vh;border-radius:12px;box-shadow:var(--shadow-lg)}
+.preview .close{position:absolute;top:16px;right:16px;color:var(--ink-l);font-size:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--card);border-radius:50%;cursor:pointer;box-shadow:var(--shadow)}
+.preview .hint{color:var(--ink-ll);font-size:11px;margin-top:20px;font-weight:300;letter-spacing:.5px}
+
+/* ═══════ Empty State ═══════ */
+.empty-state{text-align:center;padding:60px 24px}
+.empty-state .ei{font-size:44px;margin-bottom:14px;opacity:.5}
+.empty-state .et{font-size:13px;color:var(--ink-ll);font-weight:300}
+
+::-webkit-scrollbar{display:none}
+body{padding-bottom:env(safe-area-inset-bottom)}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- Toast -->
+<div v-if="toast" class="toast"><span>{{toastIcon}}</span> {{toast}}</div>
+
+<!-- Image Preview -->
+<div v-if="previewImg" class="preview" @click="previewImg=''">
+  <div class="close" @click="previewImg=''">✕</div>
+  <img :src="previewImg" @click.stop>
+  <div class="hint">点击任意位置关闭</div>
+</div>
+
+<!-- ═══════ Dashboard ═══════ -->
+<div v-show="tab==='dashboard'" class="page">
+  <div class="hdr"><h1>商家管理</h1><div class="right"></div></div>
+  <div class="sec-title">管理功能</div>
+  <div class="adm-grid">
+    <div class="adm-card" @click="tab='orders';loadAllOrders()"><div class="ai">📋</div><div class="al">订单管理</div><div class="ad">核销 · 退款</div></div>
+    <div class="adm-card" @click="tab='photos'"><div class="ai">📷</div><div class="al">客片管理</div><div class="ad">上传 · 分类</div></div>
+    <div class="adm-card" @click="tab='pkgs'"><div class="ai">💄</div><div class="al">套餐管理</div><div class="ad">上架 · 定价</div></div>
+    <div class="adm-card" @click="tab='schedule';loadSchedule()"><div class="ai">📅</div><div class="al">档期配置</div><div class="ad">时段 · 休息日</div></div>
+    <div class="adm-card" @click="loadSchedule();tab='rules'"><div class="ai">⚙️</div><div class="al">取消规则</div><div class="ad">时限 · 手续费</div></div>
+    <div class="adm-card" @click="exportOrders()"><div class="ai">📊</div><div class="al">导出报表</div><div class="ad">Excel 导出</div></div>
+  </div>
+</div>
+
+<!-- ═══════ 订单管理 ═══════ -->
+<div v-show="tab==='orders'" class="page">
+  <div class="hdr"><div class="back" @click="tab='dashboard'">←</div><h1>订单管理</h1><div class="right"></div></div>
+  <div class="cat-tabs">
+    <span class="cat-tab" :class="{active:!orderFilter}" @click="orderFilter=null;loadAllOrders()">全部</span>
+    <span class="cat-tab" :class="{active:orderFilter==='pending'}" @click="orderFilter='pending';loadAllOrders()">待支付</span>
+    <span class="cat-tab" :class="{active:orderFilter==='booked'}" @click="orderFilter='booked';loadAllOrders()">已预约</span>
+    <span class="cat-tab" :class="{active:orderFilter==='completed'}" @click="orderFilter='completed';loadAllOrders()">已完成</span>
+    <span class="cat-tab" :class="{active:orderFilter==='cancelled'}" @click="orderFilter='cancelled';loadAllOrders()">已取消</span>
+  </div>
+  <div v-for="o in allOrders" :key="o.id" class="order-card">
+    <div class="top">
+      <span class="order-no">{{o.order_no}} · {{o.nickname}}</span>
+      <span class="badge" :class="'badge-'+o.status">{{statusText(o.status)}}</span>
+    </div>
+    <div class="body">
+      <div class="pkg-name">{{o.package_name}}</div>
+      <div class="detail">
+        <span class="v">{{o.booking_date}}</span> · <span class="v">{{o.time_slot}}</span><br>
+        <span class="v">{{o.customer_name}}</span> · <span class="v">{{o.customer_phone}}</span><br>
+        金额: <span class="v" style="color:var(--rose)">¥{{o.amount}}</span>
+      </div>
+    </div>
+    <div class="footer">
+      <div style="font-size:11px;color:var(--ink-ll);font-weight:300">{{o.created_at}}</div>
+      <div style="display:flex;gap:8px">
+        <button v-if="o.status==='booked'" class="btn btn-sm btn-ok" @click="completeOrder(o)">核销</button>
+        <button v-if="['pending','booked'].includes(o.status)" class="btn btn-sm btn-ghost" @click="adminCancelOrder(o)">强制取消</button>
+      </div>
+    </div>
+  </div>
+  <div v-if="!allOrders.length" class="empty-state"><div class="ei">📋</div><div class="et">暂无订单</div></div>
+</div>
+
+<!-- ═══════ 客片管理 ═══════ -->
+<div v-show="tab==='photos'" class="page">
+  <div class="hdr"><div class="back" @click="tab='dashboard'">←</div><h1>客片管理</h1><div class="right"></div></div>
+  <div class="sec-title">分类管理</div>
+  <div class="adm-list">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 4px 12px">
+      <span class="tag tag-rose" v-for="c in categories" :key="c.id" style="cursor:pointer;font-size:12px;padding:6px 14px" @click="deleteCategory(c)">{{c.name}} ✕</span>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 4px 16px">
+      <input v-model="newCatName" placeholder="输入新分类名" style="flex:1;border:1px solid var(--ink-lll);border-radius:var(--rs);padding:10px 14px;font-size:13px;font-family:inherit;outline:none;background:var(--bg)">
+      <button class="btn btn-sm" @click="addCategory">添加</button>
+    </div>
+  </div>
+  <div class="sec-title">客片列表</div>
+  <div class="adm-list">
+    <div class="adm-item" v-for="p in photos" :key="p.id">
+      <img :src="p.image" @click="previewImg=p.image" style="cursor:pointer">
+      <div class="info">
+        <div class="name">{{p.title}}</div>
+        <div class="sub">{{p.category_name||'未分类'}} · {{p.tags||'无标签'}}</div>
+      </div>
+      <button class="btn btn-sm btn-err" @click="deletePhoto(p)">删除</button>
+    </div>
+  </div>
+  <div class="sec-title">添加新客片</div>
+  <div class="form">
+    <div class="form-group"><label>标题</label><input v-model="newPhoto.title" placeholder="例：大唐盛世"></div>
+    <div class="form-group"><label>图片地址</label><input v-model="newPhoto.image_url" placeholder="https://..."></div>
+    <div class="form-group"><label>所属分类</label>
+      <select v-model="newPhoto.category_id" style="width:100%;border:none;font-size:14px;padding:4px 0;font-family:inherit;background:transparent">
+        <option value="">选择分类</option>
+        <option v-for="c in categories" :key="c.id" :value="c.id">{{c.name}}</option>
+      </select>
+    </div>
+    <div class="form-group"><label>标签（逗号分隔）</label><input v-model="newPhoto.tags" placeholder="华丽, 经典"></div>
+    <button class="btn btn-block" @click="addPhoto">添加客片</button>
+  </div>
+</div>
+
+<!-- ═══════ 套餐管理 ═══════ -->
+<div v-show="tab==='pkgs'" class="page">
+  <div class="hdr"><div class="back" @click="tab='dashboard'">←</div><h1>套餐管理</h1><div class="right"></div></div>
+  <div class="sec-title">现有套餐</div>
+  <div class="adm-list">
+    <div class="adm-item" v-for="p in packages" :key="p.id">
+      <img :src="p.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop'">
+      <div class="info">
+        <div class="name">{{p.name}} <span style="color:var(--rose)">¥{{p.price}}</span></div>
+        <div class="sub">{{p.description}}</div>
+        <div class="sub" :style="{color:p.is_active?'var(--ok)':'var(--err)'}">{{p.is_active?'已上架':'已下架'}}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn btn-sm btn-outline" @click="togglePkgActive(p)">{{p.is_active?'下架':'上架'}}</button>
+        <button class="btn btn-sm btn-err" @click="deletePkg(p)">删除</button>
+      </div>
+    </div>
+  </div>
+  <div class="sec-title">添加套餐</div>
+  <div class="form">
+    <div class="form-group"><label>套餐名称</label><input v-model="newPkg.name" placeholder="例：精致妆造"></div>
+    <div class="form-group"><label>价格（元）</label><input v-model.number="newPkg.price" type="number" step="0.01" placeholder="399.00"></div>
+    <div class="form-group"><label>套餐描述</label><input v-model="newPkg.description" placeholder="包含内容描述"></div>
+    <div class="form-group"><label>预计时长（分钟）</label><input v-model.number="newPkg.duration_minutes" type="number" placeholder="120"></div>
+    <div class="form-group"><label>封面图地址</label><input v-model="newPkg.cover" placeholder="https://..."></div>
+    <button class="btn btn-block" @click="addPkg">添加套餐</button>
+  </div>
+</div>
+
+<!-- ═══════ 档期配置 ═══════ -->
+<div v-show="tab==='schedule'" class="page">
+  <div class="hdr"><div class="back" @click="tab='dashboard'">←</div><h1>档期配置</h1><div class="right"></div></div>
+  <div class="sec-title">每周营业时段</div>
+  <div class="form">
+    <div class="form-group" v-for="(sc,i) in schedConfig" :key="i">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:14px;font-weight:500">{{weekNames[sc.weekday]}}</span>
+        <label class="switch"><input type="checkbox" v-model="sc.is_enabled"><span class="slider"></span></label>
+      </div>
+      <div v-if="sc.is_enabled">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="tag tag-gold" v-for="(slot,j) in sc.time_slots" :key="j" style="font-size:11px;padding:4px 12px">
+            {{slot}} <span style="cursor:pointer;margin-left:4px;font-weight:600" @click="sc.time_slots.splice(j,1)">✕</span>
+          </span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input v-model="newSlotStart" type="time" style="border:1px solid var(--ink-lll);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;flex:1;background:var(--bg)">
+          <span style="color:var(--ink-ll);font-size:12px">→</span>
+          <input v-model="newSlotEnd" type="time" style="border:1px solid var(--ink-lll);border-radius:8px;padding:6px 10px;font-size:12px;font-family:inherit;flex:1;background:var(--bg)">
+          <button class="btn btn-sm" style="padding:6px 14px" @click="newSlotStart&&newSlotEnd&&(sc.time_slots.push(newSlotStart+'-'+newSlotEnd),newSlotStart='',newSlotEnd='')">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sec-title">临时闭店</div>
+  <div class="form">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" v-if="schedClosed.length">
+      <span class="tag tag-rose" v-for="d in schedClosed" :key="d" style="font-size:11px;padding:5px 14px">
+        {{d}} <span style="cursor:pointer;margin-left:4px;font-weight:600" @click="schedClosed.splice(schedClosed.indexOf(d),1)">✕</span>
+      </span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <input v-model="newClosedDate" type="date" style="flex:1;border:1px solid var(--ink-lll);border-radius:var(--rs);padding:10px 14px;font-size:13px;font-family:inherit;background:var(--bg)">
+      <button class="btn btn-sm" @click="newClosedDate&&(schedClosed.push(newClosedDate),newClosedDate='')">添加</button>
+    </div>
+  </div>
+  <div style="padding:14px"><button class="btn btn-block" @click="saveSchedule">保存档期配置</button></div>
+</div>
+
+<!-- ═══════ 取消规则 ═══════ -->
+<div v-show="tab==='rules'" class="page">
+  <div class="hdr"><div class="back" @click="tab='dashboard'">←</div><h1>取消规则</h1><div class="right"></div></div>
+  <div class="sec-title">退款政策配置</div>
+  <div class="form">
+    <div class="form-group">
+      <label>免费取消提前时间</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input v-model.number="cancelRules.free_cancel_hours" type="number" min="0" style="width:80px;border:none;font-size:20px;font-weight:600;color:var(--rose);text-align:center;font-family:inherit;background:transparent">
+        <span style="font-size:13px;color:var(--ink-l)">小时</span>
+      </div>
+      <div class="form-hint">距预约开始时间超过此时间可免费取消</div>
+    </div>
+    <div class="form-group">
+      <label>不足时限的取消政策</label>
+      <select v-model="cancelRules.fee_type" style="width:100%;border:none;font-size:14px;padding:4px 0;font-family:inherit;background:transparent">
+        <option value="none">不可取消</option>
+        <option value="percent">按比例扣费</option>
+        <option value="fixed">固定金额扣费</option>
+      </select>
+    </div>
+    <div class="form-group" v-if="cancelRules.fee_type==='percent'">
+      <label>扣费比例</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input v-model.number="cancelRules.fee_value" type="number" min="0" max="100" style="width:80px;border:none;font-size:20px;font-weight:600;color:var(--rose);text-align:center;font-family:inherit;background:transparent">
+        <span style="font-size:13px;color:var(--ink-l)">%</span>
+      </div>
+    </div>
+    <div class="form-group" v-if="cancelRules.fee_type==='fixed'">
+      <label>扣费金额</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px;color:var(--rose)">¥</span>
+        <input v-model.number="cancelRules.fee_value" type="number" step="0.01" min="0" style="width:100px;border:none;font-size:20px;font-weight:600;color:var(--rose);font-family:inherit;background:transparent">
+      </div>
+    </div>
+    <button class="btn btn-block" @click="saveRules">保存规则</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+const{createApp,ref,computed,onMounted,reactive}=Vue;
+const API='/api';
+
+createApp({
+  setup(){
+    const tab=ref('dashboard');
+    const toast=ref('');
+    const toastIcon=ref('✓');
+    const previewImg=ref('');
+    const photos=ref([]);
+    const categories=ref([]);
+    const packages=ref([]);
+    const allOrders=ref([]);
+    const orderFilter=ref(null);
+    const schedConfig=ref([]);
+    const schedClosed=ref([]);
+    const cancelRules=ref({free_cancel_hours:24,fee_type:'none',fee_value:0});
+    const newSlotStart=ref('');
+    const newSlotEnd=ref('');
+    const newClosedDate=ref('');
+    const newPhoto=reactive({title:'',image_url:'',category_id:'',tags:''});
+    const newPkg=reactive({name:'',price:0,description:'',duration_minutes:120,cover:''});
+    const newCatName=ref('');
+    const weekNames=['周日','周一','周二','周三','周四','周五','周六'];
+    const adminUser=ref(null);
+
+    function showToast(msg,icon='✓',dur=2200){toastIcon.value=icon;toast.value=msg;setTimeout(()=>{toast.value='';toastIcon.value='✓'},dur)}
+    async function api(path,opt={}){
+      const h={'Content-Type':'application/json'};
+      if(adminUser.value)h['x-user-id']=adminUser.value.id;
+      const r=await fetch(API+path,{...opt,headers:{...h,...opt.headers}});
+      if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.error||'请求失败')}
+      return r.json();
+    }
+    function statusText(s){return{pending:'待支付',booked:'已预约',completed:'已完成',cancelled:'已取消'}[s]||s}
+
+    async function loadPhotos(){photos.value=await api('/photos')}
+    async function loadCategories(){categories.value=await api('/categories')}
+    async function loadPackages(){packages.value=await api('/packages?all=1')}
+    async function loadAllOrders(){const q=orderFilter.value?`?status=${orderFilter.value}`:'';allOrders.value=await api('/orders'+q)}
+    async function loadSchedule(){const d=await api('/schedule');schedConfig.value=d.config.map(c=>({...c,time_slots:JSON.parse(c.time_slots)}));schedClosed.value=d.closed_dates;cancelRules.value=d.cancel_rules}
+
+    async function initAdmin(){
+      const users=await api('/auth/users');
+      const admin=users.find(u=>u.is_admin);
+      if(admin){
+        adminUser.value=admin;
+      }else{
+        const d=await api('/auth/login',{method:'POST',body:JSON.stringify({openid:'admin_openid',nickname:'商家管理',is_admin:1})});
+        adminUser.value=d.user;
+      }
+    }
+
+    async function completeOrder(o){try{await api(`/orders/${o.id}/complete`,{method:'POST'});showToast('核销成功','✅');loadAllOrders()}catch(e){showToast(e.message,'❌')}}
+    async function adminCancelOrder(o){try{await api(`/orders/${o.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'商家强制取消'})});showToast('已取消','✓');loadAllOrders()}catch(e){showToast(e.message,'❌'})}
+
+    async function addPhoto(){try{await api('/photos',{method:'POST',body:JSON.stringify({...newPhoto})});showToast('添加成功','📷');newPhoto.title='';newPhoto.image_url='';newPhoto.category_id='';newPhoto.tags='';loadPhotos()}catch(e){showToast(e.message,'❌')}}
+    async function deletePhoto(p){try{await api(`/photos/${p.id}`,{method:'DELETE'});showToast('已删除','✓');loadPhotos()}catch(e){showToast(e.message,'❌')}}
+    async function addCategory(){if(!newCatName.value)return;try{await api('/categories',{method:'POST',body:JSON.stringify({name:newCatName.value})});newCatName.value='';loadCategories();showToast('分类已添加','✓')}catch(e){showToast(e.message,'❌')}}
+    async function deleteCategory(c){try{await api(`/categories/${c.id}`,{method:'DELETE'});loadCategories();showToast('已删除','✓')}catch(e){showToast(e.message,'❌'})}
+
+    async function addPkg(){try{await api('/packages',{method:'POST',body:JSON.stringify(newPkg)});showToast('套餐已添加','💄');newPkg.name='';newPkg.price=0;newPkg.description='';newPkg.duration_minutes=120;newPkg.cover='';loadPackages()}catch(e){showToast(e.message,'❌')}}
+    async function togglePkgActive(p){try{await api(`/packages/${p.id}`,{method:'PUT',body:JSON.stringify({...p,is_active:p.is_active?0:1})});loadPackages()}catch(e){showToast(e.message,'❌')}}
+    async function deletePkg(p){try{await api(`/packages/${p.id}`,{method:'DELETE'});loadPackages();showToast('已删除','✓')}catch(e){showToast(e.message,'❌'})}
+
+    async function saveSchedule(){try{await api('/schedule',{method:'PUT',body:JSON.stringify({config:schedConfig.value,closed_dates:schedClosed.value})});showToast('档期已保存','📅')}catch(e){showToast(e.message,'❌')}}
+    async function saveRules(){try{await api('/schedule',{method:'PUT',body:JSON.stringify({cancel_rules:cancelRules.value})});showToast('规则已保存','⚙️')}catch(e){showToast(e.message,'❌')}}
+    function exportOrders(){window.open(API+'/orders/export','_blank')}
+
+    onMounted(async()=>{await initAdmin();loadPhotos();loadCategories();loadPackages()});
+
+    return{
+      tab,toast,toastIcon,previewImg,
+      photos,categories,packages,
+      allOrders,orderFilter,
+      schedConfig,schedClosed,cancelRules,newSlotStart,newSlotEnd,newClosedDate,
+      newPhoto,newPkg,newCatName,weekNames,
+      showToast,statusText,
+      loadAllOrders,loadSchedule,
+      completeOrder,adminCancelOrder,
+      addPhoto,deletePhoto,addCategory,deleteCategory,
+      addPkg,togglePkgActive,deletePkg,
+      saveSchedule,saveRules,exportOrders
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
