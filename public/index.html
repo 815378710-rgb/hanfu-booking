@@ -4,20 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>霓裳 · 汉服妆造预约</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600&family=Noto+Sans+SC:wght@100;200;300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 <style>
+/* ═══ Reset ═══ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 :root{
   --bg:#FFF8F6;--white:#FFFFFF;
-  --ink:#2D2226;--ink-70:#6B5C62;--ink-50:#9B8A90;--ink-30:#C8B8BE;--ink-15:#E5D8DC;--ink-08:#F3ECF0;--ink-04:#FAF5F7;
+  --ink:#1A1116;--ink-80:#3D3036;--ink-60:#6B5C62;--ink-40:#9B8A90;--ink-25:#C8B8BE;--ink-12:#E5D8DC;--ink-06:#F3ECF0;--ink-03:#FAF5F7;
   --rose:#C4788A;--rose-light:#F2E0E6;--rose-lighter:#FAF0F3;--rose-dark:#A85A6C;
   --gold:#C9A87C;--gold-light:#F5EDE0;
-  --green:#7BAF8A;
-  --serif:'Noto Serif SC','Cormorant Garamond',Georgia,serif;
-  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
-  --display:'Cormorant Garamond','Noto Serif SC',Georgia,serif;
+  --green:#5A9E6B;--green-light:rgba(90,158,107,.1);
+  --red:#D94F4F;
+  /* System fonts first, Google Fonts as enhancement */
+  --serif: 'Noto Serif SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', serif;
+  --sans: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --display: Georgia, 'Noto Serif SC', serif;
 }
 
 html{font-size:16px}
@@ -25,32 +26,32 @@ body{
   font-family:var(--sans);background:var(--bg);color:var(--ink);
   max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  font-weight:300;letter-spacing:.02em;
+  font-weight:400;letter-spacing:.02em;line-height:1.6;
 }
 
 /* ── Navigation ── */
 .nav{
   position:sticky;top:0;z-index:100;
-  background:rgba(255,248,246,.88);backdrop-filter:blur(20px);
-  border-bottom:.5px solid var(--ink-15);
+  background:rgba(255,248,246,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--ink-12);
 }
 .nav-inner{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 20px;
 }
 .nav-title{
-  font-family:var(--serif);font-size:20px;font-weight:400;
-  letter-spacing:.2em;color:var(--ink);
+  font-family:var(--serif);font-size:22px;font-weight:600;
+  letter-spacing:.15em;color:var(--ink);
 }
 .nav-sub{
-  font-family:var(--sans);font-size:9px;font-weight:300;
-  letter-spacing:.35em;color:var(--ink-30);text-transform:uppercase;
+  font-family:var(--sans);font-size:10px;font-weight:400;
+  letter-spacing:.3em;color:var(--ink-40);text-transform:uppercase;
   margin-top:2px;
 }
 .nav-back{
-  font-size:14px;cursor:pointer;color:var(--ink-50);
+  font-size:15px;cursor:pointer;color:var(--ink-60);
   transition:color .3s;background:none;border:none;
-  font-family:var(--sans);font-weight:300;letter-spacing:.05em;
+  font-family:var(--sans);font-weight:500;letter-spacing:.05em;
   display:flex;align-items:center;gap:4px;
 }
 .nav-back:hover{color:var(--ink)}
@@ -59,8 +60,8 @@ body{
 .tabs{
   position:fixed;bottom:0;left:50%;transform:translateX(-50%);
   width:100%;max-width:430px;
-  background:rgba(255,248,246,.92);backdrop-filter:blur(24px);
-  border-top:.5px solid var(--ink-15);
+  background:rgba(255,248,246,.95);backdrop-filter:blur(24px);
+  border-top:1px solid var(--ink-12);
   display:flex;z-index:100;
   padding:6px 0 calc(8px + env(safe-area-inset-bottom));
 }
@@ -70,54 +71,53 @@ body{
 }
 .tabs .tab-icon{
   font-size:20px;display:block;margin-bottom:3px;
-  opacity:.3;transition:all .3s;
+  opacity:.35;transition:all .3s;
 }
 .tabs .tab-label{
-  font-size:9px;font-weight:300;letter-spacing:.15em;
-  color:var(--ink-30);transition:all .3s;
+  font-size:10px;font-weight:500;letter-spacing:.12em;
+  color:var(--ink-40);transition:all .3s;
 }
 .tabs .tab.on .tab-icon{opacity:1}
-.tabs .tab.on .tab-label{color:var(--rose);font-weight:400}
+.tabs .tab.on .tab-label{color:var(--rose);font-weight:600}
 
 /* ── Page ── */
 .page{padding-bottom:80px;min-height:100vh}
 
 /* ── Hero Banner ── */
 .hero{
-  position:relative;height:200px;overflow:hidden;
-  margin:0 16px;border-radius:12px;margin-top:12px;
+  position:relative;height:220px;overflow:hidden;
+  margin:0 16px;border-radius:14px;margin-top:12px;
+  box-shadow:0 4px 20px rgba(45,34,38,.1);
 }
-.hero-bg{
-  width:100%;height:100%;object-fit:cover;
-}
+.hero-bg{width:100%;height:100%;object-fit:cover;}
 .hero-overlay{
   position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(255,248,246,0) 0%,rgba(45,34,38,.4) 100%);
+  background:linear-gradient(180deg,rgba(255,248,246,0) 0%,rgba(26,17,22,.55) 100%);
   display:flex;flex-direction:column;justify-content:flex-end;
-  padding:20px;
+  padding:24px;
 }
 .hero-tag{
-  font-size:9px;font-weight:300;letter-spacing:.3em;
-  color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:6px;
+  font-size:10px;font-weight:500;letter-spacing:.3em;
+  color:rgba(255,255,255,.8);text-transform:uppercase;margin-bottom:8px;
 }
 .hero-title{
-  font-family:var(--serif);font-size:22px;font-weight:400;
-  color:#fff;letter-spacing:.1em;
+  font-family:var(--serif);font-size:24px;font-weight:600;
+  color:#fff;letter-spacing:.08em;
 }
 .hero-sub{
-  font-size:11px;font-weight:200;color:rgba(255,255,255,.8);
-  margin-top:4px;letter-spacing:.05em;
+  font-size:13px;font-weight:400;color:rgba(255,255,255,.85);
+  margin-top:6px;letter-spacing:.03em;
 }
 .hero-cta{
   position:absolute;top:16px;right:16px;
-  background:rgba(255,255,255,.2);backdrop-filter:blur(10px);
-  border:1px solid rgba(255,255,255,.3);
-  padding:6px 14px;border-radius:20px;
-  font-size:10px;font-weight:300;color:#fff;
-  letter-spacing:.1em;cursor:pointer;
+  background:rgba(255,255,255,.25);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.35);
+  padding:8px 16px;border-radius:20px;
+  font-size:11px;font-weight:500;color:#fff;
+  letter-spacing:.08em;cursor:pointer;
   transition:all .3s;
 }
-.hero-cta:active{background:rgba(255,255,255,.3)}
+.hero-cta:active{background:rgba(255,255,255,.4)}
 
 /* ── Section Heading ── */
 .heading{padding:24px 20px 12px;}
@@ -125,22 +125,22 @@ body{
   display:flex;align-items:baseline;justify-content:space-between;
 }
 .heading-en{
-  font-family:var(--display);font-size:10px;font-weight:300;
-  letter-spacing:.4em;color:var(--ink-30);
+  font-family:var(--display);font-size:11px;font-weight:400;
+  letter-spacing:.4em;color:var(--ink-25);
   text-transform:uppercase;margin-bottom:4px;
 }
 .heading-cn{
-  font-family:var(--serif);font-size:17px;font-weight:400;
-  letter-spacing:.1em;color:var(--ink);
+  font-family:var(--serif);font-size:18px;font-weight:600;
+  letter-spacing:.08em;color:var(--ink);
 }
 .heading-more{
-  font-size:11px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--ink-60);
+  letter-spacing:.03em;cursor:pointer;
   transition:color .3s;
 }
 .heading-more:hover{color:var(--rose)}
 .heading-line{
-  width:20px;height:1.5px;background:var(--rose-light);
+  width:24px;height:2px;background:var(--rose);
   margin-top:10px;border-radius:1px;
 }
 
@@ -151,15 +151,15 @@ body{
 }
 .pills::-webkit-scrollbar{display:none}
 .pill{
-  white-space:nowrap;padding:7px 16px;border-radius:20px;
-  font-size:12px;font-weight:300;letter-spacing:.08em;
-  color:var(--ink-50);cursor:pointer;
-  background:var(--ink-04);border:1px solid transparent;
+  white-space:nowrap;padding:8px 18px;border-radius:20px;
+  font-size:13px;font-weight:500;letter-spacing:.05em;
+  color:var(--ink-60);cursor:pointer;
+  background:var(--ink-03);border:1.5px solid transparent;
   transition:all .3s;
 }
 .pill.on{
   color:var(--rose-dark);background:var(--rose-lighter);
-  border-color:var(--rose-light);
+  border-color:var(--rose-light);font-weight:600;
 }
 
 /* ── Photo Grid ── */
@@ -168,20 +168,17 @@ body{
 }
 .card{
   break-inside:avoid;margin-bottom:12px;
-  cursor:pointer;border-radius:10px;overflow:hidden;
+  cursor:pointer;border-radius:12px;overflow:hidden;
   background:var(--white);
-  box-shadow:0 1px 8px rgba(45,34,38,.06);
+  box-shadow:0 2px 12px rgba(45,34,38,.08);
   transition:transform .3s,box-shadow .3s;
 }
 .card:active{transform:scale(.97)}
-.card img{
-  width:100%;display:block;
-  transition:opacity .4s;
-}
+.card img{width:100%;display:block;transition:opacity .4s;}
 .card-meta{padding:10px 12px 12px;}
 .card-title{
-  font-family:var(--serif);font-size:13px;font-weight:400;
-  letter-spacing:.06em;color:var(--ink);
+  font-family:var(--serif);font-size:14px;font-weight:500;
+  letter-spacing:.05em;color:var(--ink);
 }
 .card-bottom{
   display:flex;justify-content:space-between;align-items:center;
@@ -189,9 +186,9 @@ body{
 }
 .card-tags{display:flex;gap:6px;flex:1;overflow:hidden;}
 .card-tag{
-  font-size:10px;font-weight:300;letter-spacing:.05em;
-  color:var(--ink-50);background:var(--ink-04);
-  padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:500;letter-spacing:.03em;
+  color:var(--ink-60);background:var(--ink-03);
+  padding:3px 8px;border-radius:10px;
 }
 .card-heart{
   font-size:16px;cursor:pointer;transition:transform .3s;
@@ -203,27 +200,29 @@ body{
 /* ── Package List ── */
 .pkg{padding:0 16px;}
 .pkg-item{
-  background:var(--white);border-radius:12px;
-  margin-bottom:16px;overflow:hidden;
-  box-shadow:0 2px 12px rgba(45,34,38,.06);
+  background:var(--white);border-radius:14px;
+  margin-bottom:18px;overflow:hidden;
+  box-shadow:0 2px 16px rgba(45,34,38,.07);
   transition:transform .3s;
 }
 .pkg-item:active{transform:scale(.98)}
 .pkg-cover-wrap{position:relative;overflow:hidden;}
-.pkg-cover{
-  width:100%;height:180px;object-fit:cover;
-  display:block;
-}
+.pkg-cover{width:100%;height:180px;object-fit:cover;display:block;}
 .pkg-badge{
   position:absolute;top:12px;right:12px;
-  font-size:9px;font-weight:400;letter-spacing:.15em;
+  font-size:10px;font-weight:600;letter-spacing:.1em;
   color:#fff;background:var(--rose);
-  padding:4px 12px;border-radius:12px;
+  padding:5px 14px;border-radius:14px;
+  box-shadow:0 2px 8px rgba(196,120,138,.3);
+}
+.pkg-badge.gold{
+  background:linear-gradient(135deg,var(--gold),#D4A853);
+  box-shadow:0 2px 8px rgba(201,168,124,.4);
 }
 .pkg-fav{
   position:absolute;top:12px;left:12px;
-  width:32px;height:32px;border-radius:50%;
-  background:rgba(255,255,255,.8);backdrop-filter:blur(8px);
+  width:34px;height:34px;border-radius:50%;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(8px);
   display:flex;align-items:center;justify-content:center;
   font-size:16px;cursor:pointer;border:none;
   transition:all .3s;
@@ -231,51 +230,52 @@ body{
 .pkg-fav:active{transform:scale(1.2)}
 .pkg-body{padding:16px 16px 4px;}
 .pkg-name{
-  font-family:var(--serif);font-size:16px;font-weight:500;
-  letter-spacing:.08em;
+  font-family:var(--serif);font-size:17px;font-weight:600;
+  letter-spacing:.06em;
 }
 .pkg-desc{
-  font-size:12px;font-weight:300;color:var(--ink-70);
+  font-size:13px;font-weight:400;color:var(--ink-60);
   margin-top:6px;line-height:1.7;letter-spacing:.02em;
 }
 .pkg-tags{
   display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;
 }
 .pkg-tag{
-  font-size:10px;font-weight:300;color:var(--rose);
-  background:var(--rose-lighter);padding:3px 10px;
+  font-size:10px;font-weight:500;color:var(--rose);
+  background:var(--rose-lighter);padding:4px 10px;
   border-radius:10px;letter-spacing:.03em;
 }
+.pkg-tag.green{color:var(--green);background:var(--green-light);}
+.pkg-tag.gold{color:#9A7B4F;background:var(--gold-light);}
 .pkg-bottom{
   display:flex;justify-content:space-between;
   align-items:center;padding:12px 16px 16px;
 }
 .pkg-price{
-  font-family:var(--display);font-size:26px;font-weight:400;
+  font-family:var(--display);font-size:28px;font-weight:400;
   color:var(--rose-dark);
 }
-.pkg-price .yuan{
-  font-size:14px;font-weight:300;
-}
+.pkg-price .yuan{font-size:15px;font-weight:400;}
 .pkg-info{
-  font-size:10px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;margin-top:2px;
+  font-size:11px;font-weight:400;color:var(--ink-40);
+  letter-spacing:.03em;margin-top:2px;
 }
 .btn-book{
   background:var(--ink);color:var(--bg);
-  border:none;border-radius:20px;
-  padding:10px 20px;font-size:12px;font-weight:300;
-  letter-spacing:.1em;cursor:pointer;
+  border:none;border-radius:22px;
+  padding:11px 22px;font-size:13px;font-weight:500;
+  letter-spacing:.08em;cursor:pointer;
   font-family:var(--sans);
   transition:all .3s;
+  box-shadow:0 2px 8px rgba(26,17,22,.15);
 }
 .btn-book:active{opacity:.8;transform:scale(.96)}
 .btn-detail{
-  font-size:11px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;cursor:pointer;
+  font-size:12px;font-weight:500;color:var(--ink-60);
+  letter-spacing:.03em;cursor:pointer;
   background:none;border:none;font-family:var(--sans);
-  padding:10px 16px;display:block;width:100%;
-  text-align:center;border-top:.5px solid var(--ink-08);
+  padding:12px 16px;display:block;width:100%;
+  text-align:center;border-top:1px solid var(--ink-06);
   transition:color .3s;
 }
 .btn-detail:hover{color:var(--rose)}
@@ -283,29 +283,31 @@ body{
 /* ── Buttons ── */
 .btn{
   display:block;width:100%;
-  padding:15px;text-align:center;
-  font-family:var(--sans);font-size:13px;font-weight:400;
-  letter-spacing:.15em;color:var(--white);
-  background:var(--ink);border:none;border-radius:24px;
+  padding:16px;text-align:center;
+  font-family:var(--sans);font-size:14px;font-weight:500;
+  letter-spacing:.12em;color:var(--white);
+  background:var(--ink);border:none;border-radius:26px;
   cursor:pointer;transition:all .3s;
+  box-shadow:0 2px 12px rgba(26,17,22,.15);
 }
 .btn:active{opacity:.85;transform:scale(.98)}
-.btn:disabled{background:var(--ink-15);color:var(--ink-30);transform:none}
+.btn:disabled{background:var(--ink-25);color:var(--ink-40);transform:none;box-shadow:none;cursor:not-allowed}
 .btn-outline{
   background:transparent;color:var(--ink);
-  border:1px solid var(--ink-15);
+  border:1.5px solid var(--ink-12);box-shadow:none;
 }
-.btn-outline:active{border-color:var(--ink-30)}
+.btn-outline:active{border-color:var(--ink-25)}
 .btn-sm{
   display:inline-block;width:auto;
-  padding:8px 20px;font-size:11px;border-radius:20px;
+  padding:9px 22px;font-size:12px;border-radius:22px;
 }
 .btn-ghost{
-  background:transparent;color:var(--ink-50);
-  border:1px solid var(--ink-08);
+  background:transparent;color:var(--ink-60);
+  border:1.5px solid var(--ink-06);box-shadow:none;
 }
 .btn-rose{
   background:var(--rose);color:var(--white);
+  box-shadow:0 2px 12px rgba(196,120,138,.25);
 }
 .btn-rose:active{background:var(--rose-dark)}
 
@@ -315,19 +317,19 @@ body{
   padding:20px 24px 8px;gap:12px;
 }
 .step-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--ink-15);transition:all .4s;
+  width:9px;height:9px;border-radius:50%;
+  background:var(--ink-12);transition:all .4s;
 }
-.step-dot.on{background:var(--rose);transform:scale(1.2)}
-.step-dot.done{background:var(--ink-30)}
+.step-dot.on{background:var(--rose);transform:scale(1.3);box-shadow:0 0 8px rgba(196,120,138,.3)}
+.step-dot.done{background:var(--ink-25)}
 .step-label{
-  font-size:9px;font-weight:300;letter-spacing:.15em;
-  color:var(--ink-30);transition:all .3s;
+  font-size:10px;font-weight:500;letter-spacing:.12em;
+  color:var(--ink-40);transition:all .3s;
 }
-.step-label.on{color:var(--rose);font-weight:400}
-.step-label.done{color:var(--ink-50)}
+.step-label.on{color:var(--rose);font-weight:600}
+.step-label.done{color:var(--ink-60)}
 .step-line{
-  width:32px;height:1.5px;background:var(--ink-15);
+  width:32px;height:2px;background:var(--ink-12);
   transition:background .4s;border-radius:1px;
 }
 .step-line.done{background:var(--rose-light)}
@@ -340,20 +342,30 @@ body{
 }
 .cal-head button{
   background:none;border:none;cursor:pointer;
-  color:var(--ink-50);font-size:20px;
-  transition:color .3s;font-family:var(--sans);font-weight:200;
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-60);font-size:22px;
+  transition:color .3s;font-family:var(--sans);font-weight:400;
+  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;
 }
-.cal-head button:active{background:var(--ink-04)}
+.cal-head button:active{background:var(--ink-03)}
 .cal-month{
-  font-family:var(--serif);font-size:17px;font-weight:400;
-  letter-spacing:.08em;
+  font-family:var(--serif);font-size:18px;font-weight:600;
+  letter-spacing:.06em;
 }
+.cal-quick{
+  display:flex;gap:8px;margin-bottom:16px;
+}
+.cal-quick-btn{
+  font-size:11px;font-weight:500;color:var(--rose);
+  background:var(--rose-lighter);border:1px solid var(--rose-light);
+  padding:5px 12px;border-radius:14px;cursor:pointer;
+  transition:all .2s;
+}
+.cal-quick-btn:active{background:var(--rose-light)}
 .cal-week{
   display:grid;grid-template-columns:repeat(7,1fr);
-  text-align:center;font-size:10px;font-weight:300;
-  color:var(--ink-30);letter-spacing:.1em;
+  text-align:center;font-size:11px;font-weight:500;
+  color:var(--ink-40);letter-spacing:.08em;
   margin-bottom:8px;
 }
 .cal-grid{
@@ -361,267 +373,381 @@ body{
   text-align:center;gap:2px;
 }
 .cal-day{
-  padding:10px 0;font-size:14px;font-weight:300;
+  padding:11px 0;font-size:15px;font-weight:400;
   cursor:pointer;transition:all .2s;
   font-family:var(--display);border-radius:50%;
 }
 .cal-day:hover:not(.off):not(.empty){background:var(--rose-lighter);color:var(--rose)}
-.cal-day.off{color:var(--ink-15);cursor:default}
-.cal-day.today{color:var(--rose);font-weight:500}
+.cal-day.off{color:var(--ink-12);cursor:default}
+.cal-day.today{color:var(--rose);font-weight:700}
 .cal-day.sel{
   background:var(--rose);color:#fff !important;
+  font-weight:600;box-shadow:0 2px 8px rgba(196,120,138,.3);
 }
 .cal-day.empty{cursor:default}
 
 /* ── Time Slots ── */
 .slots{padding:0 20px;}
 .slots-title{
-  font-size:11px;font-weight:300;letter-spacing:.15em;
-  color:var(--ink-50);margin-bottom:12px;
+  font-size:12px;font-weight:500;letter-spacing:.1em;
+  color:var(--ink-60);margin-bottom:12px;
   display:flex;align-items:center;gap:8px;
 }
 .slots-date{
-  font-size:10px;color:var(--rose);
-  font-family:var(--serif);letter-spacing:.05em;
+  font-size:11px;color:var(--rose);
+  font-family:var(--serif);letter-spacing:.05em;font-weight:600;
 }
 .slot-grid{
   display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
 }
 .slot{
-  padding:13px 0;text-align:center;
-  font-size:13px;font-weight:300;letter-spacing:.05em;
-  border:1px solid var(--ink-08);border-radius:10px;
+  padding:14px 0;text-align:center;
+  font-size:14px;font-weight:500;letter-spacing:.03em;
+  border:1.5px solid var(--ink-06);border-radius:12px;
   cursor:pointer;transition:all .3s;
-  color:var(--ink-70);background:var(--white);
+  color:var(--ink-80);background:var(--white);
 }
 .slot:active:not(.gone){transform:scale(.96)}
 .slot.on{
   background:var(--rose);color:#fff;
   border-color:var(--rose);
+  box-shadow:0 2px 8px rgba(196,120,138,.25);
 }
 .slot.gone{
-  color:var(--ink-15);cursor:not-allowed;
+  color:var(--ink-25);cursor:not-allowed;
   text-decoration:line-through;border-color:transparent;
-  background:var(--ink-04);
+  background:var(--ink-03);
 }
 
 /* ── Form ── */
 .field{padding:0 20px;margin-bottom:18px;}
 .field-label{
-  font-size:10px;font-weight:300;letter-spacing:.15em;
-  color:var(--ink-50);margin-bottom:6px;
+  font-size:11px;font-weight:500;letter-spacing:.1em;
+  color:var(--ink-60);margin-bottom:8px;
 }
 .field-value{
-  font-size:14px;font-weight:300;letter-spacing:.03em;
-  padding:12px 14px;background:var(--ink-04);border-radius:10px;
+  font-size:14px;font-weight:500;letter-spacing:.02em;
+  padding:12px 14px;background:var(--ink-03);border-radius:12px;
+  color:var(--ink);
 }
 .field input{
-  width:100%;border:1px solid var(--ink-08);outline:none;
-  font-size:14px;font-weight:300;letter-spacing:.03em;
-  padding:12px 14px;font-family:var(--sans);
+  width:100%;border:1.5px solid var(--ink-06);outline:none;
+  font-size:15px;font-weight:400;letter-spacing:.02em;
+  padding:13px 14px;font-family:var(--sans);
   background:var(--white);color:var(--ink);
-  border-radius:10px;transition:border-color .3s;
+  border-radius:12px;transition:border-color .3s;
 }
-.field input::placeholder{color:var(--ink-30);font-weight:200}
-.field input:focus{border-color:var(--rose)}
+.field input::placeholder{color:var(--ink-25);font-weight:400}
+.field input:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(196,120,138,.1)}
 .field-hint{
-  font-size:10px;font-weight:300;color:var(--ink-50);
-  margin-top:6px;letter-spacing:.03em;
+  font-size:11px;font-weight:400;color:var(--ink-40);
+  margin-top:6px;letter-spacing:.02em;
 }
+.field-error{
+  font-size:11px;font-weight:500;color:var(--red);
+  margin-top:4px;letter-spacing:.02em;
+}
+.field-row{
+  display:flex;gap:10px;
+}
+.field-row .field{flex:1;padding:0;}
+
+/* ── Guest Section ── */
+.guest-section{
+  margin:0 20px 18px;
+  background:var(--white);border-radius:14px;
+  border:1.5px solid var(--ink-06);
+  overflow:hidden;
+}
+.guest-header{
+  padding:12px 16px;
+  background:var(--rose-lighter);
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;color:var(--rose-dark);
+  letter-spacing:.05em;
+}
+.guest-body{padding:16px;}
+.guest-card{
+  padding:12px 0;
+  border-bottom:1px solid var(--ink-06);
+}
+.guest-card:last-child{border:none;}
+.guest-card-title{
+  font-size:12px;font-weight:600;color:var(--ink);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+.guest-card-title .num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--rose);color:#fff;
+  font-size:10px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+}
+.guest-input{
+  width:100%;border:1.5px solid var(--ink-06);outline:none;
+  font-size:14px;font-weight:400;
+  padding:10px 12px;font-family:var(--sans);
+  background:var(--ink-03);color:var(--ink);
+  border-radius:10px;transition:border-color .3s;
+  margin-bottom:8px;
+}
+.guest-input::placeholder{color:var(--ink-25)}
+.guest-input:focus{border-color:var(--rose);background:var(--white)}
 
 /* ── Cancel Policy Banner ── */
 .policy-banner{
-  margin:0 20px;padding:12px 16px;
-  background:var(--rose-lighter);border-radius:10px;
+  margin:0 20px;padding:14px 16px;
+  background:var(--rose-lighter);border-radius:12px;
   display:flex;gap:10px;align-items:flex-start;
   margin-bottom:20px;
 }
-.policy-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.policy-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
 .policy-text{
-  font-size:11px;font-weight:300;color:var(--ink-70);
-  line-height:1.6;letter-spacing:.02em;
+  font-size:12px;font-weight:400;color:var(--ink-60);
+  line-height:1.7;letter-spacing:.02em;
 }
-.policy-text b{color:var(--rose-dark);font-weight:500}
+.policy-text b{color:var(--rose-dark);font-weight:600}
+
+/* ── Tips Banner ── */
+.tips-banner{
+  margin:0 20px;padding:14px 16px;
+  background:var(--gold-light);border-radius:12px;
+  display:flex;gap:10px;align-items:flex-start;
+  margin-bottom:20px;
+}
+.tips-banner .policy-text{color:#7A6234;}
+.tips-banner .policy-text b{color:#8B6914;}
 
 /* ── Pay Summary ── */
 .summary{margin:0 20px;}
 .summary-row{
   display:flex;justify-content:space-between;
-  padding:13px 0;border-bottom:.5px solid var(--ink-08);
-  font-size:13px;font-weight:300;
+  padding:14px 0;border-bottom:1px solid var(--ink-03);
+  font-size:14px;font-weight:400;
 }
-.summary-row .k{color:var(--ink-50)}
+.summary-row .k{color:var(--ink-60)}
 .summary-total{
   display:flex;justify-content:space-between;
-  padding:16px 0;font-family:var(--serif);font-size:22px;font-weight:400;
+  padding:18px 0;font-family:var(--serif);font-size:24px;font-weight:600;
   color:var(--rose-dark);
 }
 .pay-note{
-  text-align:center;padding:12px 20px;
-  font-size:10px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;
+  text-align:center;padding:14px 20px;
+  font-size:11px;font-weight:400;color:var(--ink-40);
+  letter-spacing:.03em;
 }
 
 /* ── Order Card ── */
 .ord{
   margin:0 16px;background:var(--white);
-  border-radius:12px;overflow:hidden;margin-bottom:14px;
-  box-shadow:0 1px 8px rgba(45,34,38,.05);
+  border-radius:14px;overflow:hidden;margin-bottom:14px;
+  box-shadow:0 2px 12px rgba(45,34,38,.06);
 }
 .ord-head{
-  padding:10px 16px;
+  padding:12px 16px;
   display:flex;justify-content:space-between;align-items:center;
-  border-bottom:.5px solid var(--ink-08);
+  border-bottom:1px solid var(--ink-03);
 }
 .ord-no{
-  font-size:10px;font-weight:300;color:var(--ink-50);
-  font-family:'SF Mono',monospace;letter-spacing:.03em;
+  font-size:11px;font-weight:400;color:var(--ink-40);
+  font-family:'SF Mono',monospace;letter-spacing:.02em;
 }
 .ord-status{
-  font-size:9px;font-weight:400;letter-spacing:.1em;
-  padding:3px 10px;border-radius:10px;
+  font-size:10px;font-weight:600;letter-spacing:.08em;
+  padding:4px 12px;border-radius:12px;
 }
 .ord-status-pending{color:var(--rose);background:var(--rose-lighter)}
-.ord-status-booked{color:var(--green);background:rgba(123,175,138,.1)}
-.ord-status-completed{color:var(--ink-50);background:var(--ink-04)}
-.ord-status-cancelled{color:var(--ink-30);background:var(--ink-04)}
+.ord-status-booked{color:var(--green);background:var(--green-light)}
+.ord-status-completed{color:var(--ink-40);background:var(--ink-03)}
+.ord-status-cancelled{color:var(--ink-25);background:var(--ink-03)}
 .ord-body{padding:14px 16px}
 .ord-pkg{
-  font-family:var(--serif);font-size:14px;font-weight:500;
-  letter-spacing:.06em;margin-bottom:8px;
+  font-family:var(--serif);font-size:15px;font-weight:600;
+  letter-spacing:.04em;margin-bottom:8px;
 }
 .ord-detail{
-  font-size:12px;font-weight:300;color:var(--ink-70);
-  line-height:1.9;letter-spacing:.02em;
+  font-size:13px;font-weight:400;color:var(--ink-60);
+  line-height:2;letter-spacing:.02em;
 }
-.ord-detail b{color:var(--ink);font-weight:400}
+.ord-detail b{color:var(--ink);font-weight:500}
+.ord-guests{
+  margin-top:8px;padding:8px 12px;
+  background:var(--ink-03);border-radius:10px;
+  font-size:12px;font-weight:400;color:var(--ink-60);
+  line-height:1.8;
+}
+.ord-guests b{color:var(--ink);font-weight:500}
+.ord-timeline{
+  margin-top:10px;padding:10px 12px;
+  background:var(--ink-03);border-radius:10px;
+}
+.ord-timeline-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:400;color:var(--ink-40);
+  padding:3px 0;
+}
+.ord-timeline-item.active{color:var(--rose);font-weight:500}
+.ord-timeline-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--ink-12);flex-shrink:0;
+}
+.ord-timeline-item.active .ord-timeline-dot{background:var(--rose);}
 .ord-foot{
-  padding:10px 16px;
+  padding:12px 16px;
   display:flex;justify-content:space-between;align-items:center;
-  border-top:.5px solid var(--ink-08);
+  border-top:1px solid var(--ink-03);
 }
 .ord-amount{
-  font-family:var(--display);font-size:20px;font-weight:400;
+  font-family:var(--display);font-size:22px;font-weight:400;
   color:var(--rose-dark);
 }
 .ord-actions{display:flex;gap:8px}
 
 /* ── My Page ── */
 .my-head{
-  padding:36px 20px 28px;text-align:center;
+  padding:40px 20px 28px;text-align:center;
   background:linear-gradient(180deg,var(--rose-lighter) 0%,var(--bg) 100%);
 }
 .my-avatar{
-  width:68px;height:68px;border-radius:50%;
+  width:72px;height:72px;border-radius:50%;
   background:var(--white);
-  box-shadow:0 2px 12px rgba(196,120,138,.15);
+  box-shadow:0 4px 16px rgba(196,120,138,.18);
   display:flex;align-items:center;justify-content:center;
   margin:0 auto 14px;
-  font-family:var(--serif);font-size:22px;font-weight:400;
+  font-family:var(--serif);font-size:24px;font-weight:600;
   color:var(--rose);
 }
 .my-name{
-  font-family:var(--serif);font-size:17px;font-weight:500;
-  letter-spacing:.12em;
+  font-family:var(--serif);font-size:18px;font-weight:600;
+  letter-spacing:.1em;
 }
 .my-role{
-  font-size:9px;font-weight:300;color:var(--ink-50);
+  font-size:10px;font-weight:500;color:var(--ink-40);
   letter-spacing:.25em;margin-top:4px;text-transform:uppercase;
 }
 .my-stats{
   display:grid;grid-template-columns:repeat(4,1fr);
   margin:20px 16px 0;background:var(--white);
-  border-radius:12px;overflow:hidden;
-  box-shadow:0 1px 8px rgba(45,34,38,.05);
+  border-radius:14px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(45,34,38,.06);
 }
 .my-stat{
   text-align:center;padding:18px 0;cursor:pointer;
-  border-right:.5px solid var(--ink-08);
+  border-right:1px solid var(--ink-03);
   transition:background .2s;
 }
 .my-stat:last-child{border:none}
-.my-stat:active{background:var(--ink-04)}
+.my-stat:active{background:var(--ink-03)}
 .my-stat-num{
-  font-family:var(--display);font-size:22px;font-weight:400;
+  font-family:var(--display);font-size:24px;font-weight:400;
   color:var(--rose-dark);
 }
 .my-stat-lbl{
-  font-size:9px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.12em;margin-top:3px;
+  font-size:10px;font-weight:500;color:var(--ink-40);
+  letter-spacing:.1em;margin-top:4px;
 }
 .my-links{
   margin:16px;background:var(--white);
-  border-radius:12px;overflow:hidden;
-  box-shadow:0 1px 8px rgba(45,34,38,.05);
+  border-radius:14px;overflow:hidden;
+  box-shadow:0 2px 12px rgba(45,34,38,.06);
 }
 .my-link{
   display:flex;align-items:center;justify-content:space-between;
-  padding:16px 18px;border-bottom:.5px solid var(--ink-08);
+  padding:17px 18px;border-bottom:1px solid var(--ink-03);
   cursor:pointer;transition:background .2s;
-  font-size:13px;font-weight:300;letter-spacing:.05em;
+  font-size:14px;font-weight:400;letter-spacing:.03em;
 }
 .my-link:last-child{border:none}
-.my-link:active{background:var(--ink-04)}
-.my-link-icon{font-size:16px;margin-right:10px;opacity:.5}
-.my-link-arrow{color:var(--ink-30);font-size:12px}
+.my-link:active{background:var(--ink-03)}
+.my-link-icon{font-size:17px;margin-right:12px;opacity:.6}
+.my-link-arrow{color:var(--ink-25);font-size:13px}
+
+/* ── Business Hours Bar ── */
+.hours-bar{
+  margin:0 20px;padding:12px 16px;
+  background:var(--white);border-radius:12px;
+  box-shadow:0 1px 6px rgba(45,34,38,.05);
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:16px;
+}
+.hours-icon{font-size:18px;flex-shrink:0;}
+.hours-text{
+  font-size:12px;font-weight:400;color:var(--ink-60);
+  line-height:1.6;
+}
+.hours-text b{color:var(--ink);font-weight:600;}
 
 /* ── Success ── */
-.ok{text-align:center;padding:60px 24px;}
+.ok{text-align:center;padding:50px 24px 30px;}
 .ok-icon{
-  width:64px;height:64px;border-radius:50%;
+  width:68px;height:68px;border-radius:50%;
   background:linear-gradient(135deg,var(--rose-light),var(--rose));
   display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;font-size:28px;color:#fff;
+  margin:0 auto 20px;font-size:30px;color:#fff;
   animation:pop .6s cubic-bezier(.68,-.55,.27,1.55);
+  box-shadow:0 4px 20px rgba(196,120,138,.3);
 }
+@keyframes pop{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 .ok h2{
-  font-family:var(--serif);font-size:22px;font-weight:500;
-  letter-spacing:.08em;margin-bottom:8px;
+  font-family:var(--serif);font-size:24px;font-weight:600;
+  letter-spacing:.06em;margin-bottom:8px;
 }
 .ok-sub{
-  font-size:12px;font-weight:300;color:var(--ink-50);
-  margin-bottom:24px;letter-spacing:.05em;
+  font-size:13px;font-weight:400;color:var(--ink-40);
+  margin-bottom:24px;letter-spacing:.03em;
 }
 .ok-detail{
-  background:var(--white);border-radius:12px;
-  padding:20px;margin:0 auto;max-width:280px;
-  box-shadow:0 1px 8px rgba(45,34,38,.05);
+  background:var(--white);border-radius:14px;
+  padding:20px;margin:0 auto;max-width:300px;
+  box-shadow:0 2px 12px rgba(45,34,38,.06);
   text-align:left;
 }
 .ok-row{
   display:flex;justify-content:space-between;
-  padding:8px 0;font-size:12px;font-weight:300;
-  border-bottom:.5px solid var(--ink-08);
+  padding:9px 0;font-size:13px;font-weight:400;
+  border-bottom:1px solid var(--ink-03);
 }
 .ok-row:last-child{border:none}
-.ok-row .k{color:var(--ink-50)}
-.ok-row .v{color:var(--ink);font-weight:400}
+.ok-row .k{color:var(--ink-40)}
+.ok-row .v{color:var(--ink);font-weight:500}
+.ok-next{
+  margin:20px auto 0;max-width:300px;
+  padding:16px;background:var(--rose-lighter);
+  border-radius:14px;text-align:left;
+}
+.ok-next-title{
+  font-size:13px;font-weight:600;color:var(--rose-dark);
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.ok-next-item{
+  font-size:12px;font-weight:400;color:var(--ink-60);
+  line-height:2;padding-left:4px;
+}
 .ok-actions{
   display:flex;gap:12px;justify-content:center;margin-top:28px;
 }
 .ok-share{
-  margin-top:20px;font-size:11px;font-weight:300;
-  color:var(--ink-50);letter-spacing:.05em;
+  margin-top:20px;font-size:12px;font-weight:400;
+  color:var(--ink-40);letter-spacing:.03em;
   cursor:pointer;
 }
 .ok-share:hover{color:var(--rose)}
 
 /* ── Empty ── */
 .empty{text-align:center;padding:60px 24px}
-.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.empty-icon{font-size:44px;margin-bottom:14px;opacity:.5}
 .empty-title{
-  font-family:var(--serif);font-size:15px;font-weight:400;
-  color:var(--ink);letter-spacing:.08em;margin-bottom:6px;
+  font-family:var(--serif);font-size:16px;font-weight:500;
+  color:var(--ink);letter-spacing:.06em;margin-bottom:6px;
 }
 .empty-text{
-  font-size:12px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;line-height:1.6;
+  font-size:13px;font-weight:400;color:var(--ink-40);
+  letter-spacing:.03em;line-height:1.6;
 }
 .empty-cta{
-  display:inline-block;margin-top:16px;
-  font-size:11px;font-weight:300;color:var(--rose);
-  letter-spacing:.1em;cursor:pointer;
-  border-bottom:1px solid var(--rose-light);
+  display:inline-block;margin-top:18px;
+  font-size:12px;font-weight:500;color:var(--rose);
+  letter-spacing:.08em;cursor:pointer;
+  border-bottom:1.5px solid var(--rose-light);
   padding-bottom:2px;
   transition:all .3s;
 }
@@ -629,7 +755,7 @@ body{
 /* ── Modal ── */
 .modal-bg{
   position:fixed;inset:0;
-  background:rgba(45,34,38,.2);backdrop-filter:blur(16px);
+  background:rgba(26,17,22,.25);backdrop-filter:blur(16px);
   z-index:150;display:flex;align-items:flex-end;justify-content:center;
 }
 .modal-box{
@@ -637,19 +763,19 @@ body{
   border-radius:20px 20px 0 0;
   padding:24px 20px calc(24px + env(safe-area-inset-bottom));
   animation:slideUp .35s cubic-bezier(.32,.72,0,1);
-  max-height:80vh;overflow-y:auto;
+  max-height:85vh;overflow-y:auto;
 }
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-handle{
-  width:36px;height:4px;background:var(--ink-15);
+  width:36px;height:4px;background:var(--ink-12);
   border-radius:2px;margin:0 auto 20px;
 }
 .modal-box h3{
-  font-family:var(--serif);font-size:17px;font-weight:500;
-  letter-spacing:.06em;margin-bottom:16px;
+  font-family:var(--serif);font-size:18px;font-weight:600;
+  letter-spacing:.04em;margin-bottom:16px;
 }
 .modal-box p{
-  font-size:13px;font-weight:300;color:var(--ink-70);
+  font-size:14px;font-weight:400;color:var(--ink-60);
   line-height:1.8;margin-bottom:16px;letter-spacing:.02em;
 }
 .modal-box .acts{display:flex;gap:10px}
@@ -661,32 +787,33 @@ body{
   height:200px;object-fit:cover;
 }
 .pkg-detail-name{
-  font-family:var(--serif);font-size:20px;font-weight:500;
-  letter-spacing:.08em;margin-bottom:4px;
+  font-family:var(--serif);font-size:21px;font-weight:600;
+  letter-spacing:.06em;margin-bottom:4px;
 }
 .pkg-detail-price{
-  font-family:var(--display);font-size:28px;font-weight:400;
+  font-family:var(--display);font-size:30px;font-weight:400;
   color:var(--rose-dark);margin-bottom:4px;
 }
+.pkg-detail-meta{
+  display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+}
 .pkg-detail-time{
-  font-size:11px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;margin-bottom:16px;
+  font-size:12px;font-weight:500;color:var(--ink-40);
+  letter-spacing:.03em;
 }
 .pkg-detail-desc{
-  font-size:13px;font-weight:300;color:var(--ink-70);
+  font-size:14px;font-weight:400;color:var(--ink-60);
   line-height:1.8;margin-bottom:16px;
 }
-.pkg-detail-items{
-  margin-bottom:20px;
-}
+.pkg-detail-items{margin-bottom:20px;}
 .pkg-detail-item{
   display:flex;align-items:center;gap:10px;
-  padding:10px 0;border-bottom:.5px solid var(--ink-08);
-  font-size:13px;font-weight:300;color:var(--ink);
+  padding:11px 0;border-bottom:1px solid var(--ink-03);
+  font-size:14px;font-weight:400;color:var(--ink);
 }
 .pkg-detail-item:last-child{border:none}
 .pkg-detail-item .check{
-  color:var(--green);font-size:16px;flex-shrink:0;
+  color:var(--green);font-size:17px;flex-shrink:0;
 }
 
 /* ── Toast ── */
@@ -694,9 +821,9 @@ body{
   position:fixed;top:40%;left:50%;
   transform:translate(-50%,-50%);
   background:var(--ink);color:var(--bg);
-  padding:12px 24px;font-size:13px;font-weight:300;
-  letter-spacing:.05em;z-index:300;border-radius:10px;
-  animation:fadeIn .2s;box-shadow:0 8px 32px rgba(0,0,0,.2);
+  padding:14px 28px;font-size:14px;font-weight:500;
+  letter-spacing:.03em;z-index:300;border-radius:12px;
+  animation:fadeIn .2s;box-shadow:0 8px 32px rgba(0,0,0,.25);
 }
 @keyframes fadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 
@@ -711,39 +838,39 @@ body{
 .preview img{
   max-width:90%;max-height:72vh;
   border-radius:12px;
-  box-shadow:0 8px 40px rgba(45,34,38,.15);
+  box-shadow:0 8px 40px rgba(45,34,38,.18);
 }
 .preview-close{
   position:absolute;top:16px;right:16px;
-  width:40px;height:40px;border-radius:50%;
+  width:42px;height:42px;border-radius:50%;
   background:var(--white);
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
   display:flex;align-items:center;justify-content:center;
-  font-size:18px;color:var(--ink-50);cursor:pointer;
+  font-size:18px;color:var(--ink-60);cursor:pointer;
   border:none;transition:all .3s;
 }
 .preview-close:active{transform:scale(.9)}
 .preview-actions{
   position:absolute;bottom:40px;
-  display:flex;gap:20px;
+  display:flex;gap:24px;
 }
 .preview-act{
   display:flex;flex-direction:column;align-items:center;gap:4px;
-  cursor:pointer;font-size:10px;font-weight:300;color:var(--ink-50);
-  letter-spacing:.05em;
+  cursor:pointer;font-size:11px;font-weight:500;color:var(--ink-40);
+  letter-spacing:.03em;
 }
-.preview-act-icon{font-size:22px;opacity:.6}
+.preview-act-icon{font-size:24px;opacity:.6}
 .preview-act:active .preview-act-icon{opacity:1}
 
 /* ── Skeleton ── */
 .skeleton{
-  background:linear-gradient(90deg,var(--ink-04) 25%,var(--ink-08) 50%,var(--ink-04) 75%);
+  background:linear-gradient(90deg,var(--ink-03) 25%,var(--ink-06) 50%,var(--ink-03) 75%);
   background-size:200% 100%;
   animation:shimmer 1.5s infinite;
   border-radius:6px;
 }
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-img{height:160px;border-radius:10px;margin-bottom:12px;}
+.skel-img{height:160px;border-radius:12px;margin-bottom:12px;}
 .skel-text{height:12px;width:60%;margin-bottom:8px;}
 .skel-text-sm{height:10px;width:40%;}
 
@@ -751,24 +878,26 @@ body{
 .spacer{height:20px}
 .spacer-lg{height:36px}
 
-/* ── Fade Transition ── */
-.fade-enter-active{animation:fadeIn .3s}
-.fade-leave-active{animation:fadeIn .3s reverse}
-
 ::-webkit-scrollbar{display:none}
 body{padding-bottom:env(safe-area-inset-bottom)}
 
 /* ── Loading Spinner ── */
-.loading-wrap{
-  display:flex;align-items:center;justify-content:center;
-  padding:40px;
-}
+.loading-wrap{display:flex;align-items:center;justify-content:center;padding:40px;}
 .spinner{
-  width:24px;height:24px;border:2px solid var(--ink-15);
+  width:26px;height:26px;border:2.5px solid var(--ink-12);
   border-top-color:var(--rose);border-radius:50%;
   animation:spin .8s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Recommend Badge ── */
+.recommend-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 10px;border-radius:10px;
+  font-size:10px;font-weight:600;letter-spacing:.05em;
+  background:linear-gradient(135deg,#FFF3E0,#FFE0B2);
+  color:#E65100;
+}
 </style>
 </head>
 <body>
@@ -814,6 +943,15 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="hero-cta">立即查看 →</div>
   </div>
 
+  <!-- Business Hours -->
+  <div class="hours-bar" style="margin-top:14px">
+    <span class="hours-icon">🕐</span>
+    <div class="hours-text">
+      <b>营业时间</b>：周一至周六 9:00 - 18:00<br>
+      周日休息 · 节假日请提前咨询
+    </div>
+  </div>
+
   <div class="heading">
     <div class="heading-row">
       <div>
@@ -849,7 +987,6 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
   </div>
 
-  <!-- Skeleton loading -->
   <div class="grid" v-if="!photos.length && loading">
     <div class="card" v-for="i in 4" :key="i">
       <div class="skeleton skel-img"></div>
@@ -884,11 +1021,20 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="heading-line"></div>
   </div>
 
+  <!-- Recommendation Guide -->
+  <div class="tips-banner" style="margin-bottom:18px">
+    <span class="policy-icon">💡</span>
+    <div class="policy-text">
+      <b>选套餐小贴士：</b>第一次体验推荐「精致妆造」，和闺蜜一起选「闺蜜双人套餐」更划算哦！
+    </div>
+  </div>
+
   <div class="pkg" v-if="packages.length">
-    <div class="pkg-item" v-for="(p,i) in packages" :key="p.id">
+    <div class="pkg-item" v-for="p in packages" :key="p.id">
       <div class="pkg-cover-wrap">
         <img class="pkg-cover" :src="p.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'" loading="lazy">
-        <span class="pkg-badge" v-if="i===1">✨ 人气推荐</span>
+        <span class="pkg-badge" v-if="p.is_hot">🔥 热门推荐</span>
+        <span class="pkg-badge gold" v-else-if="p.price>=699">✨ 高端之选</span>
         <button class="pkg-fav" @click.stop="togglePkgFav(p.id)">
           {{likedPkgs.has(p.id) ? '❤️' : '🤍'}}
         </button>
@@ -898,14 +1044,18 @@ body{padding-bottom:env(safe-area-inset-bottom)}
         <div class="pkg-desc">{{p.description}}</div>
         <div class="pkg-tags">
           <span class="pkg-tag">约{{p.duration_minutes}}分钟</span>
+          <span class="pkg-tag green">👤 {{p.person_count}}人</span>
           <span class="pkg-tag" v-if="p.price>=699">含摄影</span>
-          <span class="pkg-tag" v-if="p.name.includes('闺蜜')">双人优惠</span>
+          <span class="pkg-tag gold" v-if="p.person_count>1">闺蜜同行</span>
         </div>
       </div>
       <div class="pkg-bottom">
         <div>
           <div class="pkg-price"><span class="yuan">¥</span>{{p.price}}</div>
-          <div class="pkg-info">含妆造 · 服饰 · 配饰</div>
+          <div class="pkg-info">
+            <template v-if="p.person_count>1">人均 ¥{{Math.round(p.price/p.person_count)}}</template>
+            <template v-else>含妆造 · 服饰 · 配饰</template>
+          </div>
         </div>
         <button class="btn-book" @click="startBooking(p)">立即预约</button>
       </div>
@@ -913,7 +1063,6 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
   </div>
 
-  <!-- Skeleton -->
   <div class="pkg" v-if="!packages.length && loading">
     <div class="pkg-item" v-for="i in 2" :key="i">
       <div class="skeleton" style="height:180px;margin-bottom:0;"></div>
@@ -937,7 +1086,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="nav-inner">
       <button class="nav-back" @click="goBack">← 返回</button>
       <div style="text-align:center">
-        <div class="nav-title" style="font-size:16px">{{['','选择档期','填写信息','确认支付'][bookingStep]}}</div>
+        <div class="nav-title" style="font-size:17px">{{['','选择档期','填写信息','确认支付'][bookingStep]}}</div>
       </div>
       <div style="width:48px"></div>
     </div>
@@ -961,10 +1110,11 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   </div>
 
   <!-- Selected Package Summary -->
-  <div style="padding:8px 20px 0;display:flex;align-items:center;gap:8px;" v-if="bookingPkg.name">
-    <span style="font-size:10px;color:var(--ink-50);letter-spacing:.1em;">已选</span>
-    <span style="font-size:12px;font-weight:400;color:var(--rose);">{{bookingPkg.name}}</span>
-    <span style="font-size:12px;color:var(--rose-dark);font-family:var(--display)">¥{{bookingPkg.price}}</span>
+  <div style="padding:8px 20px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap" v-if="bookingPkg.name">
+    <span style="font-size:11px;color:var(--ink-40);letter-spacing:.08em;font-weight:500">已选</span>
+    <span style="font-size:13px;font-weight:600;color:var(--rose);">{{bookingPkg.name}}</span>
+    <span style="font-size:13px;color:var(--rose-dark);font-family:var(--display);font-weight:400">¥{{bookingPkg.price}}</span>
+    <span class="pkg-tag green" style="font-size:10px">👤 {{bookingPkg.person_count||1}}人</span>
   </div>
 
   <!-- Step 1: Select Date & Time -->
@@ -974,6 +1124,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
         <button @click="prevMonth">‹</button>
         <span class="cal-month">{{calYear}}年{{calMonth+1}}月</span>
         <button @click="nextMonth">›</button>
+      </div>
+      <!-- Quick jump buttons -->
+      <div class="cal-quick">
+        <span class="cal-quick-btn" @click="jumpToday">今天</span>
+        <span class="cal-quick-btn" @click="jumpWeekend">本周末</span>
+        <span class="cal-quick-btn" @click="jumpNextWeek">下周</span>
       </div>
       <div class="cal-week">
         <span v-for="d in ['日','一','二','三','四','五','六']" :key="d">{{d}}</span>
@@ -1021,14 +1177,55 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <div class="field-label">时间</div>
       <div class="field-value">{{formatDate(selectedDate)}} {{selectedSlot}}</div>
     </div>
+
+    <!-- Main booker info -->
+    <div style="padding:0 20px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:6px">
+        <span style="width:20px;height:20px;border-radius:50%;background:var(--rose);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">主</span>
+        预约人信息（到店核验）
+      </div>
+    </div>
     <div class="field">
       <div class="field-label">姓名</div>
-      <input v-model="customerName" placeholder="到店核验姓名">
+      <input v-model="customerName" placeholder="请输入姓名">
+      <div v-if="showValidation && !customerName" class="field-error">请填写姓名</div>
     </div>
     <div class="field">
       <div class="field-label">手机号</div>
-      <input v-model="customerPhone" type="tel" placeholder="11位手机号" maxlength="11">
+      <input v-model="customerPhone" type="tel" placeholder="请输入11位手机号" maxlength="11"
+        @input="customerPhone=customerPhone.replace(/\D/g,'')">
       <div class="field-hint">用于到店核验和预约提醒 📱</div>
+      <div v-if="showValidation && customerPhone && !isValidPhone(customerPhone)" class="field-error">请输入正确的11位手机号</div>
+      <div v-if="showValidation && !customerPhone" class="field-error">请填写手机号</div>
+    </div>
+
+    <!-- Multi-person guest info -->
+    <div v-if="needsGuestInfo" class="guest-section">
+      <div class="guest-header">
+        👥 同行人信息（{{guests.length}}/{{bookingPkg.person_count - 1}}位）
+      </div>
+      <div class="guest-body">
+        <div class="guest-card" v-for="(g,idx) in guests" :key="idx">
+          <div class="guest-card-title">
+            <span class="num">{{idx+2}}</span>
+            第{{idx+2}}位同行人
+          </div>
+          <input class="guest-input" v-model="g.name" :placeholder="'第'+(idx+2)+'位姓名'">
+          <input class="guest-input" v-model="g.phone" type="tel" placeholder="手机号" maxlength="11"
+            @input="g.phone=g.phone.replace(/\D/g,'')">
+        </div>
+      </div>
+    </div>
+
+    <!-- To-visit tips -->
+    <div class="tips-banner">
+      <span class="policy-icon">📝</span>
+      <div class="policy-text">
+        <b>到店须知：</b><br>
+        • 请提前10分钟到店，迟到超过15分钟可能影响服务<br>
+        • 到店请出示预约手机号即可核验<br>
+        • 可自带喜欢的配饰或发饰
+      </div>
     </div>
 
     <!-- Cancel Policy -->
@@ -1041,7 +1238,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 
     <div class="spacer"></div>
     <div style="padding:0 20px">
-      <button class="btn" @click="submitOrder" :disabled="!customerName||customerPhone.length<11">
+      <button class="btn" @click="validateAndSubmit" :disabled="!isFormValid">
         提交预约
       </button>
     </div>
@@ -1052,11 +1249,15 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   <template v-if="bookingStep===3">
     <div class="spacer"></div>
     <div class="summary">
-      <div class="summary-row"><span class="k">套餐</span><span>{{bookingPkg.name}}</span></div>
+      <div class="summary-row"><span class="k">套餐</span><span>{{bookingPkg.name}}（{{bookingPkg.person_count}}人）</span></div>
       <div class="summary-row"><span class="k">日期</span><span>{{formatDate(selectedDate)}}</span></div>
       <div class="summary-row"><span class="k">时段</span><span>{{selectedSlot}}</span></div>
-      <div class="summary-row"><span class="k">姓名</span><span>{{customerName}}</span></div>
-      <div class="summary-row"><span class="k">手机</span><span>{{customerPhone}}</span></div>
+      <div class="summary-row"><span class="k">预约人</span><span>{{customerName}} · {{customerPhone}}</span></div>
+      <template v-if="guests.length">
+        <div class="summary-row" v-for="(g,i) in guests" :key="i">
+          <span class="k">同行人{{i+2}}</span><span>{{g.name}} · {{g.phone}}</span>
+        </div>
+      </template>
       <div class="summary-total"><span>合计</span><span>¥{{currentOrder?.amount||bookingPkg.price}}</span></div>
     </div>
     <div class="spacer"></div>
@@ -1075,7 +1276,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
     <div class="pay-note">15分钟内未支付自动取消</div>
     <div style="text-align:center;padding:10px">
-      <span style="font-size:12px;font-weight:300;color:var(--ink-50);cursor:pointer;letter-spacing:.05em" @click="cancelPendingOrder">取消支付</span>
+      <span style="font-size:13px;font-weight:400;color:var(--ink-40);cursor:pointer;letter-spacing:.03em" @click="cancelPendingOrder">取消支付</span>
     </div>
   </template>
 </div>
@@ -1092,7 +1293,20 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <div class="ok-row"><span class="k">套餐</span><span class="v">{{currentOrder?.package_name||bookingPkg.name}}</span></div>
       <div class="ok-row"><span class="k">日期</span><span class="v">{{formatDate(currentOrder?.booking_date)}}</span></div>
       <div class="ok-row"><span class="k">时段</span><span class="v">{{currentOrder?.time_slot}}</span></div>
+      <div class="ok-row"><span class="k">预约人</span><span class="v">{{customerName}}</span></div>
+      <div class="ok-row" v-for="(g,i) in (currentOrder?.guests||[])" :key="i">
+        <span class="k">同行人{{i+2}}</span><span class="v">{{g.name}}</span>
+      </div>
       <div class="ok-row"><span class="k">金额</span><span class="v" style="color:var(--rose-dark)">¥{{currentOrder?.amount}}</span></div>
+    </div>
+
+    <!-- Next steps guidance -->
+    <div class="ok-next">
+      <div class="ok-next-title">📌 接下来你需要知道</div>
+      <div class="ok-next-item">1. 到店出示预约手机号即可核验</div>
+      <div class="ok-next-item">2. 建议提前10分钟到店准备</div>
+      <div class="ok-next-item">3. 如需取消，请在24小时前操作</div>
+      <div class="ok-next-item" v-if="(currentOrder?.guests||[]).length">4. 请通知同行人准时到达</div>
     </div>
 
     <div class="ok-actions">
@@ -1136,7 +1350,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <span><span class="my-link-icon">📋</span>我的预约</span><span class="my-link-arrow">→</span>
     </div>
     <div class="my-link" @click="showFavorites=true" v-if="likedPhotos.size">
-      <span><span class="my-link-icon">❤️</span>我的收藏 <span style="color:var(--rose);font-size:11px">({{likedPhotos.size}})</span></span><span class="my-link-arrow">→</span>
+      <span><span class="my-link-icon">❤️</span>我的收藏 <span style="color:var(--rose);font-size:12px">({{likedPhotos.size}})</span></span><span class="my-link-arrow">→</span>
     </div>
     <div class="my-link" @click="tab='photos'">
       <span><span class="my-link-icon">📸</span>浏览客片</span><span class="my-link-arrow">→</span>
@@ -1156,7 +1370,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="nav-inner">
       <button class="nav-back" @click="tab='my'">← 返回</button>
       <div style="text-align:center">
-        <div class="nav-title" style="font-size:16px">我的预约</div>
+        <div class="nav-title" style="font-size:17px">我的预约</div>
       </div>
       <div style="width:48px"></div>
     </div>
@@ -1174,10 +1388,31 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <span class="ord-status" :class="'ord-status-'+o.status">{{statusText(o.status)}}</span>
     </div>
     <div class="ord-body">
-      <div class="ord-pkg">{{o.package_name}}</div>
+      <div class="ord-pkg">{{o.package_name}} <span style="font-size:12px;color:var(--ink-40);font-weight:400">· {{o.person_count||1}}人</span></div>
       <div class="ord-detail">
         📅 {{formatDate(o.booking_date)}} {{o.time_slot}}<br>
         👤 {{o.customer_name}} · {{o.customer_phone}}
+      </div>
+      <!-- Show guests if any -->
+      <div class="ord-guests" v-if="o.guests && o.guests.length">
+        <div v-for="(g,i) in o.guests" :key="i">
+          👥 同行人{{i+2}}：<b>{{g.name}}</b> · {{g.phone}}
+        </div>
+      </div>
+      <!-- Order timeline -->
+      <div class="ord-timeline" v-if="o.status!=='cancelled'">
+        <div class="ord-timeline-item active">
+          <span class="ord-timeline-dot"></span>
+          下单 · {{formatTime(o.created_at)}}
+        </div>
+        <div class="ord-timeline-item" :class="{active: o.paid_at}">
+          <span class="ord-timeline-dot"></span>
+          {{o.paid_at ? '已支付 · '+formatTime(o.paid_at) : '待支付'}}
+        </div>
+        <div class="ord-timeline-item" :class="{active: o.status==='completed'}">
+          <span class="ord-timeline-dot"></span>
+          {{o.status==='completed' ? '已完成' : '待到店'}}
+        </div>
       </div>
     </div>
     <div class="ord-foot">
@@ -1219,8 +1454,8 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <p v-if="cancelModal" style="text-align:center">
       {{cancelModal.package_name}}<br>
       {{formatDate(cancelModal.booking_date)}} {{cancelModal.time_slot}}<br>
-      <span style="color:var(--rose-dark);font-size:18px;font-family:var(--display)">¥{{cancelModal.amount}}</span><br><br>
-      <span style="font-size:11px;color:var(--ink-50)">退款将原路返回到你的账户</span>
+      <span style="color:var(--rose-dark);font-size:20px;font-family:var(--display)">¥{{cancelModal.amount}}</span><br><br>
+      <span style="font-size:12px;color:var(--ink-40)">退款将原路返回到你的账户</span>
     </p>
     <div class="acts">
       <button class="btn btn-outline btn-sm" @click="cancelModal=null">再想想</button>
@@ -1236,10 +1471,14 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <img class="pkg-detail-cover" :src="pkgDetailModal.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'">
     <div class="pkg-detail-name">{{pkgDetailModal.name}}</div>
     <div class="pkg-detail-price">¥{{pkgDetailModal.price}}</div>
-    <div class="pkg-detail-time">⏱ 约 {{pkgDetailModal.duration_minutes}} 分钟</div>
+    <div class="pkg-detail-meta">
+      <span class="pkg-detail-time">⏱ 约 {{pkgDetailModal.duration_minutes}} 分钟</span>
+      <span class="pkg-detail-time">👤 {{pkgDetailModal.person_count}}人</span>
+      <span class="pkg-detail-time" v-if="pkgDetailModal.person_count>1">💰 人均 ¥{{Math.round(pkgDetailModal.price/pkgDetailModal.person_count)}}</span>
+    </div>
     <div class="pkg-detail-desc">{{pkgDetailModal.description}}</div>
 
-    <div style="font-size:11px;font-weight:400;color:var(--ink);letter-spacing:.1em;margin-bottom:8px;">📋 套餐包含</div>
+    <div style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.08em;margin-bottom:8px;">📋 套餐包含</div>
     <div class="pkg-detail-items">
       <div class="pkg-detail-item" v-for="item in getPackageItems(pkgDetailModal)" :key="item">
         <span class="check">✓</span>
@@ -1247,7 +1486,13 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       </div>
     </div>
 
-    <!-- Cancel policy in detail -->
+    <div class="tips-banner" style="margin:0 0 12px">
+      <span class="policy-icon">📝</span>
+      <div class="policy-text">
+        <b>到店须知：</b>提前10分钟到店，出示预约手机号核验即可
+      </div>
+    </div>
+
     <div class="policy-banner" style="margin:0 0 16px;">
       <span class="policy-icon">📋</span>
       <div class="policy-text">
@@ -1258,7 +1503,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <button class="btn btn-rose" @click="startBooking(pkgDetailModal);pkgDetailModal=null" style="margin-bottom:10px">
       立即预约
     </button>
-    <button class="btn btn-outline" @click="pkgDetailModal=null" style="font-size:12px">
+    <button class="btn btn-outline" @click="pkgDetailModal=null" style="font-size:13px">
       再看看
     </button>
   </div>
@@ -1278,11 +1523,11 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       </div>
     </div>
     <div v-else style="text-align:center;padding:30px 0">
-      <div style="font-size:30px;opacity:.3;margin-bottom:10px">🤍</div>
-      <div style="font-size:12px;color:var(--ink-50)">还没有收藏的客片</div>
-      <div style="font-size:11px;color:var(--ink-30);margin-top:4px">点击 🤍 即可收藏</div>
+      <div style="font-size:32px;opacity:.4;margin-bottom:10px">🤍</div>
+      <div style="font-size:13px;color:var(--ink-40);font-weight:400">还没有收藏的客片</div>
+      <div style="font-size:12px;color:var(--ink-25);margin-top:4px">点击 🤍 即可收藏</div>
     </div>
-    <button class="btn btn-outline" @click="showFavorites=false" style="margin-top:16px;font-size:12px">关闭</button>
+    <button class="btn btn-outline" @click="showFavorites=false" style="margin-top:16px;font-size:13px">关闭</button>
   </div>
 </div>
 
@@ -1291,20 +1536,22 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   <div class="modal-box" @click.stop>
     <div class="modal-handle"></div>
     <h3>🌸 关于霓裳</h3>
-    <p style="text-align:center;line-height:2">
+    <p style="text-align:center;line-height:2.2">
       霓裳汉服妆造工作室<br>
       专注汉服妆造体验<br>
       让每一位女孩都能<br>
       穿越千年，梦回盛世 ✨<br><br>
-      <span style="font-size:11px;color:var(--ink-50)">营业时间：周一至周六 9:00-18:00</span><br>
-      <span style="font-size:11px;color:var(--ink-50)">客服微信：nichang_hanfu</span>
+      <span style="font-size:12px;color:var(--ink-40);font-weight:500">🕐 营业时间：周一至周六 9:00-18:00</span><br>
+      <span style="font-size:12px;color:var(--ink-40);font-weight:500">💬 客服微信：nichang_hanfu</span><br>
+      <span style="font-size:12px;color:var(--ink-40);font-weight:500">📍 支持到店体验 · 支持外景跟拍</span>
     </p>
-    <button class="btn btn-outline" @click="showAbout=false" style="margin-top:16px;font-size:12px">知道了</button>
+    <button class="btn btn-outline" @click="showAbout=false" style="margin-top:16px;font-size:13px">知道了</button>
   </div>
 </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 <script>
 const{createApp,ref,computed,onMounted}=Vue;
 const API='/api';
@@ -1327,6 +1574,7 @@ createApp({
     const timeSlots=ref([]);
     const customerName=ref('');
     const customerPhone=ref('');
+    const guests=ref([]);
     const currentOrder=ref(null);
     const now=new Date();
     const calMonth=ref(now.getMonth());
@@ -1338,8 +1586,8 @@ createApp({
     const showFavorites=ref(false);
     const showAbout=ref(false);
     const loading=ref(true);
+    const showValidation=ref(false);
 
-    // Favorites (persisted in localStorage)
     const likedPhotos = ref(new Set(JSON.parse(localStorage.getItem('likedPhotos')||'[]')));
     const likedPkgs = ref(new Set(JSON.parse(localStorage.getItem('likedPkgs')||'[]')));
 
@@ -1369,6 +1617,34 @@ createApp({
 
     const favPhotos = computed(()=>photos.value.filter(p=>likedPhotos.value.has(p.id)));
 
+    // Multi-person logic
+    const needsGuestInfo = computed(()=>{
+      const pc = bookingPkg.value.person_count || 1;
+      const needsAll = bookingPkg.value.needs_all_names !== 0;
+      return pc > 1 && needsAll;
+    });
+
+    const isFormValid = computed(()=>{
+      if(!customerName.value || !isValidPhone(customerPhone.value)) return false;
+      if(needsGuestInfo.value){
+        return guests.value.every(g => g.name && isValidPhone(g.phone));
+      }
+      return true;
+    });
+
+    function isValidPhone(phone){
+      return /^1\d{10}$/.test(phone);
+    }
+
+    function validateAndSubmit(){
+      showValidation.value = true;
+      if(!isFormValid.value){
+        showToast('请完善所有信息');
+        return;
+      }
+      submitOrder();
+    }
+
     function showToast(msg,dur=2000){toast.value=msg;setTimeout(()=>toast.value='',dur)}
     async function api(path,opt={}){
       const h={'Content-Type':'application/json'};
@@ -1379,7 +1655,6 @@ createApp({
     }
     function statusText(s){return{pending:'待支付',booked:'已预约',completed:'已完成',cancelled:'已取消'}[s]||s}
 
-    // Format date for display
     function formatDate(dateStr){
       if(!dateStr) return '';
       const d=new Date(dateStr+'T00:00:00');
@@ -1387,7 +1662,14 @@ createApp({
       return `${d.getMonth()+1}月${d.getDate()}日 ${weekdays[d.getDay()]}`;
     }
 
-    // Package items based on package type
+    function formatTime(datetimeStr){
+      if(!datetimeStr) return '';
+      // Handle "YYYY-MM-DD HH:MM:SS" format
+      const parts = datetimeStr.split(' ');
+      if(parts.length > 1) return parts[1].substring(0,5);
+      return datetimeStr;
+    }
+
     function getPackageItems(pkg){
       const name=pkg.name||'';
       if(name.includes('基础')){
@@ -1402,18 +1684,29 @@ createApp({
       return['汉服租借','妆面设计','发型设计','基础配饰'];
     }
 
-    // Open photo preview
-    function openPreview(p){
-      previewPhoto.value=p;
-      previewImg.value=p.image;
-    }
+    function openPreview(p){previewPhoto.value=p;previewImg.value=p.image;}
+    function sharePhoto(){showToast('已复制分享链接 📤')}
+    function shareOrder(){showToast('已复制分享链接，快发给闺蜜吧 💕')}
 
-    // Share functions (simulated)
-    function sharePhoto(){
-      showToast('已复制分享链接 📤');
+    // Calendar quick jump
+    function jumpToday(){
+      const t=new Date();
+      calYear.value=t.getFullYear();calMonth.value=t.getMonth();
     }
-    function shareOrder(){
-      showToast('已复制分享链接，快发给闺蜜吧 💕');
+    function jumpWeekend(){
+      const t=new Date();
+      const day=t.getDay();
+      const diff = day===0 ? 0 : (6-day);
+      t.setDate(t.getDate()+diff);
+      calYear.value=t.getFullYear();calMonth.value=t.getMonth();
+      // auto-select if enabled
+      const date=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+      selectDate(date);
+    }
+    function jumpNextWeek(){
+      const t=new Date();
+      t.setDate(t.getDate()+(7-t.getDay()+1));
+      calYear.value=t.getFullYear();calMonth.value=t.getMonth();
     }
 
     const calDays=computed(()=>{
@@ -1451,43 +1744,99 @@ createApp({
     function prevMonth(){if(calMonth.value===0){calMonth.value=11;calYear.value--}else calMonth.value--}
     function nextMonth(){if(calMonth.value===11){calMonth.value=0;calYear.value++}else calMonth.value++}
 
-    function startBooking(pkg){bookingPkg.value=pkg;bookingStep.value=1;selectedDate.value='';selectedSlot.value='';tab.value='booking';calMonth.value=new Date().getMonth();calYear.value=new Date().getFullYear()}
+    function startBooking(pkg){
+      bookingPkg.value=pkg;bookingStep.value=1;
+      selectedDate.value='';selectedSlot.value='';
+      customerName.value='';customerPhone.value='';
+      showValidation.value=false;
+      // Init guests array based on package person_count
+      const extraPersons = (pkg.person_count||1) - 1;
+      guests.value = extraPersons > 0 ? Array.from({length:extraPersons},()=>({name:'',phone:''})) : [];
+      tab.value='booking';
+      calMonth.value=new Date().getMonth();calYear.value=new Date().getFullYear();
+    }
+
     function goBack(){if(bookingStep.value>1)bookingStep.value--;else{tab.value='packages';bookingStep.value=1}}
 
-    async function submitOrder(){try{const o=await api('/orders',{method:'POST',body:JSON.stringify({package_id:bookingPkg.value.id,booking_date:selectedDate.value,time_slot:selectedSlot.value,customer_name:customerName.value,customer_phone:customerPhone.value})});currentOrder.value=o;bookingStep.value=3;showToast('订单已创建 ✨')}catch(e){showToast(e.message)}}
-    async function payOrder(){try{const o=await api(`/orders/${currentOrder.value.id}/pay`,{method:'POST'});currentOrder.value=o;tab.value='ok';showToast('支付成功 🎉')}catch(e){showToast(e.message)}}
-    async function payExistingOrder(o){try{await api(`/orders/${o.id}/pay`,{method:'POST'});showToast('支付成功 🎉');loadOrders()}catch(e){showToast(e.message)}}
-    async function cancelPendingOrder(){if(currentOrder.value){await api(`/orders/${currentOrder.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'取消支付'})});currentOrder.value=null;tab.value='packages';showToast('已取消')}}
+    async function submitOrder(){
+      try{
+        const body={
+          package_id:bookingPkg.value.id,
+          booking_date:selectedDate.value,
+          time_slot:selectedSlot.value,
+          customer_name:customerName.value,
+          customer_phone:customerPhone.value
+        };
+        if(guests.value.length>0){
+          body.guests = guests.value.map(g=>({name:g.name,phone:g.phone}));
+        }
+        const o=await api('/orders',{method:'POST',body:JSON.stringify(body)});
+        currentOrder.value=o;bookingStep.value=3;showToast('订单已创建 ✨');
+      }catch(e){showToast(e.message)}
+    }
+
+    async function payOrder(){
+      try{
+        const o=await api(`/orders/${currentOrder.value.id}/pay`,{method:'POST'});
+        currentOrder.value=o;tab.value='ok';showToast('支付成功 🎉');
+      }catch(e){showToast(e.message)}
+    }
+
+    async function payExistingOrder(o){
+      try{await api(`/orders/${o.id}/pay`,{method:'POST'});showToast('支付成功 🎉');loadOrders()}
+      catch(e){showToast(e.message)}
+    }
+
+    async function cancelPendingOrder(){
+      if(currentOrder.value){
+        await api(`/orders/${currentOrder.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'取消支付'})});
+        currentOrder.value=null;tab.value='packages';showToast('已取消');
+      }
+    }
 
     function showCancelModal(o){cancelModal.value=o}
     function showPkgDetail(p){pkgDetailModal.value=p}
 
-    async function confirmCancel(){try{await api(`/orders/${cancelModal.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});showToast('退款将原路返回 💰');cancelModal.value=null;loadOrders()}catch(e){showToast(e.message);cancelModal.value=null}}
-    async function cancelOrder(o){try{await api(`/orders/${o.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});showToast('已取消');loadOrders()}catch(e){showToast(e.message)}}
-    async function deleteOrder(o){try{await api(`/orders/${o.id}`,{method:'DELETE'});showToast('已删除');loadOrders()}catch(e){showToast(e.message)}}
+    async function confirmCancel(){
+      try{
+        await api(`/orders/${cancelModal.value.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});
+        showToast('退款将原路返回 💰');cancelModal.value=null;loadOrders();
+      }catch(e){showToast(e.message);cancelModal.value=null}
+    }
+
+    async function cancelOrder(o){
+      try{await api(`/orders/${o.id}/cancel`,{method:'POST',body:JSON.stringify({reason:'用户取消'})});showToast('已取消');loadOrders()}
+      catch(e){showToast(e.message)}
+    }
+
+    async function deleteOrder(o){
+      try{await api(`/orders/${o.id}`,{method:'DELETE'});showToast('已删除');loadOrders()}
+      catch(e){showToast(e.message)}
+    }
 
     onMounted(async()=>{
       try{
         await initUser();
         await Promise.all([loadPhotos(),loadCategories(),loadPackages()]);
-      }finally{
-        loading.value=false;
-      }
+      }finally{loading.value=false}
     });
 
     return{
       tab,toast,previewImg,previewPhoto,currentUser,
       photos,categories,photoFilter,filteredPhotos,packages,loading,
-      bookingPkg,bookingStep,selectedDate,selectedSlot,timeSlots,customerName,customerPhone,currentOrder,
+      bookingPkg,bookingStep,selectedDate,selectedSlot,timeSlots,
+      customerName,customerPhone,guests,currentOrder,
       calMonth,calYear,calDays,prevMonth,nextMonth,
+      jumpToday,jumpWeekend,jumpNextWeek,
       myOrders,orderFilter,cancelModal,orderCounts,
       pkgDetailModal,showFavorites,showAbout,
       likedPhotos,likedPkgs,favPhotos,
+      showValidation,needsGuestInfo,isFormValid,isValidPhone,
       showToast,statusText,selectDate,startBooking,goBack,
-      formatDate,getPackageItems,openPreview,
+      formatDate,formatTime,getPackageItems,openPreview,
       sharePhoto,shareOrder,
       toggleLike,togglePkgFav,toggleLikePreview,
-      submitOrder,payOrder,payExistingOrder,cancelPendingOrder,
+      validateAndSubmit,submitOrder,payOrder,payExistingOrder,cancelPendingOrder,
       showCancelModal,showPkgDetail,confirmCancel,cancelOrder,deleteOrder,
       loadOrders
     };

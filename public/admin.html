@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>霓裳汉服 · 商家管理</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -19,11 +18,11 @@
   --shadow-lg:0 4px 24px rgba(61,50,48,.08);
 }
 html{font-size:16px}
-body{font-family:'Noto Sans SC','PingFang SC','Helvetica Neue',sans-serif;background:var(--bg);color:var(--ink);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--ink);max-width:430px;margin:0 auto;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 
 /* ═══════ Header ═══════ */
 .hdr{background:var(--bg);padding:14px 20px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(221,213,210,.5);backdrop-filter:blur(16px)}
-.hdr h1{font-family:'Noto Serif SC',serif;font-size:17px;font-weight:600;letter-spacing:1.5px}
+.hdr h1{font-family:'Noto Serif SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;font-size:17px;font-weight:600;letter-spacing:1.5px}
 .hdr .back{font-size:18px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--rose-lll);color:var(--rose);transition:.2s;border:none}
 .hdr .back:active{background:var(--rose-ll)}
 .hdr .right{width:34px}
@@ -70,11 +69,11 @@ body{font-family:'Noto Sans SC','PingFang SC','Helvetica Neue',sans-serif;backgr
 .badge-completed{background:var(--ink-lll);color:var(--ink-l)}
 .badge-cancelled{background:#FDF2F2;color:var(--err)}
 .order-card .body{padding:18px}
-.order-card .pkg-name{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:600;margin-bottom:12px;letter-spacing:.5px}
+.order-card .pkg-name{font-family:'Noto Serif SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;font-size:15px;font-weight:600;margin-bottom:12px;letter-spacing:.5px}
 .order-card .detail{font-size:13px;color:var(--ink-l);line-height:2.1;font-weight:300}
 .order-card .detail .v{color:var(--ink);font-weight:400}
 .order-card .footer{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(221,213,210,.5)}
-.order-card .amount{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:600;color:var(--rose)}
+.order-card .amount{font-family:'Noto Serif SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',serif;font-size:18px;font-weight:600;color:var(--rose)}
 
 /* ═══════ Admin Lists ═══════ */
 .adm-list{padding:10px 16px}
@@ -235,7 +234,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <div class="info">
         <div class="name">{{p.name}} <span style="color:var(--rose)">¥{{p.price}}</span></div>
         <div class="sub">{{p.description}}</div>
-        <div class="sub" :style="{color:p.is_active?'var(--ok)':'var(--err)'}">{{p.is_active?'已上架':'已下架'}}</div>
+        <div class="sub">👤 {{p.person_count||1}}人 · {{p.is_hot?'🔥热门':''}} · {{p.is_active?'已上架':'已下架'}}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button class="btn btn-sm btn-outline" @click="togglePkgActive(p)">{{p.is_active?'下架':'上架'}}</button>
@@ -249,6 +248,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="form-group"><label>价格（元）</label><input v-model.number="newPkg.price" type="number" step="0.01" placeholder="399.00"></div>
     <div class="form-group"><label>套餐描述</label><input v-model="newPkg.description" placeholder="包含内容描述"></div>
     <div class="form-group"><label>预计时长（分钟）</label><input v-model.number="newPkg.duration_minutes" type="number" placeholder="120"></div>
+    <div class="form-group"><label>服务人数</label><input v-model.number="newPkg.person_count" type="number" min="1" max="10" placeholder="1"></div>
+    <div class="form-group"><label>是否需要填写所有人信息</label>
+      <select v-model.number="newPkg.needs_all_names" style="width:100%;padding:10px;border:1px solid var(--ink-lll);border-radius:10px;font-size:14px">
+        <option :value="1">是（每人需填姓名手机）</option>
+        <option :value="0">否（只填预约人即可）</option>
+      </select>
+    </div>
+    <div class="form-group"><label>标记为热门</label>
+      <select v-model.number="newPkg.is_hot" style="width:100%;padding:10px;border:1px solid var(--ink-lll);border-radius:10px;font-size:14px">
+        <option :value="0">否</option>
+        <option :value="1">是</option>
+      </select>
+    </div>
     <div class="form-group"><label>封面图地址</label><input v-model="newPkg.cover" placeholder="https://..."></div>
     <button class="btn btn-block" @click="addPkg">添加套餐</button>
   </div>
@@ -357,7 +369,7 @@ createApp({
     const newSlotEnd=ref('');
     const newClosedDate=ref('');
     const newPhoto=reactive({title:'',image_url:'',category_id:'',tags:''});
-    const newPkg=reactive({name:'',price:0,description:'',duration_minutes:120,cover:''});
+    const newPkg=reactive({name:'',price:0,description:'',duration_minutes:120,cover:'',person_count:1,needs_all_names:1,is_hot:0});
     const newCatName=ref('');
     const weekNames=['周日','周一','周二','周三','周四','周五','周六'];
     const adminUser=ref(null);
@@ -397,8 +409,8 @@ createApp({
     async function addCategory(){if(!newCatName.value)return;try{await api('/categories',{method:'POST',body:JSON.stringify({name:newCatName.value})});newCatName.value='';loadCategories();showToast('分类已添加','✓')}catch(e){showToast(e.message,'❌')}}
     async function deleteCategory(c){try{await api(`/categories/${c.id}`,{method:'DELETE'});loadCategories();showToast('已删除','✓')}catch(e){showToast(e.message,'❌'})}
 
-    async function addPkg(){try{await api('/packages',{method:'POST',body:JSON.stringify(newPkg)});showToast('套餐已添加','💄');newPkg.name='';newPkg.price=0;newPkg.description='';newPkg.duration_minutes=120;newPkg.cover='';loadPackages()}catch(e){showToast(e.message,'❌')}}
-    async function togglePkgActive(p){try{await api(`/packages/${p.id}`,{method:'PUT',body:JSON.stringify({...p,is_active:p.is_active?0:1})});loadPackages()}catch(e){showToast(e.message,'❌')}}
+    async function addPkg(){try{await api('/packages',{method:'POST',body:JSON.stringify(newPkg)});showToast('套餐已添加','💄');newPkg.name='';newPkg.price=0;newPkg.description='';newPkg.duration_minutes=120;newPkg.cover='';newPkg.person_count=1;newPkg.needs_all_names=1;newPkg.is_hot=0;loadPackages()}catch(e){showToast(e.message,'❌')}}
+    async function togglePkgActive(p){try{await api(`/packages/${p.id}`,{method:'PUT',body:JSON.stringify({...p,is_active:p.is_active?0:1,person_count:p.person_count||1,needs_all_names:p.needs_all_names??1,is_hot:p.is_hot||0})});loadPackages()}catch(e){showToast(e.message,'❌')}}
     async function deletePkg(p){try{await api(`/packages/${p.id}`,{method:'DELETE'});loadPackages();showToast('已删除','✓')}catch(e){showToast(e.message,'❌'})}
 
     async function saveSchedule(){try{await api('/schedule',{method:'PUT',body:JSON.stringify({config:schedConfig.value,closed_dates:schedClosed.value})});showToast('档期已保存','📅')}catch(e){showToast(e.message,'❌')}}

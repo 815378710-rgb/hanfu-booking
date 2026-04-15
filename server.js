@@ -67,6 +67,9 @@ db.exec(`
     description TEXT DEFAULT '',
     duration_minutes INTEGER DEFAULT 120,
     cover TEXT DEFAULT '',
+    person_count INTEGER DEFAULT 1,
+    needs_all_names INTEGER DEFAULT 1,
+    is_hot INTEGER DEFAULT 0,
     is_active INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now','localtime'))
   );
@@ -109,6 +112,14 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (package_id) REFERENCES packages(id)
   );
+
+  CREATE TABLE IF NOT EXISTS order_guests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id INTEGER NOT NULL,
+    guest_name TEXT NOT NULL,
+    guest_phone TEXT NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+  );
 `);
 
 // ── Seed demo data if empty ──
@@ -131,15 +142,15 @@ if (catCount === 0) {
   ];
   demoPhotos.forEach(p => insPhoto.run(...p));
 
-  const insPkg = db.prepare('INSERT INTO packages (name, price, description, duration_minutes, cover, is_active) VALUES (?, ?, ?, ?, ?, ?)');
+  const insPkg = db.prepare('INSERT INTO packages (name, price, description, duration_minutes, cover, person_count, needs_all_names, is_hot, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
   insPkg.run('基础妆造', 199, '含基础汉服租借+简单妆面+发型', 90,
-    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop', 1);
+    'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop', 1, 1, 0, 1);
   insPkg.run('精致妆造', 399, '含精选汉服+精致妆面+发型+配饰', 120,
-    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=300&fit=crop', 1);
+    'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=300&fit=crop', 1, 1, 1, 1);
   insPkg.run('豪华妆造+摄影', 699, '含高端汉服+精致妆面+发型+配饰+外景拍摄30张', 180,
-    'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', 1);
+    'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', 1, 1, 0, 1);
   insPkg.run('闺蜜双人套餐', 999, '两人含精选汉服+妆造+双人合照20张', 150,
-    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=300&fit=crop', 1);
+    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=300&fit=crop', 2, 0, 1, 1);
 
   // Schedule: default slots for each weekday (Mon-Sat enabled, Sun disabled)
   const insSched = db.prepare('INSERT INTO schedule_config (weekday, time_slots, is_enabled) VALUES (?, ?, ?)');
@@ -351,41 +362,75 @@ function genOrderNo() {
 
 // Create order
 app.post('/api/orders', requireUser, (req, res) => {
-  const { package_id, booking_date, time_slot, customer_name, customer_phone } = req.body;
+  const { package_id, booking_date, time_slot, customer_name, customer_phone, guests } = req.body;
   if (!package_id || !booking_date || !time_slot || !customer_name || !customer_phone) {
     return res.status(400).json({ error: '请填写完整信息' });
   }
 
-  // Check slot still available
-  const existing = db.prepare(
-    "SELECT 1 FROM orders WHERE booking_date=? AND time_slot=? AND status IN ('pending','booked')"
-  ).get(booking_date, time_slot);
-  if (existing) return res.status(409).json({ error: '该时段已被预约' });
-
   const pkg = db.prepare('SELECT * FROM packages WHERE id=? AND is_active=1').get(package_id);
   if (!pkg) return res.status(400).json({ error: '套餐不存在或已下架' });
 
-  const order_no = genOrderNo();
-  const r = db.prepare(
-    'INSERT INTO orders (order_no, user_id, package_id, booking_date, time_slot, customer_name, customer_phone, amount, status) VALUES (?,?,?,?,?,?,?,?,?)'
-  ).run(order_no, req.user.id, package_id, booking_date, time_slot, customer_name, customer_phone, pkg.price, 'pending');
+  // Multi-person: validate guests info
+  if (pkg.person_count > 1 && pkg.needs_all_names) {
+    if (!Array.isArray(guests) || guests.length < pkg.person_count - 1) {
+      return res.status(400).json({ error: `该套餐需填写${pkg.person_count}位参与者信息` });
+    }
+    for (const g of guests) {
+      if (!g.name || !g.phone || !/^1\d{10}$/.test(g.phone)) {
+        return res.status(400).json({ error: '请为每位参与者填写完整姓名和手机号' });
+      }
+    }
+  }
 
-  const order = db.prepare(`
-    SELECT o.*, p.name as package_name, p.price as package_price
-    FROM orders o JOIN packages p ON o.package_id=p.id WHERE o.id=?
-  `).get(r.lastInsertRowid);
+  // Use transaction for concurrency safety
+  const createOrder = db.transaction(() => {
+    // Double-check slot availability within transaction (SELECT FOR UPDATE pattern)
+    const existing = db.prepare(
+      "SELECT 1 FROM orders WHERE booking_date=? AND time_slot=? AND status IN ('pending','booked')"
+    ).get(booking_date, time_slot);
+    if (existing) throw new Error('该时段已被预约，请选择其他时间');
 
-  res.json(order);
+    const order_no = genOrderNo();
+    const r = db.prepare(
+      'INSERT INTO orders (order_no, user_id, package_id, booking_date, time_slot, customer_name, customer_phone, amount, status) VALUES (?,?,?,?,?,?,?,?,?)'
+    ).run(order_no, req.user.id, package_id, booking_date, time_slot, customer_name, customer_phone, pkg.price, 'pending');
+
+    // Insert additional guests
+    if (pkg.person_count > 1 && Array.isArray(guests) && guests.length > 0) {
+      const insGuest = db.prepare('INSERT INTO order_guests (order_id, guest_name, guest_phone) VALUES (?,?,?)');
+      guests.forEach(g => insGuest.run(r.lastInsertRowid, g.name, g.phone));
+    }
+
+    return r.lastInsertRowid;
+  });
+
+  try {
+    const orderId = createOrder();
+    const order = db.prepare(`
+      SELECT o.*, p.name as package_name, p.price as package_price, p.person_count
+      FROM orders o JOIN packages p ON o.package_id=p.id WHERE o.id=?
+    `).get(orderId);
+    
+    // Fetch guests
+    order.guests = db.prepare('SELECT guest_name as name, guest_phone as phone FROM order_guests WHERE order_id=?').all(orderId);
+    res.json(order);
+  } catch (e) {
+    res.status(409).json({ error: e.message });
+  }
 });
 
 // Get my orders
 app.get('/api/orders/my', requireUser, (req, res) => {
   const { status } = req.query;
-  let sql = 'SELECT o.*, p.name as package_name, p.price as package_price FROM orders o JOIN packages p ON o.package_id=p.id WHERE o.user_id=?';
+  let sql = 'SELECT o.*, p.name as package_name, p.price as package_price, p.person_count FROM orders o JOIN packages p ON o.package_id=p.id WHERE o.user_id=?';
   const params = [req.user.id];
   if (status) { sql += ' AND o.status=?'; params.push(status); }
   sql += ' ORDER BY o.created_at DESC';
-  res.json(db.prepare(sql).all(...params));
+  const orders = db.prepare(sql).all(...params);
+  // Attach guests
+  const getGuests = db.prepare('SELECT guest_name as name, guest_phone as phone FROM order_guests WHERE order_id=?');
+  orders.forEach(o => { o.guests = getGuests.all(o.id); });
+  res.json(orders);
 });
 
 // Get all orders (admin)
