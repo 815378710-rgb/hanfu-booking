@@ -1620,7 +1620,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 
     <div style="padding:0 20px">
       <button class="btn btn-rose" @click="payOrder">
-        💳 支付 ¥{{currentOrder?.amount||bookingPkg.price}}
+        💳 支付 ¥{{currentOrder?.final_amount||currentOrder?.amount||bookingPkg.price}}
       </button>
     </div>
     <div class="pay-note">15分钟内未支付自动取消</div>
@@ -1979,7 +1979,7 @@ createApp({
     const publicStats=ref({});
     const availableCoupons=ref([]);
     const selectedCouponId=ref(null);
-    const countdown=ref({h:'23',m:'59',m:'59',s:'59'});
+    const countdown=ref({h:'23',m:'59',s:'59'});
     const heroIndex=ref(0);
     const heroBanners=ref([
       {tag:'SPRING COLLECTION',title:'春日花间 · 新品上架',sub:'4款春季限定妆造套餐，预约立享9折',img:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=400&fit=crop'},

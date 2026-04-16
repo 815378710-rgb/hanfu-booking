@@ -494,6 +494,9 @@ app.post('/api/orders', requireUser, (req, res) => {
   if (!package_id || !booking_date || !time_slot || !customer_name || !customer_phone) {
     return res.status(400).json({ error: '请填写完整信息' });
   }
+  if (!/^1\d{10}$/.test(customer_phone)) {
+    return res.status(400).json({ error: '请输入正确的11位手机号' });
+  }
 
   const pkg = db.prepare('SELECT * FROM packages WHERE id=? AND is_active=1').get(package_id);
   if (!pkg) return res.status(400).json({ error: '套餐不存在或已下架' });
@@ -677,8 +680,9 @@ app.get('/api/orders/export', requireAdmin, (req, res) => {
 
   const statusMap = { pending: '待支付', booked: '已预约', completed: '已完成', cancelled: '已取消' };
   const header = '订单号,用户昵称,姓名,手机号,套餐,原价,优惠金额,实付金额,预约日期,时段,状态,创建时间,支付时间';
+  function escCsv(v) { const s = String(v ?? ''); return s.includes(',') || s.includes('"') || s.includes('\n') ? '"' + s.replace(/"/g, '""') + '"' : s; }
   const csvRows = rows.map(r =>
-    [r.order_no, r.nickname, r.customer_name, r.customer_phone, r.package_name, r.amount, r.discount_amount, r.final_amount, r.booking_date, r.time_slot, statusMap[r.status]||r.status, r.created_at, r.paid_at||''].join(',')
+    [r.order_no, r.nickname, r.customer_name, r.customer_phone, r.package_name, r.amount, r.discount_amount, r.final_amount, r.booking_date, r.time_slot, statusMap[r.status]||r.status, r.created_at, r.paid_at||''].map(escCsv).join(',')
   );
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -779,14 +783,16 @@ app.post('/api/coupons/claim', requireUser, (req, res) => {
   if (coupon.valid_from && coupon.valid_from > now) return res.status(400).json({ error: '优惠券尚未生效' });
   if (coupon.valid_to && coupon.valid_to < now) return res.status(400).json({ error: '优惠券已过期' });
 
-  // Check global usage limit
-  if (coupon.used_count >= coupon.max_uses) return res.status(400).json({ error: '优惠券已被领取完' });
+  // Check global usage limit (count actual claims, not usage)
+  const claimCount = db.prepare('SELECT COUNT(*) as c FROM user_coupons WHERE coupon_id=?').get(coupon.id).c;
+  if (claimCount >= coupon.max_uses) return res.status(400).json({ error: '优惠券已被领取完' });
 
   // Check if user already has this coupon
   const existing = db.prepare('SELECT id FROM user_coupons WHERE user_id=? AND coupon_id=?').get(req.user.id, coupon.id);
   if (existing) return res.status(400).json({ error: '您已领取过该优惠券' });
 
   db.prepare('INSERT INTO user_coupons (user_id, coupon_id) VALUES (?, ?)').run(req.user.id, coupon.id);
+  db.prepare('UPDATE coupons SET used_count = used_count + 1 WHERE id = ?').run(coupon.id);
   res.json({ ok: true, message: '领取成功', coupon });
 });
 
@@ -885,6 +891,17 @@ app.get('/admin', (req, res) => {
 app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// ── Auto-cancel pending orders after 15 minutes ──
+setInterval(() => {
+  const result = db.prepare(`
+    UPDATE orders SET status='cancelled', cancelled_at=datetime('now','localtime'), cancel_reason='超时未支付自动取消', refund_amount=0
+    WHERE status='pending' AND datetime(created_at, '+15 minutes') < datetime('now','localtime')
+  `).run();
+  if (result.changes > 0) {
+    console.log(`⏰ 自动取消 ${result.changes} 个超时未支付订单`);
+  }
+}, 60 * 1000); // Check every minute
 
 app.listen(PORT, () => {
   console.log(`✨ 汉服妆造预约系统已启动: http://localhost:${PORT}`);
