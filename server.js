@@ -832,10 +832,18 @@ app.post('/api/orders/:id/pay', requireUser, (req, res) => {
 });
 
 // Cancel order
-app.post('/api/orders/:id/cancel', requireUser, (req, res) => {
+app.post('/api/orders/:id/cancel', (req, res, next) => {
+  // Accept both user auth and merchant/staff auth
+  const token = req.headers['x-merchant-token'];
+  if (token && merchantSessions.has(token)) {
+    const merchant = db.prepare('SELECT * FROM merchants WHERE id = ?').get(merchantSessions.get(token));
+    if (merchant) { req.merchant = merchant; req.isStaff = true; return next(); }
+  }
+  requireUser(req, res, next);
+}, (req, res) => {
   const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
   if (!order) return res.status(404).json({ error: '订单不存在' });
-  if (order.user_id !== req.user.id && !req.user.is_admin) return res.status(403).json({ error: '无权操作' });
+  if (!req.isStaff && order.user_id !== req.user.id && !req.user.is_admin) return res.status(403).json({ error: '无权操作' });
   if (!['pending', 'booked'].includes(order.status)) return res.status(400).json({ error: '该订单无法取消' });
 
   const rules = db.prepare('SELECT * FROM cancel_rules WHERE id=1').get();
@@ -868,15 +876,36 @@ app.post('/api/orders/:id/complete', requireStaff, (req, res) => {
   res.json(db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id));
 });
 
-// Delete order (soft delete for user)
+// Delete order (for user: only own cancelled/completed orders; cascades related data)
 app.delete('/api/orders/:id', requireUser, (req, res) => {
   const order = db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id);
   if (!order) return res.status(404).json({ error: '订单不存在' });
   if (order.user_id !== req.user.id && !req.user.is_admin) return res.status(403).json({ error: '无权操作' });
   if (!['cancelled', 'completed'].includes(order.status)) return res.status(400).json({ error: '只能删除已取消或已完成的订单' });
-  // Actually hide for user (real deletion would be admin only)
-  db.prepare('DELETE FROM orders WHERE id=?').run(req.params.id);
+  const deleteOrder = db.transaction(() => {
+    db.prepare('DELETE FROM order_guests WHERE order_id=?').run(order.id);
+    db.prepare('DELETE FROM reviews WHERE order_id=?').run(order.id);
+    db.prepare('DELETE FROM user_coupons WHERE order_id=?').run(order.id);
+    db.prepare('DELETE FROM orders WHERE id=?').run(order.id);
+  });
+  deleteOrder();
   res.json({ ok: true });
+});
+
+// Search orders (admin)
+app.get('/api/orders/search', requireStaff, (req, res) => {
+  const { q, status } = req.query;
+  if (!q) return res.json([]);
+  const keyword = `%${q}%`;
+  let sql = `
+    SELECT o.*, p.name as package_name, p.price as package_price, u.nickname
+    FROM orders o JOIN packages p ON o.package_id=p.id JOIN users u ON o.user_id=u.id
+    WHERE (o.order_no LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ? OR u.nickname LIKE ?)
+  `;
+  const params = [keyword, keyword, keyword, keyword];
+  if (status) { sql += ' AND o.status=?'; params.push(status); }
+  sql += ' ORDER BY o.created_at DESC LIMIT 50';
+  res.json(db.prepare(sql).all(...params));
 });
 
 // Export orders as CSV

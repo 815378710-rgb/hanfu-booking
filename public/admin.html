@@ -75,7 +75,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);max-width:430
 .stat-wide .v{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--rose)}
 
 /* ═══ Trend Bar ═══ */
-.trend{display:flex;align-items:flex-end;gap:4px;height:60px;padding:12px 16px}
+.trend{display:flex;align-items:flex-end;gap:4px;height:80px;padding:12px 16px;margin-bottom:8px}
 .trend-bar{flex:1;border-radius:4px 4px 0 0;background:var(--rose-ll);min-height:4px;transition:height .4s;position:relative}
 .trend-bar.active{background:var(--rose)}
 .trend-label{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--ink-ll);white-space:nowrap}
@@ -336,11 +336,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="hdr-title">订单管理</div>
     <div style="width:48px"></div>
   </div>
-  <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none">
+  <div style="padding:12px 16px 0">
+    <div style="display:flex;gap:8px;align-items:center;background:var(--card);border-radius:var(--rs);padding:0 12px;border:1.5px solid var(--ink-llll)">
+      <span style="font-size:14px;opacity:.4">🔍</span>
+      <input v-model="orderSearch" placeholder="搜索订单号/姓名/手机号..." style="flex:1;border:none;outline:none;padding:10px 0;font-size:13px;font-family:var(--sans);background:transparent"
+        @input="debounceOrderSearch">
+      <button v-if="orderSearch" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink-ll);padding:4px" @click="orderSearch='';loadOrders()">✕</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none">
     <span v-for="f in [null,'pending','booked','completed','cancelled']" :key="f"
       class="tag" :class="orderFilter===f?'tag-rose':''"
       :style="{cursor:'pointer',padding:'7px 14px',fontSize:'12px',fontWeight:orderFilter===f?'600':'400'}"
-      @click="orderFilter=f;loadOrders()">
+      @click="orderFilter=f;orderSearch?debounceOrderSearch():loadOrders()">
       {{f===null?'全部':statusText(f)}}
     </span>
   </div>
@@ -646,10 +654,12 @@ createApp({
     const newAnn=reactive({title:'',content:'',type:'info'});
     const shopForm=reactive({shop_name:'',shop_slogan:'',phone:'',wechat:'',address:'',business_hours:'',holiday_note:'',about:''});
     const passForm=reactive({old:'',new:''});
+    const orderSearch=ref('');
+    let searchTimer=null;
     const weekNames=['周日','周一','周二','周三','周四','周五','周六'];
     const todayStr=new Date().toISOString().slice(5,10);
 
-    function showToast(msg,dur=2000){toastMsg.value=msg;toast.value=true;setTimeout(()=>toast.value=false,dur)}
+    function showToast(msg,dur=2000){toastMsg.value=msg;toast.value=true;setTimeout(()=>{toast.value=false;toastMsg.value=''},dur)}
     function statusText(s){return{pending:'待支付',booked:'已预约',completed:'已完成',cancelled:'已取消'}[s]||s}
 
     async function api(path,opt={}){
@@ -683,6 +693,14 @@ createApp({
 
     async function loadDashboard(){try{dash.value=await api('/dashboard/stats')}catch(e){}}
     async function loadOrders(){const q=orderFilter.value?`?status=${orderFilter.value}`:'';allOrders.value=await api('/orders'+q)}
+    function debounceOrderSearch(){
+      clearTimeout(searchTimer);
+      searchTimer=setTimeout(async()=>{
+        if(!orderSearch.value){loadOrders();return;}
+        const q=`?q=${encodeURIComponent(orderSearch.value)}${orderFilter.value?'&status='+orderFilter.value:''}`;
+        allOrders.value=await api('/orders/search'+q);
+      },300);
+    }
     async function loadPhotos(){photos.value=await api('/photos')}
     async function loadCategories(){categories.value=await api('/categories')}
     async function loadPackages(){packages.value=await api('/packages?all=1')}
@@ -715,7 +733,7 @@ createApp({
       dash,allOrders,orderFilter,photos,categories,packages,
       schedConfig,schedClosed,cancelRules,newSlotStart,newSlotEnd,newClosedDate,
       newPhoto,newPkg,newCatName,announcements,newAnn,shopForm,passForm,
-      weekNames,todayStr,
+      weekNames,todayStr,orderSearch,debounceOrderSearch,
       doLogin,doLogout,statusText,showToast,
       loadDashboard,loadOrders,loadPhotos,loadCategories,loadPackages,loadSchedule,loadAnn,loadShop,
       completeOrder,adminCancelOrder,addPhoto,deletePhoto,addCategory,deleteCategory,

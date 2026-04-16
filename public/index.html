@@ -1247,7 +1247,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 
   <div class="grid" v-if="photos.length">
     <div class="card" v-for="p in filteredPhotos" :key="p.id" @click="openPreview(p)">
-      <img :src="p.image" loading="lazy">
+      <img :src="p.image" loading="lazy" @error="$event.target.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22600%22><rect fill=%22%23F3ECF0%22 width=%22400%22 height=%22600%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23C8B8BE%22 font-size=%2240%22>📸</text></svg>'">
       <div class="card-meta">
         <div class="card-title">{{p.title}}</div>
         <div class="card-bottom">
@@ -1349,7 +1349,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   <div class="pkg" v-if="packages.length">
     <div class="pkg-item" v-for="p in packages" :key="p.id">
       <div class="pkg-cover-wrap">
-        <img class="pkg-cover" :src="p.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'" loading="lazy">
+        <img class="pkg-cover" :src="p.cover||'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop'" loading="lazy" @error="$event.target.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22400%22><rect fill=%22%23F3ECF0%22 width=%22600%22 height=%22400%22/><text x=%2250%%22 y=%2250%%22 text-anchor=%22middle%22 fill=%22%23C8B8BE%22 font-size=%2240%22>💄</text></svg>'">
         <span class="pkg-badge" v-if="p.is_hot">🔥 热门推荐</span>
         <span class="pkg-badge gold" v-else-if="p.price>=699">✨ 高端之选</span>
         <button class="pkg-fav" @click.stop="togglePkgFav(p.id)">
@@ -1582,7 +1582,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="policy-banner">
       <span class="policy-icon">📋</span>
       <div class="policy-text">
-        <b>取消规则：</b>预约时间前<b>24小时</b>可免费取消。不足24小时不可取消，请合理安排时间哦～
+        <b>取消规则：</b>预约时间前<b>{{cancelRules.free_cancel_hours||24}}小时</b>可免费取消。<span v-if="cancelRules.fee_type==='none'">不足{{cancelRules.free_cancel_hours||24}}小时不可取消，请合理安排时间哦～</span><span v-else-if="cancelRules.fee_type==='percent'">不足{{cancelRules.free_cancel_hours||24}}小时取消将扣除{{cancelRules.fee_value}}%手续费。</span><span v-else-if="cancelRules.fee_type==='fixed'">不足{{cancelRules.free_cancel_hours||24}}小时取消将扣除¥{{cancelRules.fee_value}}手续费。</span>
       </div>
     </div>
 
@@ -1686,10 +1686,10 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="my-avatar">{{currentUser?.nickname?.[0]||'·'}}</div>
     <div class="my-name">{{currentUser?.nickname||'...'}}</div>
     <div style="margin-top:6px">
-      <span class="member-badge gold">👑 金卡会员</span>
+      <span class="member-badge" :class="memberClass">{{memberIcon}} {{memberName}}</span>
     </div>
     <div style="margin-top:6px">
-      <span class="points-display">✨ {{currentUser?.points||680}} 积分</span>
+      <span class="points-display">✨ {{currentUser?.points||0}} 积分</span>
     </div>
     <div class="my-role">MY RESERVATIONS</div>
   </div>
@@ -1868,7 +1868,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="policy-banner" style="margin:0 0 16px;">
       <span class="policy-icon">📋</span>
       <div class="policy-text">
-        <b>取消政策：</b>预约前24小时免费取消，超时不可取消
+        <b>取消政策：</b>预约前{{cancelRules.free_cancel_hours||24}}小时免费取消，超时不可取消
       </div>
     </div>
 
@@ -2015,9 +2015,36 @@ createApp({
       try{ announcements.value = await api('/announcements'); }catch(e){}
     }
     const shopInfo=ref({});
+    const cancelRules=ref({free_cancel_hours:24,fee_type:'none',fee_value:0});
     async function loadShopInfo(){
       try{ shopInfo.value = await api('/shop'); }catch(e){}
     }
+    async function loadCancelRules(){
+      try{
+        const s = await api('/schedule');
+        if(s.cancel_rules) cancelRules.value = s.cancel_rules;
+      }catch(e){}
+    }
+
+    // Member computed props
+    const memberClass = computed(()=>{
+      const pts = currentUser.value?.points||0;
+      if(pts>=500) return 'gold';
+      if(pts>=200) return 'silver';
+      return 'normal';
+    });
+    const memberName = computed(()=>{
+      const pts = currentUser.value?.points||0;
+      if(pts>=500) return '金卡会员';
+      if(pts>=200) return '银卡会员';
+      return '普通会员';
+    });
+    const memberIcon = computed(()=>{
+      const pts = currentUser.value?.points||0;
+      if(pts>=500) return '🥇';
+      if(pts>=200) return '🥈';
+      return '🥉';
+    });
 
     // Countdown timer
     function updateCountdown(){
@@ -2169,7 +2196,7 @@ createApp({
     function jumpWeekend(){
       const t=new Date();
       const day=t.getDay();
-      const diff = day===0 ? 0 : (6-day);
+      const diff = day===0 ? 6 : (6-day);
       t.setDate(t.getDate()+diff);
       calYear.value=t.getFullYear();calMonth.value=t.getMonth();
       // auto-select if enabled
@@ -2248,6 +2275,7 @@ createApp({
         }
         const o=await api('/orders',{method:'POST',body:JSON.stringify(body)});
         currentOrder.value=o;bookingStep.value=3;showToast('订单已创建 ✨');
+        loadAvailableCoupons();
       }catch(e){showToast(e.message)}
     }
 
@@ -2255,7 +2283,29 @@ createApp({
       try{
         const o=await api(`/orders/${currentOrder.value.id}/pay`,{method:'POST'});
         currentOrder.value=o;tab.value='ok';showToast('支付成功 🎉');
+        showConfetti();
       }catch(e){showToast(e.message)}
+    }
+
+    function showConfetti(){
+      const colors=['#C4788A','#F2E0E6','#C9A87C','#5A9E6B','#D94F4F','#FFD700','#FF69B4'];
+      const container=document.createElement('div');
+      container.className='confetti-container';
+      document.body.appendChild(container);
+      for(let i=0;i<50;i++){
+        const el=document.createElement('div');
+        el.className='confetti-particle';
+        el.style.left=Math.random()*100+'%';
+        el.style.top='-10px';
+        el.style.background=colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDelay=Math.random()*0.8+'s';
+        el.style.animationDuration=(1+Math.random()*1)+'s';
+        el.style.width=(4+Math.random()*8)+'px';
+        el.style.height=(4+Math.random()*8)+'px';
+        el.style.borderRadius=Math.random()>0.5?'50%':'2px';
+        container.appendChild(el);
+      }
+      setTimeout(()=>container.remove(),2500);
     }
 
     async function payExistingOrder(o){
@@ -2293,7 +2343,7 @@ createApp({
     onMounted(async()=>{
       try{
         await initUser();
-        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons(),loadAnnouncements(),loadShopInfo()]);
+        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons(),loadAnnouncements(),loadShopInfo(),loadCancelRules(),loadOrders()]);
         // Start timers
         updateCountdown();
         setInterval(updateCountdown,1000);
@@ -2324,7 +2374,8 @@ createApp({
       countdown,heroIndex,heroBanners,reviews,
       claimCoupon,wantSameStyle,
       publicStats,availableCoupons,selectedCouponId,couponDiscount,
-      announcements,shopInfo
+      announcements,shopInfo,cancelRules,
+      memberClass,memberName,memberIcon
     };
   }
 }).mount('#app');
