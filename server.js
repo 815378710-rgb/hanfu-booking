@@ -180,6 +180,54 @@ try { db.exec("ALTER TABLE users ADD COLUMN member_level_id INTEGER DEFAULT 1");
 try { db.exec("ALTER TABLE orders ADD COLUMN discount_amount REAL DEFAULT 0"); } catch(e) {}
 try { db.exec("ALTER TABLE orders ADD COLUMN final_amount REAL DEFAULT 0"); } catch(e) {}
 
+// ── New tables: merchants, announcements, shop_config ──
+db.exec(`
+  CREATE TABLE IF NOT EXISTS merchants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    shop_name TEXT DEFAULT '霓裳汉服',
+    phone TEXT DEFAULT '',
+    avatar TEXT DEFAULT '',
+    created_at TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE IF NOT EXISTS announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    type TEXT DEFAULT 'info',
+    is_active INTEGER DEFAULT 1,
+    sort_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE IF NOT EXISTS shop_config (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    shop_name TEXT DEFAULT '霓裳汉服',
+    shop_slogan TEXT DEFAULT 'Nícháng Hanfu Studio',
+    phone TEXT DEFAULT '',
+    wechat TEXT DEFAULT 'nichang_hanfu',
+    address TEXT DEFAULT '',
+    business_hours TEXT DEFAULT '周一至周六 9:00-18:00',
+    holiday_note TEXT DEFAULT '周日休息 · 节假日请提前咨询',
+    about TEXT DEFAULT '专注汉服妆造体验\n让每一位女孩都能\n穿越千年，梦回盛世 ✨'
+  );
+`);
+
+// Seed shop_config if empty
+const scCount = db.prepare('SELECT COUNT(*) as c FROM shop_config').get().c;
+if (scCount === 0) {
+  db.prepare(`INSERT INTO shop_config (shop_name, shop_slogan) VALUES ('霓裳汉服', 'Nícháng Hanfu Studio')`).run();
+}
+
+// Seed default merchant if empty
+const merchantCount = db.prepare('SELECT COUNT(*) as c FROM merchants').get().c;
+if (merchantCount === 0) {
+  const defaultPass = crypto.createHash('sha256').update('admin123').digest('hex');
+  db.prepare('INSERT INTO merchants (username, password, shop_name, phone) VALUES (?, ?, ?, ?)').run('admin', defaultPass, '霓裳汉服', '13800000000');
+}
+
 // ── Seed demo data if empty ──
 const catCount = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
 if (catCount === 0) {
@@ -302,6 +350,16 @@ function requireAdmin(req, res, next) {
     next();
   });
 }
+// Combined: accept either admin user or merchant token
+function requireStaff(req, res, next) {
+  const token = req.headers['x-merchant-token'];
+  if (token && merchantSessions.has(token)) {
+    const merchant = db.prepare('SELECT * FROM merchants WHERE id = ?').get(merchantSessions.get(token));
+    if (merchant) { req.merchant = merchant; return next(); }
+  }
+  // Fallback to admin user
+  requireAdmin(req, res, next);
+}
 
 // ════════════════════════════════════════
 //  Auth (demo: just create/get user by openid)
@@ -331,18 +389,171 @@ app.post('/api/auth/switch', (req, res) => {
 });
 
 // ════════════════════════════════════════
+//  Merchant Auth (商家登录)
+// ════════════════════════════════════════
+const merchantSessions = new Map(); // token -> merchant_id
+
+function requireMerchant(req, res, next) {
+  const token = req.headers['x-merchant-token'];
+  if (!token || !merchantSessions.has(token)) return res.status(401).json({ error: '请先登录商家后台' });
+  const merchant = db.prepare('SELECT * FROM merchants WHERE id = ?').get(merchantSessions.get(token));
+  if (!merchant) return res.status(401).json({ error: '商家账号不存在' });
+  req.merchant = merchant;
+  next();
+}
+
+app.post('/api/merchant/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: '请输入用户名和密码' });
+  const hash = crypto.createHash('sha256').update(password).digest('hex');
+  const merchant = db.prepare('SELECT * FROM merchants WHERE username = ? AND password = ?').get(username, hash);
+  if (!merchant) return res.status(401).json({ error: '用户名或密码错误' });
+  const token = crypto.randomBytes(24).toString('hex');
+  merchantSessions.set(token, merchant.id);
+  const { password: _, ...safe } = merchant;
+  res.json({ token, merchant: safe });
+});
+
+app.post('/api/merchant/logout', (req, res) => {
+  const token = req.headers['x-merchant-token'];
+  if (token) merchantSessions.delete(token);
+  res.json({ ok: true });
+});
+
+app.get('/api/merchant/me', requireMerchant, (req, res) => {
+  const { password: _, ...safe } = req.merchant;
+  res.json(safe);
+});
+
+// Change password
+app.post('/api/merchant/password', requireMerchant, (req, res) => {
+  const { old_password, new_password } = req.body;
+  if (!old_password || !new_password) return res.status(400).json({ error: '请填写完整' });
+  if (new_password.length < 6) return res.status(400).json({ error: '密码至少6位' });
+  const oldHash = crypto.createHash('sha256').update(old_password).digest('hex');
+  if (oldHash !== req.merchant.password) return res.status(400).json({ error: '原密码错误' });
+  const newHash = crypto.createHash('sha256').update(new_password).digest('hex');
+  db.prepare('UPDATE merchants SET password = ? WHERE id = ?').run(newHash, req.merchant.id);
+  res.json({ ok: true });
+});
+
+// ════════════════════════════════════════
+//  Shop Config (店铺设置)
+// ════════════════════════════════════════
+app.get('/api/shop', (req, res) => {
+  const config = db.prepare('SELECT * FROM shop_config LIMIT 1').get();
+  res.json(config || {});
+});
+
+app.put('/api/shop', requireMerchant, (req, res) => {
+  const { shop_name, shop_slogan, phone, wechat, address, business_hours, holiday_note, about } = req.body;
+  db.prepare('UPDATE shop_config SET shop_name=?, shop_slogan=?, phone=?, wechat=?, address=?, business_hours=?, holiday_note=?, about=? WHERE id=1')
+    .run(shop_name, shop_slogan, phone, wechat, address, business_hours, holiday_note, about);
+  res.json(db.prepare('SELECT * FROM shop_config WHERE id=1').get());
+});
+
+// ════════════════════════════════════════
+//  Announcements (公告)
+// ════════════════════════════════════════
+app.get('/api/announcements', (req, res) => {
+  const active = req.query.all !== '1';
+  const sql = active
+    ? 'SELECT * FROM announcements WHERE is_active=1 ORDER BY sort_order DESC, created_at DESC'
+    : 'SELECT * FROM announcements ORDER BY sort_order DESC, created_at DESC';
+  res.json(db.prepare(sql).all());
+});
+
+app.post('/api/announcements', requireMerchant, (req, res) => {
+  const { title, content, type, is_active } = req.body;
+  if (!title || !content) return res.status(400).json({ error: '请填写标题和内容' });
+  const r = db.prepare('INSERT INTO announcements (title, content, type, is_active) VALUES (?,?,?,?)')
+    .run(title, content, type || 'info', is_active !== undefined ? is_active : 1);
+  res.json(db.prepare('SELECT * FROM announcements WHERE id=?').get(r.lastInsertRowid));
+});
+
+app.put('/api/announcements/:id', requireMerchant, (req, res) => {
+  const { title, content, type, is_active } = req.body;
+  db.prepare('UPDATE announcements SET title=?, content=?, type=?, is_active=? WHERE id=?')
+    .run(title, content, type, is_active, req.params.id);
+  res.json(db.prepare('SELECT * FROM announcements WHERE id=?').get(req.params.id));
+});
+
+app.delete('/api/announcements/:id', requireMerchant, (req, res) => {
+  db.prepare('DELETE FROM announcements WHERE id=?').run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ════════════════════════════════════════
+//  Dashboard Stats (数据看板)
+// ════════════════════════════════════════
+app.get('/api/dashboard/stats', requireMerchant, (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const thisMonth = today.slice(0, 7);
+
+  // Today stats
+  const todayOrders = db.prepare("SELECT COUNT(*) as c FROM orders WHERE date(created_at)=?").get(today).c;
+  const todayRevenue = db.prepare("SELECT COALESCE(SUM(final_amount),0) as s FROM orders WHERE date(created_at)=? AND status IN ('booked','completed')").get(today).s;
+  const todayBooked = db.prepare("SELECT COUNT(*) as c FROM orders WHERE booking_date=? AND status IN ('booked','completed')").get(today).c;
+  const todayPending = db.prepare("SELECT COUNT(*) as c FROM orders WHERE status='pending'").get().c;
+
+  // This month
+  const monthOrders = db.prepare("SELECT COUNT(*) as c FROM orders WHERE strftime('%Y-%m',created_at)=?").get(thisMonth).c;
+  const monthRevenue = db.prepare("SELECT COALESCE(SUM(final_amount),0) as s FROM orders WHERE strftime('%Y-%m',created_at)=? AND status IN ('booked','completed')").get(thisMonth).s;
+
+  // Total
+  const totalOrders = db.prepare("SELECT COUNT(*) as c FROM orders").get().c;
+  const totalRevenue = db.prepare("SELECT COALESCE(SUM(final_amount),0) as s FROM orders WHERE status IN ('booked','completed')").get().s;
+  const totalUsers = db.prepare("SELECT COUNT(*) as c FROM users").get().c;
+  const totalReviews = db.prepare("SELECT COUNT(*) as c FROM reviews").get().c;
+
+  // Recent orders (last 5)
+  const recentOrders = db.prepare(`
+    SELECT o.id, o.order_no, o.customer_name, o.booking_date, o.time_slot, o.status, o.final_amount, o.created_at, p.name as package_name
+    FROM orders o JOIN packages p ON o.package_id=p.id
+    ORDER BY o.created_at DESC LIMIT 5
+  `).all();
+
+  // Last 7 days trend
+  const trend = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0, 10);
+    const cnt = db.prepare("SELECT COUNT(*) as c FROM orders WHERE date(created_at)=?").get(ds).c;
+    const rev = db.prepare("SELECT COALESCE(SUM(final_amount),0) as s FROM orders WHERE date(created_at)=? AND status IN ('booked','completed')").get(ds).s;
+    trend.push({ date: ds.slice(5), orders: cnt, revenue: rev });
+  }
+
+  // Popular packages
+  const popularPkgs = db.prepare(`
+    SELECT p.name, COUNT(o.id) as cnt, COALESCE(SUM(o.final_amount),0) as revenue
+    FROM packages p LEFT JOIN orders o ON o.package_id=p.id AND o.status IN ('booked','completed')
+    GROUP BY p.id ORDER BY cnt DESC LIMIT 5
+  `).all();
+
+  res.json({
+    today: { orders: todayOrders, revenue: todayRevenue, booked_today: todayBooked, pending: todayPending },
+    month: { orders: monthOrders, revenue: monthRevenue },
+    total: { orders: totalOrders, revenue: totalRevenue, users: totalUsers, reviews: totalReviews },
+    recent_orders: recentOrders,
+    trend,
+    popular_packages: popularPkgs
+  });
+});
+
+// ════════════════════════════════════════
 //  Categories
 // ════════════════════════════════════════
 app.get('/api/categories', (req, res) => {
   res.json(db.prepare('SELECT * FROM categories ORDER BY sort_order').all());
 });
-app.post('/api/categories', requireAdmin, (req, res) => {
+app.post('/api/categories', requireStaff, (req, res) => {
   const { name } = req.body;
   const max = db.prepare('SELECT MAX(sort_order) as m FROM categories').get().m || 0;
   const r = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)').run(name, max + 1);
   res.json(db.prepare('SELECT * FROM categories WHERE id = ?').get(r.lastInsertRowid));
 });
-app.delete('/api/categories/:id', requireAdmin, (req, res) => {
+app.delete('/api/categories/:id', requireStaff, (req, res) => {
   db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
   res.json({ ok: true });
 });
@@ -360,7 +571,7 @@ app.get('/api/photos', (req, res) => {
   }
   res.json(rows);
 });
-app.post('/api/photos', requireAdmin, upload.single('image'), (req, res) => {
+app.post('/api/photos', requireStaff, upload.single('image'), (req, res) => {
   const { title, category_id, tags, sort_order } = req.body;
   const image = req.file ? `/uploads/${req.file.filename}` : req.body.image_url;
   if (!image) return res.status(400).json({ error: '需要图片' });
@@ -368,7 +579,7 @@ app.post('/api/photos', requireAdmin, upload.single('image'), (req, res) => {
     .run(title, image, category_id || null, tags || '', sort_order || 0);
   res.json(db.prepare('SELECT * FROM photos WHERE id=?').get(r.lastInsertRowid));
 });
-app.delete('/api/photos/:id', requireAdmin, (req, res) => {
+app.delete('/api/photos/:id', requireStaff, (req, res) => {
   const photo = db.prepare('SELECT * FROM photos WHERE id=?').get(req.params.id);
   if (photo && photo.image.startsWith('/uploads/')) {
     const fp = path.join(__dirname, photo.image);
@@ -398,19 +609,19 @@ app.get('/api/packages', (req, res) => {
   `;
   res.json(db.prepare(sql).all());
 });
-app.post('/api/packages', requireAdmin, (req, res) => {
+app.post('/api/packages', requireStaff, (req, res) => {
   const { name, price, description, duration_minutes, cover, is_active } = req.body;
   const r = db.prepare('INSERT INTO packages (name,price,description,duration_minutes,cover,is_active) VALUES (?,?,?,?,?,?)')
     .run(name, price, description || '', duration_minutes || 120, cover || '', is_active !== undefined ? is_active : 1);
   res.json(db.prepare('SELECT * FROM packages WHERE id=?').get(r.lastInsertRowid));
 });
-app.put('/api/packages/:id', requireAdmin, (req, res) => {
+app.put('/api/packages/:id', requireStaff, (req, res) => {
   const { name, price, description, duration_minutes, cover, is_active } = req.body;
   db.prepare('UPDATE packages SET name=?,price=?,description=?,duration_minutes=?,cover=?,is_active=? WHERE id=?')
     .run(name, price, description, duration_minutes, cover, is_active, req.params.id);
   res.json(db.prepare('SELECT * FROM packages WHERE id=?').get(req.params.id));
 });
-app.delete('/api/packages/:id', requireAdmin, (req, res) => {
+app.delete('/api/packages/:id', requireStaff, (req, res) => {
   db.prepare('DELETE FROM packages WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });
@@ -425,7 +636,7 @@ app.get('/api/schedule', (req, res) => {
   res.json({ config, closed_dates: closed, cancel_rules: rules || { free_cancel_hours: 24, fee_type: 'none', fee_value: 0 } });
 });
 
-app.put('/api/schedule', requireAdmin, (req, res) => {
+app.put('/api/schedule', requireStaff, (req, res) => {
   const { config, closed_dates, cancel_rules } = req.body;
   if (config) {
     const up = db.prepare('UPDATE schedule_config SET time_slots=?, is_enabled=? WHERE weekday=?');
@@ -600,7 +811,7 @@ app.get('/api/orders/my', requireUser, (req, res) => {
 });
 
 // Get all orders (admin)
-app.get('/api/orders', requireAdmin, (req, res) => {
+app.get('/api/orders', requireStaff, (req, res) => {
   const { status } = req.query;
   let sql = 'SELECT o.*, p.name as package_name, p.price as package_price, u.nickname FROM orders o JOIN packages p ON o.package_id=p.id JOIN users u ON o.user_id=u.id';
   const params = [];
@@ -652,7 +863,7 @@ app.post('/api/orders/:id/cancel', requireUser, (req, res) => {
 });
 
 // Complete (admin marks as done / 核销)
-app.post('/api/orders/:id/complete', requireAdmin, (req, res) => {
+app.post('/api/orders/:id/complete', requireStaff, (req, res) => {
   db.prepare("UPDATE orders SET status='completed' WHERE id=?").run(req.params.id);
   res.json(db.prepare('SELECT * FROM orders WHERE id=?').get(req.params.id));
 });
@@ -669,7 +880,7 @@ app.delete('/api/orders/:id', requireUser, (req, res) => {
 });
 
 // Export orders as CSV
-app.get('/api/orders/export', requireAdmin, (req, res) => {
+app.get('/api/orders/export', requireStaff, (req, res) => {
   const rows = db.prepare(`
     SELECT o.order_no, u.nickname, o.customer_name, o.customer_phone,
            p.name as package_name, o.amount, o.discount_amount, o.final_amount,

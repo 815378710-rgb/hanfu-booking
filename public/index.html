@@ -1208,11 +1208,22 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
   </div>
 
+  <!-- Announcements -->
+  <div v-for="a in announcements" :key="a.id"
+    style="margin:10px 16px 0;padding:12px 16px;border-radius:12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer"
+    :style="{background: a.type==='promo'?'linear-gradient(135deg,#FFF3E0,#FFE0B2)':a.type==='important'?'linear-gradient(135deg,#FFEBEE,#FFCDD2)':'linear-gradient(135deg,#E3F2FD,#BBDEFB)'}">
+    <span style="font-size:18px;flex-shrink:0">{{a.type==='promo'?'🎉':a.type==='important'?'🔔':'ℹ️'}}</span>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.03em">{{a.title}}</div>
+      <div style="font-size:12px;color:var(--ink-60);margin-top:2px;line-height:1.5">{{a.content}}</div>
+    </div>
+  </div>
+
   <div class="hours-bar" style="margin-top:14px">
     <span class="hours-icon">🕐</span>
     <div class="hours-text">
-      <b>营业时间</b>：周一至周六 9:00 - 18:00<br>
-      周日休息 · 节假日请提前咨询
+      <b>营业时间</b>：{{shopInfo.business_hours || '周一至周六 9:00 - 18:00'}}<br>
+      {{shopInfo.holiday_note || '周日休息 · 节假日请提前咨询'}}
     </div>
   </div>
 
@@ -1896,15 +1907,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 <div v-if="showAbout" class="modal-bg" @click="showAbout=false">
   <div class="modal-box" @click.stop>
     <div class="modal-handle"></div>
-    <h3>🌸 关于霓裳</h3>
-    <p style="text-align:center;line-height:2.2">
-      霓裳汉服妆造工作室<br>
-      专注汉服妆造体验<br>
-      让每一位女孩都能<br>
-      穿越千年，梦回盛世 ✨<br><br>
-      <span style="font-size:12px;color:var(--ink-40);font-weight:500">🕐 营业时间：周一至周六 9:00-18:00</span><br>
-      <span style="font-size:12px;color:var(--ink-40);font-weight:500">💬 客服微信：nichang_hanfu</span><br>
-      <span style="font-size:12px;color:var(--ink-40);font-weight:500">📍 支持到店体验 · 支持外景跟拍</span>
+    <h3>🌸 关于{{shopInfo.shop_name || '霓裳'}}</h3>
+    <p style="text-align:center;line-height:2.2;white-space:pre-line">
+      {{shopInfo.about || '专注汉服妆造体验\n让每一位女孩都能\n穿越千年，梦回盛世 ✨'}}<br><br>
+      <span style="font-size:12px;color:var(--ink-40);font-weight:500">🕐 营业时间：{{shopInfo.business_hours || '周一至周六 9:00-18:00'}}</span><br>
+      <span v-if="shopInfo.wechat" style="font-size:12px;color:var(--ink-40);font-weight:500">💬 客服微信：{{shopInfo.wechat}}</span><br>
+      <span v-if="shopInfo.address" style="font-size:12px;color:var(--ink-40);font-weight:500">📍 {{shopInfo.address}}</span>
     </p>
     <button class="btn btn-outline" @click="showAbout=false" style="margin-top:16px;font-size:13px">知道了</button>
   </div>
@@ -2001,6 +2009,14 @@ createApp({
     }
     async function loadAvailableCoupons(){
       try{ availableCoupons.value = await api('/coupons/available'); }catch(e){}
+    }
+    const announcements=ref([]);
+    async function loadAnnouncements(){
+      try{ announcements.value = await api('/announcements'); }catch(e){}
+    }
+    const shopInfo=ref({});
+    async function loadShopInfo(){
+      try{ shopInfo.value = await api('/shop'); }catch(e){}
     }
 
     // Countdown timer
@@ -2277,7 +2293,7 @@ createApp({
     onMounted(async()=>{
       try{
         await initUser();
-        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons()]);
+        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons(),loadAnnouncements(),loadShopInfo()]);
         // Start timers
         updateCountdown();
         setInterval(updateCountdown,1000);
@@ -2307,7 +2323,8 @@ createApp({
       couponClaimed,showMyCoupons,totalBookings,avgRating,
       countdown,heroIndex,heroBanners,reviews,
       claimCoupon,wantSameStyle,
-      publicStats,availableCoupons,selectedCouponId,couponDiscount
+      publicStats,availableCoupons,selectedCouponId,couponDiscount,
+      announcements,shopInfo
     };
   }
 }).mount('#app');
