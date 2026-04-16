@@ -2,390 +2,158 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>霓裳 · 预览</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500;600&family=Noto+Sans+SC:wght@100;200;300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>霓裳汉服 · 小程序预览</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{
-  --cream:#FAF8F5;--white:#FFFFFF;
-  --stone:#1A1714;--stone-60:#6B6560;--stone-40:#A39E99;--stone-20:#D4D0CC;--stone-10:#EBE8E4;--stone-05:#F5F3F0;
-  --blush:#D4A0A0;--blush-light:#F0E0E0;
-  --serif:'Noto Serif SC','Cormorant Garamond',Georgia,serif;
-  --sans:'Noto Sans SC','Helvetica Neue',sans-serif;
-  --display:'Cormorant Garamond','Noto Serif SC',Georgia,serif;
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 20px}
+h1{color:#fff;font-size:20px;margin-bottom:8px;letter-spacing:.1em}
+.subtitle{color:#888;font-size:13px;margin-bottom:24px}
+.phone-frame{
+  width:390px;height:844px;border-radius:44px;
+  background:#000;padding:12px;
+  box-shadow:0 20px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08);
+  position:relative;
 }
-html{font-size:16px}
-body{font-family:var(--sans);background:#e4e0dc;color:var(--stone);display:flex;justify-content:center;padding:24px;min-height:100vh;-webkit-font-smoothing:antialiased;font-weight:300}
-.phone{width:390px;background:var(--cream);border-radius:28px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.15);position:relative}
-.phone::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:100px;height:26px;background:#1a1a1a;border-radius:0 0 14px 14px;z-index:200}
-.nav{border-bottom:.5px solid var(--stone-10);padding:40px 24px 14px;display:flex;align-items:center;justify-content:space-between}
-.nav-title{font-family:var(--display);font-size:18px;font-weight:300;letter-spacing:.15em}
-.nav-sub{font-family:var(--sans);font-size:10px;font-weight:200;letter-spacing:.3em;color:var(--stone-40);text-transform:uppercase;margin-top:1px}
-.tabs{border-top:.5px solid var(--stone-10);display:flex;padding:8px 0 20px}
-.tabs .tab{flex:1;text-align:center;cursor:pointer}
-.tabs .tab-icon{font-size:16px;display:block;margin-bottom:4px;opacity:.35;transition:opacity .3s}
-.tabs .tab-label{font-size:9px;font-weight:300;letter-spacing:.2em;color:var(--stone-40)}
-.tabs .tab.on .tab-icon{opacity:.8}
-.tabs .tab.on .tab-label{color:var(--stone);font-weight:400}
-.heading{padding:28px 24px 16px}
-.heading-en{font-family:var(--display);font-size:11px;font-weight:300;letter-spacing:.35em;color:var(--stone-20);text-transform:uppercase;margin-bottom:4px}
-.heading-cn{font-family:var(--serif);font-size:18px;font-weight:300;letter-spacing:.12em}
-.heading-line{width:24px;height:.5px;background:var(--stone-20);margin-top:12px}
-.pills{display:flex;gap:12px;padding:0 24px 20px;overflow-x:auto;scrollbar-width:none}
-.pills::-webkit-scrollbar{display:none}
-.pill{white-space:nowrap;padding:6px 0;font-size:12px;font-weight:300;letter-spacing:.15em;color:var(--stone-40);cursor:pointer;border-bottom:1px solid transparent;transition:all .3s}
-.pill.on{color:var(--stone);border-bottom-color:var(--stone)}
-.grid{column-count:2;column-gap:16px;padding:0 20px}
-.card{break-inside:avoid;margin-bottom:16px;cursor:pointer}
-.card img{width:100%;display:block;border-radius:2px;transition:opacity .4s}
-.card:hover img{opacity:.9}
-.card-meta{padding:10px 2px 0}
-.card-title{font-family:var(--serif);font-size:13px;font-weight:300;letter-spacing:.08em}
-.card-tags{margin-top:6px;display:flex;gap:8px}
-.card-tag{font-size:10px;font-weight:200;letter-spacing:.1em;color:var(--stone-40)}
-.pkg{padding:0 24px}
-.pkg-item{border-bottom:.5px solid var(--stone-10);padding:24px 0;position:relative}
-.pkg-item:last-child{border:none}
-.pkg-cover{width:100%;height:200px;object-fit:cover;border-radius:2px;margin-bottom:16px}
-.pkg-badge{position:absolute;top:12px;right:12px;font-size:9px;font-weight:300;letter-spacing:.2em;color:var(--blush);background:rgba(250,248,245,.9);padding:4px 12px;border:.5px solid var(--blush-light)}
-.pkg-name{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:.1em}
-.pkg-desc{font-size:12px;font-weight:200;color:var(--stone-60);margin-top:8px;line-height:1.8;letter-spacing:.03em}
-.pkg-bottom{display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px}
-.pkg-price{font-family:var(--display);font-size:28px;font-weight:300}
-.pkg-price span{font-size:14px;font-weight:300;color:var(--stone-40)}
-.pkg-time{font-size:10px;font-weight:200;color:var(--stone-40);letter-spacing:.1em;margin-top:4px}
-.btn-book{display:inline-block;font-size:11px;font-weight:300;letter-spacing:.2em;color:var(--stone);cursor:pointer;padding:8px 0;border-bottom:.5px solid var(--stone-20);background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans);transition:all .3s}
-.btn-book:hover{border-bottom-color:var(--stone)}
-.cal{padding:24px}
-.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.cal-head button{background:none;border:none;cursor:pointer;color:var(--stone-40);font-size:18px;font-family:var(--sans);font-weight:200}
-.cal-month{font-family:var(--display);font-size:18px;font-weight:300;letter-spacing:.1em}
-.cal-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:9px;font-weight:200;color:var(--stone-40);letter-spacing:.15em;margin-bottom:12px;text-transform:uppercase}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:2px}
-.cal-day{padding:10px 0;font-size:14px;font-weight:300;cursor:pointer;transition:all .2s;font-family:var(--display)}
-.cal-day.today{color:var(--blush)}
-.cal-day.sel{background:var(--stone);color:var(--cream);border-radius:2px}
-.cal-day.empty{cursor:default}
-.slots{padding:0 24px}
-.slots-title{font-size:11px;font-weight:200;letter-spacing:.2em;color:var(--stone-40);margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.slots-date{font-size:10px;color:var(--stone-20);font-family:var(--display);letter-spacing:.1em}
-.slot-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.slot{padding:14px 0;text-align:center;font-size:13px;font-weight:300;letter-spacing:.05em;border:.5px solid var(--stone-10);cursor:pointer;transition:all .3s;color:var(--stone-60)}
-.slot.on{background:var(--stone);color:var(--cream);border-color:var(--stone)}
-.slot.gone{color:var(--stone-10);cursor:not-allowed;text-decoration:line-through;border-color:transparent;background:var(--stone-05)}
-.steps{display:flex;align-items:center;justify-content:center;padding:24px 24px 8px;gap:16px}
-.step-dot{width:6px;height:6px;border-radius:50%;background:var(--stone-10)}
-.step-dot.on{background:var(--stone)}
-.step-dot.done{background:var(--stone-40)}
-.step-label{font-size:9px;font-weight:200;letter-spacing:.2em;color:var(--stone-20);text-transform:uppercase}
-.step-label.on{color:var(--stone)}
-.field{padding:0 24px;margin-bottom:20px}
-.field-label{font-size:9px;font-weight:200;letter-spacing:.25em;color:var(--stone-40);text-transform:uppercase;margin-bottom:8px}
-.field-value{font-size:15px;font-weight:300;letter-spacing:.03em;padding:12px 0;border-bottom:.5px solid var(--stone-10)}
-.field input{width:100%;border:none;outline:none;font-size:15px;font-weight:300;letter-spacing:.03em;padding:12px 0;font-family:var(--sans);background:transparent;border-bottom:.5px solid var(--stone-100);border-bottom-color:var(--stone-10)}
-.field-hint{font-size:10px;font-weight:200;color:var(--stone-40);margin-top:6px;letter-spacing:.05em}
-.btn{display:block;width:100%;padding:16px;text-align:center;font-family:var(--sans);font-size:13px;font-weight:300;letter-spacing:.25em;color:var(--cream);background:var(--stone);border:none;cursor:pointer;transition:all .3s}
-.btn:active{opacity:.85}
-.btn-outline{background:transparent;color:var(--stone);border:.5px solid var(--stone-20)}
-.btn-sm{display:inline-block;width:auto;padding:8px 20px;font-size:11px}
-.btn-ghost{background:transparent;color:var(--stone-40);border:.5px solid var(--stone-10)}
-.btn-rose{background:var(--blush);color:var(--white)}
-.summary{margin:0 24px}
-.summary-row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:.5px solid var(--stone-10);font-size:13px;font-weight:300}
-.summary-row .k{color:var(--stone-40)}
-.summary-total{display:flex;justify-content:space-between;padding:18px 0;font-family:var(--display);font-size:22px;font-weight:300}
-.pay-note{text-align:center;padding:16px 24px;font-size:10px;font-weight:200;color:var(--stone-40);letter-spacing:.1em}
-.ord{margin:0 24px;border:.5px solid var(--stone-10);margin-bottom:16px}
-.ord-head{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--stone-10)}
-.ord-no{font-size:10px;font-weight:200;color:var(--stone-40);font-family:'SF Mono',monospace;letter-spacing:.05em}
-.ord-status{font-size:9px;font-weight:300;letter-spacing:.15em;padding:3px 10px}
-.ord-status-pending{color:var(--blush);border:.5px solid var(--blush-light)}
-.ord-status-booked{color:var(--stone-60);border:.5px solid var(--stone-20)}
-.ord-status-completed{color:var(--stone-40);border:.5px solid var(--stone-10)}
-.ord-status-cancelled{color:var(--stone-20);border:.5px solid var(--stone-10)}
-.ord-body{padding:16px}
-.ord-pkg{font-family:var(--serif);font-size:14px;font-weight:400;letter-spacing:.08em;margin-bottom:12px}
-.ord-detail{font-size:12px;font-weight:200;color:var(--stone-60);line-height:2;letter-spacing:.03em}
-.ord-detail b{color:var(--stone);font-weight:400}
-.ord-foot{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:.5px solid var(--stone-10)}
-.ord-amount{font-family:var(--display);font-size:20px;font-weight:300}
-.ord-actions{display:flex;gap:8px}
-.my-head{padding:40px 24px 32px;text-align:center}
-.my-avatar{width:64px;height:64px;border-radius:50%;border:.5px solid var(--stone-20);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:var(--serif);font-size:20px;font-weight:300;color:var(--stone-40)}
-.my-name{font-family:var(--serif);font-size:16px;font-weight:400;letter-spacing:.15em}
-.my-role{font-size:10px;font-weight:200;color:var(--stone-40);letter-spacing:.2em;margin-top:4px}
-.my-stats{display:grid;grid-template-columns:repeat(4,1fr);margin:24px 24px 0;border-top:.5px solid var(--stone-10);border-bottom:.5px solid var(--stone-10)}
-.my-stat{text-align:center;padding:20px 0;cursor:pointer;border-right:.5px solid var(--stone-10)}
-.my-stat:last-child{border:none}
-.my-stat-num{font-family:var(--display);font-size:22px;font-weight:300}
-.my-stat-lbl{font-size:9px;font-weight:200;color:var(--stone-40);letter-spacing:.15em;margin-top:4px}
-.my-links{padding:8px 24px}
-.my-link{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:.5px solid var(--stone-10);cursor:pointer;font-size:13px;font-weight:300;letter-spacing:.05em}
-.my-link:last-child{border:none}
-.my-link-arrow{color:var(--stone-20);font-size:12px}
-::-webkit-scrollbar{display:none}
+.phone-notch{
+  width:120px;height:28px;background:#000;border-radius:0 0 16px 16px;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;
+}
+.phone-screen{
+  width:100%;height:100%;border-radius:32px;overflow:hidden;
+  background:#FFF8F6;position:relative;
+}
+.phone-screen iframe{
+  width:100%;height:100%;border:none;border-radius:32px;
+}
+.phone-bar{
+  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  width:120px;height:5px;background:rgba(255,255,255,.3);border-radius:3px;
+}
+.controls{
+  display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center;
+}
+.ctrl-btn{
+  padding:10px 20px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);color:#ccc;font-size:13px;cursor:pointer;
+  transition:all .3s;letter-spacing:.05em;
+}
+.ctrl-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+.ctrl-btn.active{background:linear-gradient(135deg,#C4788A,#A85A6C);color:#fff;border-color:transparent}
+.info{
+  margin-top:20px;color:#666;font-size:12px;text-align:center;line-height:1.8;max-width:400px;
+}
+.info a{color:#C4788A;text-decoration:none}
+@media(max-width:440px){
+  .phone-frame{width:100%;height:calc(100vh - 200px);border-radius:24px;padding:6px}
+  .phone-notch{display:none}
+  .phone-screen{border-radius:18px}
+  .phone-screen iframe{border-radius:18px}
+}
 </style>
 </head>
 <body>
-<div id="app">
-<div class="phone">
 
-<!-- 客片 -->
-<div v-show="page==='photos'">
-  <div class="nav">
-    <div>
-      <div class="nav-title">霓裳</div>
-      <div class="nav-sub">Nícháng Hanfu Studio</div>
-    </div>
+<h1>🌸 霓裳 · 汉服妆造预约</h1>
+<div class="subtitle">微信小程序 UX 预览 · 面向 18-35 岁女性用户</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+    <iframe id="preview" src="http://localhost:3000"></iframe>
   </div>
-  <div class="heading">
-    <div class="heading-en">Portfolio</div>
-    <div class="heading-cn">客片鉴赏</div>
-    <div class="heading-line"></div>
-  </div>
-  <div class="pills">
-    <span class="pill on">全部</span>
-    <span class="pill">唐风</span><span class="pill">宋制</span><span class="pill">明制</span>
-    <span class="pill">魏晋</span><span class="pill">异域</span><span class="pill">仙侠</span>
-  </div>
-  <div class="grid">
-    <div class="card"><img src="https://images.unsplash.com/photo-1583427742897-f35e59d60d46?w=400&h=520&fit=crop"><div class="card-meta"><div class="card-title">大唐盛世</div><div class="card-tags"><span class="card-tag">华丽</span><span class="card-tag">经典</span></div></div></div>
-    <div class="card"><img src="https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=400&fit=crop"><div class="card-meta"><div class="card-title">宋韵清雅</div><div class="card-tags"><span class="card-tag">素雅</span><span class="card-tag">简约</span></div></div></div>
-    <div class="card"><img src="https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400&h=480&fit=crop"><div class="card-meta"><div class="card-title">明制端庄</div><div class="card-tags"><span class="card-tag">端庄</span><span class="card-tag">大气</span></div></div></div>
-    <div class="card"><img src="https://images.unsplash.com/photo-1551803091-e20673f15770?w=400&h=560&fit=crop"><div class="card-meta"><div class="card-title">魏晋风流</div><div class="card-tags"><span class="card-tag">飘逸</span><span class="card-tag">仙气</span></div></div></div>
-    <div class="card"><img src="https://images.unsplash.com/photo-1544006659-f0b21884ce1d?w=400&h=380&fit=crop"><div class="card-meta"><div class="card-title">敦煌飞天</div><div class="card-tags"><span class="card-tag">异域</span><span class="card-tag">华丽</span></div></div></div>
-    <div class="card"><img src="https://images.unsplash.com/photo-1509099836639-18ba1795216d?w=400&h=500&fit=crop"><div class="card-meta"><div class="card-title">仙侠梦回</div><div class="card-tags"><span class="card-tag">仙气</span><span class="card-tag">梦幻</span></div></div></div>
-  </div>
-  <div class="tabs">
-    <div class="tab on" @click="page='photos'"><span class="tab-icon">◉</span><span class="tab-label">客片</span></div>
-    <div class="tab" @click="page='packages'"><span class="tab-icon">◈</span><span class="tab-label">套餐</span></div>
-    <div class="tab" @click="page='my'"><span class="tab-icon">○</span><span class="tab-label">我的</span></div>
-  </div>
+  <div class="phone-bar"></div>
 </div>
 
-<!-- 套餐 -->
-<div v-show="page==='packages'">
-  <div class="nav">
-    <div>
-      <div class="nav-title">霓裳</div>
-      <div class="nav-sub">Nícháng Hanfu Studio</div>
-    </div>
-  </div>
-  <div class="heading">
-    <div class="heading-en">Experience</div>
-    <div class="heading-cn">妆造套餐</div>
-    <div class="heading-line"></div>
-  </div>
-  <div class="pkg">
-    <div class="pkg-item">
-      <img class="pkg-cover" src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=400&fit=crop">
-      <div class="pkg-name">基础妆造</div>
-      <div class="pkg-desc">含基础汉服租借 + 简单妆面 + 发型</div>
-      <div class="pkg-bottom">
-        <div><div class="pkg-price"><span>¥ </span>199</div><div class="pkg-time">约 90 分钟</div></div>
-        <button class="btn-book">预约 BOOK →</button>
-      </div>
-    </div>
-    <div class="pkg-item">
-      <div style="position:relative">
-        <img class="pkg-cover" src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&h=400&fit=crop">
-        <div class="pkg-badge">RECOMMENDED</div>
-      </div>
-      <div class="pkg-name">精致妆造</div>
-      <div class="pkg-desc">含精选汉服 + 精致妆面 + 发型 + 配饰</div>
-      <div class="pkg-bottom">
-        <div><div class="pkg-price"><span>¥ </span>399</div><div class="pkg-time">约 120 分钟</div></div>
-        <button class="btn-book" @click="page='booking'">预约 BOOK →</button>
-      </div>
-    </div>
-    <div class="pkg-item">
-      <img class="pkg-cover" src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop">
-      <div class="pkg-name">豪华妆造 + 摄影</div>
-      <div class="pkg-desc">含高端汉服 + 精致妆面 + 发型 + 配饰 + 外景拍摄30张</div>
-      <div class="pkg-bottom">
-        <div><div class="pkg-price"><span>¥ </span>699</div><div class="pkg-time">约 180 分钟</div></div>
-        <button class="btn-book" @click="page='booking'">预约 BOOK →</button>
-      </div>
-    </div>
-  </div>
-  <div class="tabs">
-    <div class="tab" @click="page='photos'"><span class="tab-icon">◉</span><span class="tab-label">客片</span></div>
-    <div class="tab on" @click="page='packages'"><span class="tab-icon">◈</span><span class="tab-label">套餐</span></div>
-    <div class="tab" @click="page='my'"><span class="tab-icon">○</span><span class="tab-label">我的</span></div>
-  </div>
+<div class="controls">
+  <button class="ctrl-btn active" onclick="reload()">🔄 刷新</button>
+  <button class="ctrl-btn" onclick="showDiff()">📊 优化对比</button>
+  <button class="ctrl-btn" onclick="window.open('http://localhost:3000/admin','_blank')">⚙️ 管理后台</button>
 </div>
 
-<!-- 预约 -->
-<div v-show="page==='booking'">
-  <div class="nav">
-    <div style="font-size:12px;font-weight:200;color:var(--stone-40);cursor:pointer;letter-spacing:.1em" @click="page='packages'">← 返回</div>
-    <div style="text-align:center"><div class="nav-title">选择档期</div></div>
-    <div style="width:48px"></div>
-  </div>
-  <div class="steps">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot on"></div><div class="step-label on">档期</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-10)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot"></div><div class="step-label">信息</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-10)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot"></div><div class="step-label">支付</div></div>
-  </div>
-  <div class="cal">
-    <div class="cal-head">
-      <button>‹</button>
-      <span class="cal-month">2026.04</span>
-      <button>›</button>
-    </div>
-    <div class="cal-week"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
-    <div class="cal-grid">
-      <div class="cal-day empty"></div><div class="cal-day empty"></div><div class="cal-day empty"></div>
-      <div class="cal-day">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div>
-      <div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div><div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div>
-      <div class="cal-day">12</div><div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div>
-      <div class="cal-day today sel">16</div><div class="cal-day">17</div><div class="cal-day">18</div>
-      <div class="cal-day">19</div><div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day">25</div>
-      <div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div><div class="cal-day">29</div><div class="cal-day">30</div>
-    </div>
-  </div>
-  <div class="slots">
-    <div class="slots-title">选择时段 <span class="slots-date">2026-04-16</span></div>
-    <div class="slot-grid">
-      <div class="slot on">09:00-11:00</div>
-      <div class="slot">11:00-13:00</div>
-      <div class="slot gone">14:00-16:00</div>
-      <div class="slot">16:00-18:00</div>
-    </div>
-  </div>
-  <div style="padding:32px 24px"><button class="btn" @click="page='form'">下一步</button></div>
+<div class="info">
+  <b>优化清单：</b><br>
+  ✅ Hero 轮播 Banner · ✅ 社交证明条 · ✅ 新人优惠券<br>
+  ✅ 客片「拍同款」· ✅ 好评精选 · ✅ 套餐评分+预约数<br>
+  ✅ 限时倒计时 · ✅ 会员等级 · ✅ 积分 · ✅ CSS 动画<br><br>
+  后端：评价系统 / 优惠券 / 会员等级 / 公开统计 API<br>
+  <a href="https://github.com/815378710-rgb/hanfu-booking" target="_blank">GitHub 仓库 →</a>
 </div>
 
-<!-- 填写 -->
-<div v-show="page==='form'">
-  <div class="nav">
-    <div style="font-size:12px;font-weight:200;color:var(--stone-40);cursor:pointer;letter-spacing:.1em" @click="page='booking'">← 返回</div>
-    <div style="text-align:center"><div class="nav-title">填写信息</div></div>
-    <div style="width:48px"></div>
-  </div>
-  <div class="steps">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot done"></div><div class="step-label" style="color:var(--stone-40)">档期</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-40)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot on"></div><div class="step-label on">信息</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-10)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot"></div><div class="step-label">支付</div></div>
-  </div>
-  <div style="height:24px"></div>
-  <div class="field"><div class="field-label">套餐</div><div class="field-value">精致妆造 · ¥399</div></div>
-  <div class="field"><div class="field-label">时间</div><div class="field-value">2026-04-16 09:00-11:00</div></div>
-  <div class="field"><div class="field-label">姓名</div><input placeholder="到店核验姓名" value="李小花"></div>
-  <div class="field"><div class="field-label">手机号</div><input placeholder="11位手机号" value="13888888888" maxlength="11"><div class="field-hint">用于到店核验和预约提醒</div></div>
-  <div style="height:32px"></div>
-  <div style="padding:0 24px"><button class="btn" @click="page='pay'">提交预约</button></div>
-</div>
-
-<!-- 支付 -->
-<div v-show="page==='pay'">
-  <div class="nav">
-    <div style="font-size:12px;font-weight:200;color:var(--stone-40);cursor:pointer;letter-spacing:.1em" @click="page='form'">← 返回</div>
-    <div style="text-align:center"><div class="nav-title">确认支付</div></div>
-    <div style="width:48px"></div>
-  </div>
-  <div class="steps">
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot done"></div><div class="step-label" style="color:var(--stone-40)">档期</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-40)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot done"></div><div class="step-label" style="color:var(--stone-40)">信息</div></div>
-    <div style="width:40px;height:.5px;background:var(--stone-40)"></div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="step-dot on"></div><div class="step-label on">支付</div></div>
-  </div>
-  <div style="height:24px"></div>
-  <div class="summary">
-    <div class="summary-row"><span class="k">套餐</span><span>精致妆造</span></div>
-    <div class="summary-row"><span class="k">日期</span><span>2026-04-16</span></div>
-    <div class="summary-row"><span class="k">时段</span><span>09:00-11:00</span></div>
-    <div class="summary-row"><span class="k">姓名</span><span>李小花</span></div>
-    <div class="summary-row"><span class="k">手机</span><span>13888888888</span></div>
-    <div class="summary-total"><span>合计</span><span>¥399</span></div>
-  </div>
-  <div style="height:20px"></div>
-  <div style="padding:0 24px"><button class="btn btn-rose">支付 ¥399</button></div>
-  <div class="pay-note">微信安全支付 · 15分钟内未支付自动取消</div>
-</div>
-
-<!-- 我的 -->
-<div v-show="page==='my'">
-  <div class="my-head">
-    <div class="my-avatar">汉</div>
-    <div class="my-name">汉服爱好者</div>
-    <div class="my-role">MY RESERVATIONS</div>
-  </div>
-  <div class="my-stats">
-    <div class="my-stat"><div class="my-stat-num">1</div><div class="my-stat-lbl">待支付</div></div>
-    <div class="my-stat"><div class="my-stat-num">2</div><div class="my-stat-lbl">已预约</div></div>
-    <div class="my-stat"><div class="my-stat-num">5</div><div class="my-stat-lbl">已完成</div></div>
-    <div class="my-stat"><div class="my-stat-num">9</div><div class="my-stat-lbl">全部</div></div>
-  </div>
-  <div class="my-links">
-    <div class="my-link" @click="page='orders'"><span>我的预约</span><span class="my-link-arrow">→</span></div>
-    <div class="my-link" @click="page='photos'"><span>浏览客片</span><span class="my-link-arrow">→</span></div>
-    <div class="my-link" @click="page='packages'"><span>套餐选购</span><span class="my-link-arrow">→</span></div>
-  </div>
-  <div class="tabs">
-    <div class="tab" @click="page='photos'"><span class="tab-icon">◉</span><span class="tab-label">客片</span></div>
-    <div class="tab" @click="page='packages'"><span class="tab-icon">◈</span><span class="tab-label">套餐</span></div>
-    <div class="tab on" @click="page='my'"><span class="tab-icon">○</span><span class="tab-label">我的</span></div>
-  </div>
-</div>
-
-<!-- 我的预约 -->
-<div v-show="page==='orders'">
-  <div class="nav">
-    <div style="font-size:12px;font-weight:200;color:var(--stone-40);cursor:pointer;letter-spacing:.1em" @click="page='my'">← 返回</div>
-    <div style="text-align:center"><div class="nav-title">我的预约</div></div>
-    <div style="width:48px"></div>
-  </div>
-  <div class="pills" style="padding-top:12px">
-    <span class="pill">全部</span><span class="pill on">待支付</span><span class="pill">已预约</span><span class="pill">已完成</span><span class="pill">已取消</span>
-  </div>
-  <div class="ord">
-    <div class="ord-head"><span class="ord-no">HF202604151439075C7100</span><span class="ord-status ord-status-pending">待支付</span></div>
-    <div class="ord-body">
-      <div class="ord-pkg">精致妆造</div>
-      <div class="ord-detail">日期 <b>2026-04-20</b><br>时段 <b>09:00-11:00</b><br>姓名 <b>李小花</b><br>手机 <b>13888888888</b></div>
+<!-- Diff Modal -->
+<div id="diffModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1e1e2e;border-radius:16px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;color:#ccc">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="color:#fff;font-size:18px">📊 优化前后对比</h2>
+      <button onclick="document.getElementById('diffModal').style.display='none'" style="background:none;border:none;color:#888;font-size:24px;cursor:pointer">×</button>
     </div>
-    <div class="ord-foot">
-      <div class="ord-amount">¥399</div>
-      <div class="ord-actions"><button class="btn btn-sm">支付</button><button class="btn btn-sm btn-outline">取消</button></div>
-    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="border-bottom:1px solid #333">
+          <th style="text-align:left;padding:10px;color:#888">区域</th>
+          <th style="text-align:left;padding:10px;color:#666">优化前</th>
+          <th style="text-align:left;padding:10px;color:#C4788A">优化后</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">首页 Banner</td>
+          <td style="padding:10px;color:#888">静态单张图</td>
+          <td style="padding:10px">3张自动轮播 + 圆点指示器</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">社交证明</td>
+          <td style="padding:10px;color:#888">❌ 无</td>
+          <td style="padding:10px">1268人已预约 + ★4.9好评</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">新人优惠</td>
+          <td style="padding:10px;color:#888">❌ 无</td>
+          <td style="padding:10px">粉色渐变横幅 + 领取交互</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">客片卡片</td>
+          <td style="padding:10px;color:#888">图片 + 收藏</td>
+          <td style="padding:10px">+ 「📸 想拍同款」按钮</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">用户评价</td>
+          <td style="padding:10px;color:#888">❌ 无</td>
+          <td style="padding:10px">好评精选区域（头像/评分/内容）</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">套餐卡片</td>
+          <td style="padding:10px;color:#888">名称/价格/时长</td>
+          <td style="padding:10px">+ ★评分 + 评价数 + 预约人数</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">限时活动</td>
+          <td style="padding:10px;color:#888">❌ 无</td>
+          <td style="padding:10px">24h 倒计时 + 呼吸发光</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">个人中心</td>
+          <td style="padding:10px;color:#888">基础信息</td>
+          <td style="padding:10px">+ 👑会员等级 + ✨积分 + 优惠券</td>
+        </tr>
+        <tr style="border-bottom:1px solid #222">
+          <td style="padding:10px;font-weight:600">动画效果</td>
+          <td style="padding:10px;color:#888">基础 transition</td>
+          <td style="padding:10px">10+ 种 keyframe 动画</td>
+        </tr>
+        <tr>
+          <td style="padding:10px;font-weight:600">后端 API</td>
+          <td style="padding:10px;color:#888">基础 CRUD</td>
+          <td style="padding:10px">+ 评价/优惠券/会员/统计</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-  <div class="ord">
-    <div class="ord-head"><span class="ord-no">HF20260414091852A3B6D0</span><span class="ord-status ord-status-booked">已预约</span></div>
-    <div class="ord-body">
-      <div class="ord-pkg">豪华妆造 + 摄影</div>
-      <div class="ord-detail">日期 <b>2026-04-18</b><br>时段 <b>14:00-16:00</b><br>姓名 <b>李小花</b><br>手机 <b>13888888888</b></div>
-    </div>
-    <div class="ord-foot">
-      <div class="ord-amount">¥699</div>
-      <div class="ord-actions"><button class="btn btn-sm btn-ghost">申请取消</button></div>
-    </div>
-  </div>
-  <div class="ord">
-    <div class="ord-head"><span class="ord-no">HF20260410153200E7F1A8</span><span class="ord-status ord-status-completed">已完成</span></div>
-    <div class="ord-body">
-      <div class="ord-pkg">基础妆造</div>
-      <div class="ord-detail">日期 <b>2026-04-12</b><br>时段 <b>11:00-13:00</b><br>姓名 <b>李小花</b><br>手机 <b>13888888888</b></div>
-    </div>
-    <div class="ord-foot">
-      <div class="ord-amount">¥199</div>
-      <div class="ord-actions"><button class="btn btn-sm btn-ghost">删除</button></div>
-    </div>
-  </div>
-</div>
-
-</div>
 </div>
 
 <script>
-createApp({setup(){const page=ref('photos');return{page}}}).mount('#app');
+function reload(){document.getElementById('preview').src='http://localhost:3000?t='+Date.now()}
+function showDiff(){document.getElementById('diffModal').style.display='flex'}
 </script>
 </body>
 </html>
