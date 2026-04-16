@@ -120,7 +120,65 @@ db.exec(`
     guest_phone TEXT NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL,
+    package_id INTEGER NOT NULL,
+    rating INTEGER NOT NULL,
+    content TEXT DEFAULT '',
+    images TEXT DEFAULT '[]',
+    is_anonymous INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (package_id) REFERENCES packages(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS coupons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    value REAL NOT NULL,
+    min_amount REAL DEFAULT 0,
+    max_uses INTEGER DEFAULT 1,
+    used_count INTEGER DEFAULT 0,
+    valid_from TEXT,
+    valid_to TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE IF NOT EXISTS user_coupons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    coupon_id INTEGER NOT NULL,
+    is_used INTEGER DEFAULT 0,
+    used_at TEXT,
+    order_id INTEGER,
+    created_at TEXT DEFAULT (datetime('now','localtime')),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (coupon_id) REFERENCES coupons(id),
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+  );
+
+  CREATE TABLE IF NOT EXISTS member_levels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    min_points INTEGER DEFAULT 0,
+    discount_percent REAL DEFAULT 0,
+    icon TEXT DEFAULT ''
+  );
 `);
+
+// ── Extend users table (safe ALTER, ignore if already exists) ──
+try { db.exec("ALTER TABLE users ADD COLUMN points INTEGER DEFAULT 0"); } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN member_level_id INTEGER DEFAULT 1"); } catch(e) {}
+// Extend orders table
+try { db.exec("ALTER TABLE orders ADD COLUMN discount_amount REAL DEFAULT 0"); } catch(e) {}
+try { db.exec("ALTER TABLE orders ADD COLUMN final_amount REAL DEFAULT 0"); } catch(e) {}
 
 // ── Seed demo data if empty ──
 const catCount = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
@@ -164,6 +222,64 @@ if (catCount === 0) {
 
   // Seed a demo admin user
   db.prepare('INSERT INTO users (openid, nickname, phone, is_admin) VALUES (?, ?, ?, 1)').run('admin_openid', '商家管理', '13800000000');
+
+  // Seed demo normal users
+  db.prepare('INSERT INTO users (openid, nickname, phone, points, member_level_id) VALUES (?, ?, ?, ?, ?)').run('user1_openid', '小仙女', '13900000001', 320, 2);
+  db.prepare('INSERT INTO users (openid, nickname, phone, points, member_level_id) VALUES (?, ?, ?, ?, ?)').run('user2_openid', '汉服爱好者', '13900000002', 150, 1);
+  db.prepare('INSERT INTO users (openid, nickname, phone, points, member_level_id) VALUES (?, ?, ?, ?, ?)').run('user3_openid', '古风少女', '13900000003', 800, 3);
+}
+
+// ── Seed member levels ──
+const mlCount = db.prepare('SELECT COUNT(*) as c FROM member_levels').get().c;
+if (mlCount === 0) {
+  const insML = db.prepare('INSERT INTO member_levels (name, min_points, discount_percent, icon) VALUES (?, ?, ?, ?)');
+  insML.run('普通会员', 0, 0, '🥉');
+  insML.run('银卡会员', 200, 5, '🥈');
+  insML.run('金卡会员', 500, 10, '🥇');
+}
+
+// ── Seed coupons ──
+const couponCount = db.prepare('SELECT COUNT(*) as c FROM coupons').get().c;
+if (couponCount === 0) {
+  const insCoupon = db.prepare('INSERT INTO coupons (code, name, type, value, min_amount, max_uses, valid_from, valid_to) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  insCoupon.run('NEWUSER9', '新人9折优惠券', 'percent', 10, 0, 1000, '2026-01-01', '2026-12-31');
+  insCoupon.run('GIRL50', '闺蜜同行减50', 'fixed', 50, 199, 500, '2026-01-01', '2026-12-31');
+  insCoupon.run('SAVE80', '满500减80', 'fixed', 80, 500, 300, '2026-01-01', '2026-12-31');
+}
+
+// ── Seed demo orders for reviews ──
+const demoOrderCount = db.prepare("SELECT COUNT(*) as c FROM orders WHERE user_id IN (SELECT id FROM users WHERE openid LIKE 'user%')").get().c;
+if (demoOrderCount === 0 && db.prepare('SELECT COUNT(*) as c FROM users WHERE openid LIKE ?').get('user%_openid').c > 0) {
+  const demoUsers = db.prepare("SELECT id FROM users WHERE openid LIKE 'user%_openid'").all();
+  const pkgs = db.prepare('SELECT id, price FROM packages WHERE is_active=1 LIMIT 3').all();
+
+  if (demoUsers.length > 0 && pkgs.length > 0) {
+    const insOrder = db.prepare(
+      "INSERT INTO orders (order_no, user_id, package_id, booking_date, time_slot, customer_name, customer_phone, amount, status, final_amount) VALUES (?,?,?,?,?,?,?,?,?,?)"
+    );
+    const names = ['小仙女', '汉服爱好者', '古风少女'];
+    const phones = ['13900000001', '13900000002', '13900000003'];
+
+    for (let i = 0; i < demoUsers.length && i < pkgs.length; i++) {
+      const no = genOrderNo();
+      insOrder.run(no, demoUsers[i].id, pkgs[i].id, '2026-04-01', '10:00-12:00', names[i], phones[i], pkgs[i].price, 'completed', pkgs[i].price);
+    }
+  }
+}
+
+// ── Seed reviews ──
+const reviewCount = db.prepare('SELECT COUNT(*) as c FROM reviews').get().c;
+if (reviewCount === 0) {
+  const completedOrders = db.prepare(
+    "SELECT o.id as order_id, o.user_id, o.package_id FROM orders o WHERE o.status='completed' ORDER BY o.id LIMIT 3"
+  ).all();
+
+  if (completedOrders.length >= 3) {
+    const insReview = db.prepare('INSERT INTO reviews (user_id, order_id, package_id, rating, content, is_anonymous) VALUES (?,?,?,?,?,?)');
+    insReview.run(completedOrders[0].user_id, completedOrders[0].order_id, completedOrders[0].package_id, 5, '超级满意的体验！化妆师技术超好，发型做得特别精致，穿上汉服感觉自己穿越回了古代。照片拍得也很美，强烈推荐！下次还会再来～', 0);
+    insReview.run(completedOrders[1].user_id, completedOrders[1].order_id, completedOrders[1].package_id, 5, '和闺蜜一起来的，两个人的妆造都很用心。服装选择很多，每一件都好美。服务态度特别好，耐心帮我们搭配。拍出来的照片超级出片！❤️', 0);
+    insReview.run(completedOrders[2].user_id, completedOrders[2].order_id, completedOrders[2].package_id, 5, '第一次穿汉服拍照，本来很紧张，但店里的小姐姐特别温柔，妆容和发型都做得超级好看！选的宋制很适合我，已经推荐给朋友们了，一定会回购！', 0);
+  }
 }
 
 // ════════════════════════════════════════
@@ -267,7 +383,19 @@ app.delete('/api/photos/:id', requireAdmin, (req, res) => {
 // ════════════════════════════════════════
 app.get('/api/packages', (req, res) => {
   const all = req.query.all === '1';
-  const sql = all ? 'SELECT * FROM packages ORDER BY id' : 'SELECT * FROM packages WHERE is_active=1 ORDER BY id';
+  const baseWhere = all ? '' : 'WHERE p.is_active=1';
+  const sql = `
+    SELECT p.*,
+      COUNT(DISTINCT o.id) as booking_count,
+      COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating,
+      COUNT(DISTINCT r.id) as review_count
+    FROM packages p
+    LEFT JOIN orders o ON o.package_id = p.id AND o.status IN ('booked','completed')
+    LEFT JOIN reviews r ON r.package_id = p.id
+    ${baseWhere}
+    GROUP BY p.id
+    ORDER BY p.id
+  `;
   res.json(db.prepare(sql).all());
 });
 app.post('/api/packages', requireAdmin, (req, res) => {
@@ -362,7 +490,7 @@ function genOrderNo() {
 
 // Create order
 app.post('/api/orders', requireUser, (req, res) => {
-  const { package_id, booking_date, time_slot, customer_name, customer_phone, guests } = req.body;
+  const { package_id, booking_date, time_slot, customer_name, customer_phone, guests, coupon_id } = req.body;
   if (!package_id || !booking_date || !time_slot || !customer_name || !customer_phone) {
     return res.status(400).json({ error: '请填写完整信息' });
   }
@@ -382,6 +510,35 @@ app.post('/api/orders', requireUser, (req, res) => {
     }
   }
 
+  // Validate coupon if provided
+  let discount = 0;
+  let userCouponId = null;
+  if (coupon_id) {
+    const uc = db.prepare(`
+      SELECT uc.*, c.type, c.value, c.min_amount, c.valid_from, c.valid_to, c.is_active
+      FROM user_coupons uc JOIN coupons c ON uc.coupon_id = c.id
+      WHERE uc.id=? AND uc.user_id=? AND uc.is_used=0
+    `).get(coupon_id, req.user.id);
+
+    if (!uc) return res.status(400).json({ error: '优惠券不存在或已使用' });
+    if (!uc.is_active) return res.status(400).json({ error: '优惠券已失效' });
+
+    const now = new Date().toISOString().slice(0, 10);
+    if (uc.valid_from && uc.valid_from > now) return res.status(400).json({ error: '优惠券尚未生效' });
+    if (uc.valid_to && uc.valid_to < now) return res.status(400).json({ error: '优惠券已过期' });
+    if (pkg.price < uc.min_amount) return res.status(400).json({ error: `订单金额需满${uc.min_amount}元` });
+
+    if (uc.type === 'percent') {
+      discount = Math.round(pkg.price * (uc.value / 100) * 100) / 100;
+    } else if (uc.type === 'fixed') {
+      discount = uc.value;
+    }
+    discount = Math.min(discount, pkg.price);
+    userCouponId = uc.id;
+  }
+
+  const finalAmount = Math.round((pkg.price - discount) * 100) / 100;
+
   // Use transaction for concurrency safety
   const createOrder = db.transaction(() => {
     // Double-check slot availability within transaction (SELECT FOR UPDATE pattern)
@@ -392,13 +549,19 @@ app.post('/api/orders', requireUser, (req, res) => {
 
     const order_no = genOrderNo();
     const r = db.prepare(
-      'INSERT INTO orders (order_no, user_id, package_id, booking_date, time_slot, customer_name, customer_phone, amount, status) VALUES (?,?,?,?,?,?,?,?,?)'
-    ).run(order_no, req.user.id, package_id, booking_date, time_slot, customer_name, customer_phone, pkg.price, 'pending');
+      'INSERT INTO orders (order_no, user_id, package_id, booking_date, time_slot, customer_name, customer_phone, amount, discount_amount, final_amount, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)'
+    ).run(order_no, req.user.id, package_id, booking_date, time_slot, customer_name, customer_phone, pkg.price, discount, finalAmount, 'pending');
 
     // Insert additional guests
     if (pkg.person_count > 1 && Array.isArray(guests) && guests.length > 0) {
       const insGuest = db.prepare('INSERT INTO order_guests (order_id, guest_name, guest_phone) VALUES (?,?,?)');
       guests.forEach(g => insGuest.run(r.lastInsertRowid, g.name, g.phone));
+    }
+
+    // Mark coupon as used
+    if (userCouponId) {
+      db.prepare("UPDATE user_coupons SET is_used=1, used_at=datetime('now','localtime'), order_id=? WHERE id=?")
+        .run(r.lastInsertRowid, userCouponId);
     }
 
     return r.lastInsertRowid;
@@ -506,16 +669,16 @@ app.delete('/api/orders/:id', requireUser, (req, res) => {
 app.get('/api/orders/export', requireAdmin, (req, res) => {
   const rows = db.prepare(`
     SELECT o.order_no, u.nickname, o.customer_name, o.customer_phone,
-           p.name as package_name, o.amount, o.booking_date, o.time_slot,
-           o.status, o.created_at, o.paid_at
+           p.name as package_name, o.amount, o.discount_amount, o.final_amount,
+           o.booking_date, o.time_slot, o.status, o.created_at, o.paid_at
     FROM orders o JOIN packages p ON o.package_id=p.id JOIN users u ON o.user_id=u.id
     ORDER BY o.created_at DESC
   `).all();
 
   const statusMap = { pending: '待支付', booked: '已预约', completed: '已完成', cancelled: '已取消' };
-  const header = '订单号,用户昵称,姓名,手机号,套餐,金额,预约日期,时段,状态,创建时间,支付时间';
+  const header = '订单号,用户昵称,姓名,手机号,套餐,原价,优惠金额,实付金额,预约日期,时段,状态,创建时间,支付时间';
   const csvRows = rows.map(r =>
-    [r.order_no, r.nickname, r.customer_name, r.customer_phone, r.package_name, r.amount, r.booking_date, r.time_slot, statusMap[r.status]||r.status, r.created_at, r.paid_at||''].join(',')
+    [r.order_no, r.nickname, r.customer_name, r.customer_phone, r.package_name, r.amount, r.discount_amount, r.final_amount, r.booking_date, r.time_slot, statusMap[r.status]||r.status, r.created_at, r.paid_at||''].join(',')
   );
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -523,6 +686,194 @@ app.get('/api/orders/export', requireAdmin, (req, res) => {
   // BOM for Excel
   res.write('\uFEFF' + header + '\n' + csvRows.join('\n'));
   res.end();
+});
+
+// ════════════════════════════════════════
+//  Reviews (评价系统)
+// ════════════════════════════════════════
+
+// Get reviews list (with optional package_id filter)
+app.get('/api/reviews', (req, res) => {
+  const { package_id } = req.query;
+  let sql = `
+    SELECT r.*, u.nickname, u.avatar,
+      CASE WHEN r.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END as display_name
+    FROM reviews r JOIN users u ON r.user_id = u.id
+  `;
+  const params = [];
+  if (package_id) { sql += ' WHERE r.package_id = ?'; params.push(package_id); }
+  sql += ' ORDER BY r.created_at DESC';
+  res.json(db.prepare(sql).all(...params));
+});
+
+// Submit review (must be completed order)
+app.post('/api/reviews', requireUser, (req, res) => {
+  const { order_id, rating, content, images, is_anonymous } = req.body;
+  if (!order_id || !rating) return res.status(400).json({ error: '请提供订单ID和评分' });
+  if (rating < 1 || rating > 5) return res.status(400).json({ error: '评分范围1-5' });
+
+  const order = db.prepare('SELECT * FROM orders WHERE id=? AND user_id=?').get(order_id, req.user.id);
+  if (!order) return res.status(404).json({ error: '订单不存在' });
+  if (order.status !== 'completed') return res.status(400).json({ error: '只能对已完成的订单进行评价' });
+
+  const existing = db.prepare('SELECT id FROM reviews WHERE order_id=?').get(order_id);
+  if (existing) return res.status(400).json({ error: '该订单已评价' });
+
+  const r = db.prepare(
+    'INSERT INTO reviews (user_id, order_id, package_id, rating, content, images, is_anonymous) VALUES (?,?,?,?,?,?,?)'
+  ).run(req.user.id, order_id, order.package_id, rating, content || '', JSON.stringify(images || []), is_anonymous ? 1 : 0);
+
+  res.json(db.prepare('SELECT * FROM reviews WHERE id=?').get(r.lastInsertRowid));
+});
+
+// Get review stats for a package
+app.get('/api/reviews/stats/:packageId', (req, res) => {
+  const pid = req.params.packageId;
+  const stats = db.prepare(`
+    SELECT COUNT(*) as total, ROUND(AVG(rating), 1) as avg_rating,
+      SUM(CASE WHEN rating=5 THEN 1 ELSE 0 END) as five_star,
+      SUM(CASE WHEN rating=4 THEN 1 ELSE 0 END) as four_star,
+      SUM(CASE WHEN rating=3 THEN 1 ELSE 0 END) as three_star,
+      SUM(CASE WHEN rating=2 THEN 1 ELSE 0 END) as two_star,
+      SUM(CASE WHEN rating=1 THEN 1 ELSE 0 END) as one_star
+    FROM reviews WHERE package_id=?
+  `).get(pid);
+  const goodRate = stats.total > 0 ? Math.round(((stats.five_star + stats.four_star) / stats.total) * 100) : 0;
+  res.json({ ...stats, good_rate: goodRate, package_id: Number(pid) });
+});
+
+// ════════════════════════════════════════
+//  Coupons (优惠券系统)
+// ════════════════════════════════════════
+
+// Get available coupons for current user
+app.get('/api/coupons/available', requireUser, (req, res) => {
+  const now = new Date().toISOString().slice(0, 10);
+  const rows = db.prepare(`
+    SELECT c.*, uc.id as user_coupon_id, uc.is_used, uc.used_at
+    FROM user_coupons uc
+    JOIN coupons c ON uc.coupon_id = c.id
+    WHERE uc.user_id = ? AND uc.is_used = 0 AND c.is_active = 1
+      AND (c.valid_from IS NULL OR c.valid_from <= ?)
+      AND (c.valid_to IS NULL OR c.valid_to >= ?)
+    ORDER BY c.created_at DESC
+  `).all(req.user.id, now, now);
+  res.json(rows);
+});
+
+// Claim a coupon
+app.post('/api/coupons/claim', requireUser, (req, res) => {
+  const { coupon_id, code } = req.body;
+  let coupon;
+  if (coupon_id) {
+    coupon = db.prepare('SELECT * FROM coupons WHERE id=? AND is_active=1').get(coupon_id);
+  } else if (code) {
+    coupon = db.prepare('SELECT * FROM coupons WHERE code=? AND is_active=1').get(code.toUpperCase());
+  } else {
+    return res.status(400).json({ error: '请提供优惠券ID或兑换码' });
+  }
+  if (!coupon) return res.status(404).json({ error: '优惠券不存在或已失效' });
+
+  // Check validity period
+  const now = new Date().toISOString().slice(0, 10);
+  if (coupon.valid_from && coupon.valid_from > now) return res.status(400).json({ error: '优惠券尚未生效' });
+  if (coupon.valid_to && coupon.valid_to < now) return res.status(400).json({ error: '优惠券已过期' });
+
+  // Check global usage limit
+  if (coupon.used_count >= coupon.max_uses) return res.status(400).json({ error: '优惠券已被领取完' });
+
+  // Check if user already has this coupon
+  const existing = db.prepare('SELECT id FROM user_coupons WHERE user_id=? AND coupon_id=?').get(req.user.id, coupon.id);
+  if (existing) return res.status(400).json({ error: '您已领取过该优惠券' });
+
+  db.prepare('INSERT INTO user_coupons (user_id, coupon_id) VALUES (?, ?)').run(req.user.id, coupon.id);
+  res.json({ ok: true, message: '领取成功', coupon });
+});
+
+// Validate a coupon for use
+app.post('/api/coupons/validate', requireUser, (req, res) => {
+  const { coupon_id, amount } = req.body;
+  if (!coupon_id || amount === undefined) return res.status(400).json({ error: '请提供优惠券ID和订单金额' });
+
+  const uc = db.prepare(`
+    SELECT uc.*, c.name, c.type, c.value, c.min_amount, c.valid_from, c.valid_to, c.is_active
+    FROM user_coupons uc JOIN coupons c ON uc.coupon_id = c.id
+    WHERE uc.id=? AND uc.user_id=? AND uc.is_used=0
+  `).get(coupon_id, req.user.id);
+
+  if (!uc) return res.status(404).json({ error: '优惠券不存在或已使用' });
+  if (!uc.is_active) return res.status(400).json({ error: '优惠券已失效' });
+
+  const now = new Date().toISOString().slice(0, 10);
+  if (uc.valid_from && uc.valid_from > now) return res.status(400).json({ error: '优惠券尚未生效' });
+  if (uc.valid_to && uc.valid_to < now) return res.status(400).json({ error: '优惠券已过期' });
+
+  if (amount < uc.min_amount) return res.status(400).json({ error: `订单金额需满${uc.min_amount}元才能使用` });
+
+  let discount = 0;
+  if (uc.type === 'percent') {
+    discount = Math.round(amount * (uc.value / 100) * 100) / 100;
+  } else if (uc.type === 'fixed') {
+    discount = uc.value;
+  }
+  discount = Math.min(discount, amount);
+
+  res.json({
+    valid: true,
+    user_coupon_id: uc.id,
+    coupon_name: uc.name,
+    type: uc.type,
+    value: uc.value,
+    discount,
+    final_amount: Math.round((amount - discount) * 100) / 100
+  });
+});
+
+// ════════════════════════════════════════
+//  Stats & Popular (统计数据)
+// ════════════════════════════════════════
+
+// Public stats for social proof
+app.get('/api/stats/public', (req, res) => {
+  const totalBookings = db.prepare("SELECT COUNT(*) as c FROM orders WHERE status IN ('booked','completed')").get().c;
+  const reviewStats = db.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN rating>=4 THEN 1 ELSE 0 END) as good FROM reviews").get();
+  const goodRate = reviewStats.total > 0 ? Math.round((reviewStats.good / reviewStats.total) * 100) : 0;
+
+  // Return customers: users with 2+ completed/booked orders
+  const repeatSql = `
+    SELECT COUNT(*) as c FROM (
+      SELECT user_id FROM orders WHERE status IN ('booked','completed')
+      GROUP BY user_id HAVING COUNT(*) >= 2
+    )
+  `;
+  const repeatCustomers = db.prepare(repeatSql).get().c;
+  const totalCustomers = db.prepare("SELECT COUNT(DISTINCT user_id) as c FROM orders WHERE status IN ('booked','completed')").get().c;
+  const repeatRate = totalCustomers > 0 ? Math.round((repeatCustomers / totalCustomers) * 100) : 0;
+
+  res.json({
+    total_bookings: totalBookings,
+    total_reviews: reviewStats.total,
+    good_rate: goodRate,
+    repeat_rate: repeatRate,
+    total_customers: totalCustomers
+  });
+});
+
+// Popular packages ranking
+app.get('/api/packages/popular', (req, res) => {
+  const rows = db.prepare(`
+    SELECT p.*,
+      COUNT(DISTINCT o.id) as booking_count,
+      COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating,
+      COUNT(DISTINCT r.id) as review_count
+    FROM packages p
+    LEFT JOIN orders o ON o.package_id = p.id AND o.status IN ('booked','completed')
+    LEFT JOIN reviews r ON r.package_id = p.id
+    WHERE p.is_active = 1
+    GROUP BY p.id
+    ORDER BY booking_count DESC, avg_rating DESC
+  `).all();
+  res.json(rows);
 });
 
 // ── Admin page ──

@@ -898,6 +898,227 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   background:linear-gradient(135deg,#FFF3E0,#FFE0B2);
   color:#E65100;
 }
+
+/* ═══ NEW: Animations ═══ */
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+@keyframes heartbeat{0%,100%{transform:scale(1)}14%{transform:scale(1.18)}28%{transform:scale(1)}42%{transform:scale(1.12)}56%{transform:scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes confetti{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(120px) rotate(720deg)}}
+@keyframes ripple{to{transform:scale(2.5);opacity:0}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(196,120,138,.2)}50%{box-shadow:0 0 20px rgba(196,120,138,.45)}}
+@keyframes countdown-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.fade-enter{animation:fadeSlideUp .45s cubic-bezier(.32,.72,0,1) both}
+.fade-enter-delay1{animation:fadeSlideUp .45s .08s cubic-bezier(.32,.72,0,1) both}
+.fade-enter-delay2{animation:fadeSlideUp .45s .16s cubic-bezier(.32,.72,0,1) both}
+.fade-enter-delay3{animation:fadeSlideUp .45s .24s cubic-bezier(.32,.72,0,1) both}
+
+/* ═══ NEW: Social Proof Bar ═══ */
+.social-proof{
+  margin:12px 16px 0;padding:12px 16px;
+  background:linear-gradient(135deg,var(--rose-lighter),#FFF5F7);
+  border-radius:12px;display:flex;align-items:center;justify-content:center;
+  gap:16px;font-size:12px;color:var(--ink-60);letter-spacing:.03em;
+  border:1px solid var(--rose-light);
+}
+.social-proof-item{display:flex;align-items:center;gap:4px}
+.social-proof-num{
+  font-family:var(--display);font-size:16px;font-weight:600;
+  color:var(--rose-dark);
+}
+
+/* ═══ NEW: Coupon Banner ═══ */
+.coupon-banner{
+  margin:12px 16px 0;padding:14px 18px;
+  background:linear-gradient(135deg,#FFE0EC,#FFD0E0,#FFC0D4);
+  border-radius:14px;position:relative;overflow:hidden;
+  cursor:pointer;transition:transform .3s;
+}
+.coupon-banner:active{transform:scale(.98)}
+.coupon-banner::after{
+  content:'';position:absolute;top:-50%;right:-20%;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+}
+.coupon-banner-row{display:flex;align-items:center;justify-content:space-between}
+.coupon-banner-left{display:flex;align-items:center;gap:10px}
+.coupon-banner-icon{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.6);display:flex;align-items:center;
+  justify-content:center;font-size:18px;
+}
+.coupon-banner-title{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.coupon-banner-sub{font-size:11px;color:var(--ink-60);margin-top:2px}
+.coupon-banner-claim{
+  padding:6px 14px;border-radius:16px;font-size:11px;font-weight:600;
+  background:var(--white);color:var(--rose-dark);border:none;
+  letter-spacing:.04em;cursor:pointer;transition:all .3s;
+  box-shadow:0 2px 8px rgba(196,120,138,.15);
+}
+.coupon-banner-claim:active{transform:scale(.95)}
+.coupon-banner-claim.claimed{background:var(--ink-06);color:var(--ink-40);box-shadow:none}
+
+/* ═══ NEW: Reviews Section ═══ */
+.reviews-preview{padding:0 16px}
+.review-card{
+  background:var(--white);border-radius:14px;padding:16px;
+  margin-bottom:10px;box-shadow:0 2px 10px rgba(45,34,38,.05);
+  animation:fadeSlideUp .4s ease both;
+}
+.review-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.review-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--rose-lighter);display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:600;color:var(--rose);
+}
+.review-info{flex:1}
+.review-name{font-size:13px;font-weight:500;color:var(--ink)}
+.review-meta{font-size:11px;color:var(--ink-40);display:flex;align-items:center;gap:6px}
+.review-stars{color:#F5A623;font-size:12px;letter-spacing:1px}
+.review-content{font-size:13px;color:var(--ink-80);line-height:1.7;letter-spacing:.02em}
+.review-pkg{font-size:11px;color:var(--ink-40);margin-top:6px;display:flex;align-items:center;gap:4px}
+.review-images{display:flex;gap:6px;margin-top:8px}
+.review-img{width:56px;height:56px;border-radius:8px;object-fit:cover;cursor:pointer}
+
+/* ═══ NEW: Package Rating ═══ */
+.pkg-rating{
+  display:flex;align-items:center;gap:6px;margin-top:6px;
+}
+.pkg-rating-stars{color:#F5A623;font-size:11px;letter-spacing:1px}
+.pkg-rating-score{font-size:12px;font-weight:600;color:var(--ink)}
+.pkg-rating-count{font-size:11px;color:var(--ink-40)}
+.pkg-booked-count{
+  font-size:11px;color:var(--rose);font-weight:500;
+  display:flex;align-items:center;gap:4px;margin-top:4px;
+}
+
+/* ═══ NEW: Countdown Timer ═══ */
+.countdown-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;margin:0 16px 10px;
+  background:linear-gradient(90deg,#FFF3E0,#FFF8E8);
+  border-radius:10px;border:1px solid #FFE0B2;
+  animation:glow 3s ease-in-out infinite;
+}
+.countdown-icon{font-size:16px}
+.countdown-text{font-size:12px;color:#E65100;font-weight:500;flex:1;letter-spacing:.03em}
+.countdown-digits{
+  display:flex;gap:3px;
+}
+.countdown-digit{
+  background:#E65100;color:#fff;padding:2px 5px;border-radius:4px;
+  font-size:12px;font-weight:700;font-family:var(--display);
+  min-width:22px;text-align:center;
+}
+.countdown-sep{color:#E65100;font-weight:700;font-size:12px;line-height:22px}
+
+/* ═══ NEW: Compare Bar ═══ */
+.compare-bar{
+  position:fixed;bottom:65px;left:50%;transform:translateX(-50%);
+  width:calc(100% - 32px);max-width:398px;
+  background:var(--white);border-radius:16px;padding:12px 16px;
+  box-shadow:0 4px 24px rgba(45,34,38,.15);
+  z-index:90;animation:slideInRight .35s ease both;
+  border:1.5px solid var(--rose-light);
+}
+.compare-bar-title{font-size:11px;font-weight:600;color:var(--ink-40);letter-spacing:.1em;margin-bottom:8px}
+.compare-bar-items{display:flex;gap:8px;margin-bottom:10px}
+.compare-bar-item{
+  flex:1;padding:8px 10px;background:var(--rose-lighter);border-radius:10px;
+  font-size:12px;font-weight:500;color:var(--ink);position:relative;
+}
+.compare-bar-item .remove{
+  position:absolute;top:-4px;right:-4px;width:16px;height:16px;
+  border-radius:50%;background:var(--red);color:#fff;font-size:9px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border:none;
+}
+.compare-bar-vs{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink-25);font-weight:600}
+.compare-bar-actions{display:flex;gap:8px}
+.compare-bar-actions .btn{flex:1}
+
+/* ═══ NEW: Tab Badge ═══ */
+.tab-badge{
+  position:absolute;top:0;right:50%;transform:translateX(16px);
+  min-width:16px;height:16px;border-radius:8px;
+  background:var(--red);color:#fff;font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;animation:scaleIn .3s ease;
+}
+
+/* ═══ NEW: Member Badge ═══ */
+.member-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:10px;font-size:10px;font-weight:600;
+  letter-spacing:.05em;
+}
+.member-badge.normal{background:var(--ink-03);color:var(--ink-40)}
+.member-badge.silver{background:linear-gradient(135deg,#F0F0F0,#E8E8E8);color:#666}
+.member-badge.gold{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);color:#B8860B}
+
+/* ═══ NEW: Points Display ═══ */
+.points-display{
+  display:flex;align-items:center;gap:4px;
+  font-size:12px;color:var(--gold);font-weight:600;
+}
+
+/* ═══ NEW: Want Same Style Button ═══ */
+.card-action-btn{
+  display:block;width:100%;margin-top:8px;padding:7px 0;
+  text-align:center;font-size:11px;font-weight:600;
+  color:var(--rose);background:var(--rose-lighter);
+  border:1px solid var(--rose-light);border-radius:8px;
+  cursor:pointer;transition:all .3s;letter-spacing:.04em;
+}
+.card-action-btn:active{background:var(--rose-light)}
+
+/* ═══ NEW: Confetti particles ═══ */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:250;overflow:hidden}
+.confetti-particle{
+  position:absolute;width:8px;height:8px;border-radius:2px;
+  animation:confetti 1.5s cubic-bezier(.25,.46,.45,.94) forwards;
+}
+
+/* ═══ STAGGER: Card entrance ═══ */
+.grid .card:nth-child(1){animation:fadeSlideUp .4s .05s ease both}
+.grid .card:nth-child(2){animation:fadeSlideUp .4s .1s ease both}
+.grid .card:nth-child(3){animation:fadeSlideUp .4s .15s ease both}
+.grid .card:nth-child(4){animation:fadeSlideUp .4s .2s ease both}
+.grid .card:nth-child(5){animation:fadeSlideUp .4s .25s ease both}
+.grid .card:nth-child(6){animation:fadeSlideUp .4s .3s ease both}
+.grid .card:nth-child(7){animation:fadeSlideUp .4s .35s ease both}
+.grid .card:nth-child(8){animation:fadeSlideUp .4s .4s ease both}
+
+/* ═══ Enhanced: Tab active indicator ═══ */
+.tabs .tab{position:relative}
+.tabs .tab.on::after{
+  content:'';position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--rose);
+}
+
+/* ═══ Enhanced: Button ripple ═══ */
+.btn,.btn-book,.btn-cta{
+  position:relative;overflow:hidden;
+}
+.btn::after,.btn-book::after{
+  content:'';position:absolute;top:50%;left:50%;
+  width:10px;height:10px;border-radius:50%;
+  background:rgba(255,255,255,.3);
+  transform:translate(-50%,-50%) scale(0);
+  transition:none;
+}
+.btn:active::after,.btn-book:active::after{
+  animation:ripple .5s ease-out;
+}
+
+/* ═══ Enhanced: Page transition ═══ */
+.page{
+  padding-bottom:80px;min-height:100vh;
+  animation:fadeSlideUp .35s ease both;
+}
 </style>
 </head>
 <body>
@@ -932,18 +1153,61 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
   </div>
 
-  <!-- Hero Banner -->
+  <!-- Hero Banner (Dynamic Carousel) -->
   <div class="hero" @click="tab='packages'">
-    <img class="hero-bg" src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=400&fit=crop" loading="lazy">
-    <div class="hero-overlay">
-      <div class="hero-tag">SPRING COLLECTION</div>
-      <div class="hero-title">春日花间 · 新品上架</div>
-      <div class="hero-sub">4款春季限定妆造套餐，预约立享9折</div>
+    <img class="hero-bg" :src="heroBanners[heroIndex].img" loading="lazy" style="transition:opacity .6s">
+    <div class="hero-overlay" style="transition:opacity .4s">
+      <div class="hero-tag">{{heroBanners[heroIndex].tag}}</div>
+      <div class="hero-title">{{heroBanners[heroIndex].title}}</div>
+      <div class="hero-sub">{{heroBanners[heroIndex].sub}}</div>
     </div>
     <div class="hero-cta">立即查看 →</div>
+    <!-- Carousel dots -->
+    <div style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px">
+      <div v-for="(_,i) in heroBanners" :key="i"
+        :style="{width:i===heroIndex?'16px':'6px',height:'6px',borderRadius:'3px',background:i===heroIndex?'#fff':'rgba(255,255,255,.4)',transition:'all .4s'}">
+      </div>
+    </div>
   </div>
 
   <!-- Business Hours -->
+  <!-- Social Proof -->
+  <div class="social-proof fade-enter-delay1">
+    <div class="social-proof-item">
+      <span class="social-proof-num">{{totalBookings || '...'}}</span>位小姐姐已预约
+    </div>
+    <div class="social-proof-item">
+      <span style="color:#F5A623">★</span>
+      <span class="social-proof-num">{{publicStats.good_rate || 0}}%</span>好评率
+    </div>
+  </div>
+
+  <!-- New User Coupon Banner -->
+  <div class="coupon-banner" @click="claimCoupon" v-if="!couponClaimed">
+    <div class="coupon-banner-row">
+      <div class="coupon-banner-left">
+        <div class="coupon-banner-icon">🎁</div>
+        <div>
+          <div class="coupon-banner-title">新人专享 · 首单9折</div>
+          <div class="coupon-banner-sub">限新用户领取，全场套餐可用</div>
+        </div>
+      </div>
+      <button class="coupon-banner-claim">立即领取</button>
+    </div>
+  </div>
+  <div class="coupon-banner" v-else style="background:linear-gradient(135deg,var(--rose-lighter),#FFF5F7)">
+    <div class="coupon-banner-row">
+      <div class="coupon-banner-left">
+        <div class="coupon-banner-icon">✅</div>
+        <div>
+          <div class="coupon-banner-title">优惠券已到账</div>
+          <div class="coupon-banner-sub">预约时自动抵扣哦～</div>
+        </div>
+      </div>
+      <button class="coupon-banner-claim claimed" disabled>已领取</button>
+    </div>
+  </div>
+
   <div class="hours-bar" style="margin-top:14px">
     <span class="hours-icon">🕐</span>
     <div class="hours-text">
@@ -983,6 +1247,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
             {{likedPhotos.has(p.id) ? '❤️' : '🤍'}}
           </span>
         </div>
+        <div class="card-action-btn" @click.stop="wantSameStyle(p)">📸 想拍同款</div>
       </div>
     </div>
   </div>
@@ -1003,6 +1268,34 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="empty-text">美美的照片马上就来～<br>先看看套餐吧</div>
     <span class="empty-cta" @click="tab='packages'">去看看套餐 →</span>
   </div>
+
+  <!-- Reviews Section -->
+  <div class="heading" v-if="reviews.length">
+    <div class="heading-row">
+      <div>
+        <div class="heading-en">Reviews</div>
+        <div class="heading-cn">好评精选</div>
+      </div>
+      <span class="heading-more">查看全部 →</span>
+    </div>
+    <div class="heading-line"></div>
+  </div>
+  <div class="reviews-preview" v-if="reviews.length">
+    <div class="review-card" v-for="(r,i) in reviews.slice(0,3)" :key="r.id" :style="{animationDelay:(i*.1)+'s'}">
+      <div class="review-header">
+        <div class="review-avatar">{{(r.display_name||'?')[0]}}</div>
+        <div class="review-info">
+          <div class="review-name">{{r.display_name || '匿名用户'}}</div>
+          <div class="review-meta">
+            <span class="review-stars">{{'★'.repeat(r.rating)}}{{'☆'.repeat(5-r.rating)}}</span>
+            <span>{{r.created_at?.split(' ')[0] || ''}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-content">{{r.content}}</div>
+    </div>
+  </div>
+  <div class="spacer-lg"></div>
 </div>
 
 <!-- ═══ 套餐 ═══ -->
@@ -1029,6 +1322,19 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
   </div>
 
+  <!-- Countdown Timer -->
+  <div class="countdown-bar">
+    <span class="countdown-icon">⏰</span>
+    <span class="countdown-text">限时特惠 · 春季限定套餐预约中</span>
+    <div class="countdown-digits">
+      <span class="countdown-digit">{{countdown.h}}</span>
+      <span class="countdown-sep">:</span>
+      <span class="countdown-digit">{{countdown.m}}</span>
+      <span class="countdown-sep">:</span>
+      <span class="countdown-digit">{{countdown.s}}</span>
+    </div>
+  </div>
+
   <div class="pkg" v-if="packages.length">
     <div class="pkg-item" v-for="p in packages" :key="p.id">
       <div class="pkg-cover-wrap">
@@ -1048,6 +1354,13 @@ body{padding-bottom:env(safe-area-inset-bottom)}
           <span class="pkg-tag" v-if="p.price>=699">含摄影</span>
           <span class="pkg-tag gold" v-if="p.person_count>1">闺蜜同行</span>
         </div>
+        <div class="pkg-rating">
+          <span class="pkg-rating-stars">{{'★'.repeat(Math.round(p.avg_rating||0))}}{{'☆'.repeat(5-Math.round(p.avg_rating||0))}}</span>
+          <span class="pkg-rating-score" v-if="p.avg_rating">{{p.avg_rating.toFixed(1)}}</span>
+          <span class="pkg-rating-count" v-if="p.review_count">{{p.review_count}}条评价</span>
+          <span class="pkg-rating-count" v-else>暂无评价</span>
+        </div>
+        <div class="pkg-booked-count">🔥 已有{{p.booking_count||0}}人预约</div>
       </div>
       <div class="pkg-bottom">
         <div>
@@ -1178,6 +1491,32 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <div class="field-value">{{formatDate(selectedDate)}} {{selectedSlot}}</div>
     </div>
 
+    <!-- Coupon selection -->
+    <div class="field" v-if="availableCoupons.length">
+      <div class="field-label">优惠券</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div v-for="c in availableCoupons" :key="c.user_coupon_id"
+          style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:2px solid;transition:all .2s;"
+          :style="{borderColor: selectedCouponId===c.user_coupon_id ? 'var(--rose)' : '#f0e8e0', background: selectedCouponId===c.user_coupon_id ? '#FFF5F7' : '#FFFAF5'}"
+          @click="selectedCouponId = selectedCouponId===c.user_coupon_id ? null : c.user_coupon_id">
+          <div style="font-size:20px;font-weight:800;color:var(--rose);min-width:60px;text-align:center;">
+            {{c.type==='percent' ? c.value+'折' : '¥'+c.value}}
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);">{{c.name}}</div>
+            <div style="font-size:11px;color:var(--ink-40);">{{c.min_amount>0?'满¥'+c.min_amount+'可用':'无门槛'}} · 有效期至{{c.valid_to}}</div>
+          </div>
+          <div style="width:20px;height:20px;border-radius:50%;border:2px solid;display:flex;align-items:center;justify-content:center;flex-shrink:0;"
+            :style="{borderColor: selectedCouponId===c.user_coupon_id ? 'var(--rose)' : '#ccc', background: selectedCouponId===c.user_coupon_id ? 'var(--rose)' : 'transparent'}">
+            <span v-if="selectedCouponId===c.user_coupon_id" style="color:#fff;font-size:12px;">✓</span>
+          </div>
+        </div>
+      </div>
+      <div v-if="selectedCouponId && couponDiscount > 0" style="margin-top:8px;padding:8px 12px;background:#e8f5e9;border-radius:8px;font-size:13px;color:#27ae60;">
+        🎉 已优惠 ¥{{couponDiscount}}，实付 ¥{{(bookingPkg.price - couponDiscount).toFixed(2)}}
+      </div>
+    </div>
+
     <!-- Main booker info -->
     <div style="padding:0 20px;margin-bottom:8px;">
       <div style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:6px">
@@ -1258,7 +1597,17 @@ body{padding-bottom:env(safe-area-inset-bottom)}
           <span class="k">同行人{{i+2}}</span><span>{{g.name}} · {{g.phone}}</span>
         </div>
       </template>
-      <div class="summary-total"><span>合计</span><span>¥{{currentOrder?.amount||bookingPkg.price}}</span></div>
+      <div class="summary-row" v-if="currentOrder?.discount_amount > 0" style="color:#27ae60;">
+        <span class="k">优惠</span><span>-¥{{currentOrder.discount_amount}}</span>
+      </div>
+      <div class="summary-total">
+        <span>合计</span>
+        <span v-if="currentOrder?.discount_amount > 0" style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:14px;color:var(--ink-40);text-decoration:line-through;">¥{{currentOrder.amount}}</span>
+          <span>¥{{currentOrder.final_amount}}</span>
+        </span>
+        <span v-else>¥{{currentOrder?.amount||bookingPkg.price}}</span>
+      </div>
     </div>
     <div class="spacer"></div>
 
@@ -1325,6 +1674,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   <div class="my-head">
     <div class="my-avatar">{{currentUser?.nickname?.[0]||'·'}}</div>
     <div class="my-name">{{currentUser?.nickname||'...'}}</div>
+    <div style="margin-top:6px">
+      <span class="member-badge gold">👑 金卡会员</span>
+    </div>
+    <div style="margin-top:6px">
+      <span class="points-display">✨ {{currentUser?.points||680}} 积分</span>
+    </div>
     <div class="my-role">MY RESERVATIONS</div>
   </div>
   <div class="my-stats">
@@ -1351,6 +1706,12 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     </div>
     <div class="my-link" @click="showFavorites=true" v-if="likedPhotos.size">
       <span><span class="my-link-icon">❤️</span>我的收藏 <span style="color:var(--rose);font-size:12px">({{likedPhotos.size}})</span></span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link" @click="showMyCoupons=true">
+      <span><span class="my-link-icon">🎫</span>我的优惠券 <span style="color:var(--rose);font-size:12px">({{availableCoupons.length}})</span></span><span class="my-link-arrow">→</span>
+    </div>
+    <div class="my-link">
+      <span><span class="my-link-icon">⭐</span>我的评价</span><span class="my-link-arrow">→</span>
     </div>
     <div class="my-link" @click="tab='photos'">
       <span><span class="my-link-icon">📸</span>浏览客片</span><span class="my-link-arrow">→</span>
@@ -1549,6 +1910,28 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   </div>
 </div>
 
+<!-- ═══ My Coupons Modal ═══ -->
+<div v-if="showMyCoupons" class="modal-bg" @click="showMyCoupons=false">
+  <div class="modal-box" @click.stop>
+    <div class="modal-handle"></div>
+    <h3>🎫 我的优惠券</h3>
+    <div v-if="!availableCoupons.length" style="text-align:center;padding:30px;color:var(--ink-40);font-size:14px;">
+      暂无可用优惠券 🎫
+    </div>
+    <div v-for="c in availableCoupons" :key="c.user_coupon_id"
+      style="background:linear-gradient(135deg,var(--rose-lighter),#FFF8FA);border-radius:14px;padding:16px;margin-bottom:10px;border:1px dashed var(--rose-light);position:relative;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--ink);letter-spacing:.04em">{{c.name}}</div>
+          <div style="font-size:12px;color:var(--ink-40);margin-top:2px">{{c.min_amount>0?'满¥'+c.min_amount+'可用':'无门槛'}} · 有效期至{{c.valid_to}}</div>
+        </div>
+        <div style="font-family:var(--display);font-size:22px;color:var(--rose-dark);font-weight:600">{{c.type==='percent'?c.value+'折':'-¥'+c.value}}</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" @click="showMyCoupons=false" style="margin-top:12px;font-size:13px">关闭</button>
+  </div>
+</div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
@@ -1588,6 +1971,69 @@ createApp({
     const loading=ref(true);
     const showValidation=ref(false);
 
+    // ── New features ──
+    const couponClaimed=ref(false);
+    const showMyCoupons=ref(false);
+    const totalBookings=ref(0);
+    const avgRating=ref('0.0');
+    const publicStats=ref({});
+    const availableCoupons=ref([]);
+    const selectedCouponId=ref(null);
+    const countdown=ref({h:'23',m:'59',m:'59',s:'59'});
+    const heroIndex=ref(0);
+    const heroBanners=ref([
+      {tag:'SPRING COLLECTION',title:'春日花间 · 新品上架',sub:'4款春季限定妆造套餐，预约立享9折',img:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&h=400&fit=crop'},
+      {tag:'BEST SELLER',title:'精致妆造 · 人气之选',sub:'精致妆面+精选汉服+配饰，做最美的自己',img:'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&h=400&fit=crop'},
+      {tag:'GIRLFRIEND',title:'闺蜜同行 · 双倍快乐',sub:'两人同行套餐 ¥999，一起穿越千年',img:'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'},
+    ]);
+    const myCoupons = availableCoupons; // alias for backward compat
+    const reviews=ref([]);
+    async function loadReviews(){
+      try{ reviews.value = await api('/reviews'); }catch(e){}
+    }
+    async function loadPublicStats(){
+      try{
+        const s = await api('/stats/public');
+        publicStats.value = s;
+        totalBookings.value = s.total_bookings;
+        avgRating.value = s.good_rate ? (4 + s.good_rate/100*1).toFixed(1) : '0.0';
+      }catch(e){}
+    }
+    async function loadAvailableCoupons(){
+      try{ availableCoupons.value = await api('/coupons/available'); }catch(e){}
+    }
+
+    // Countdown timer
+    function updateCountdown(){
+      const now=new Date();
+      const end=new Date(now);end.setHours(23,59,59,999);
+      const diff=Math.max(0,end-now);
+      const h=String(Math.floor(diff/3600000)).padStart(2,'0');
+      const m=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+      const s=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+      countdown.value={h,m,s};
+    }
+
+    // Hero auto-rotation
+    let heroTimer=null;
+    function startHeroRotation(){
+      heroTimer=setInterval(()=>{heroIndex.value=(heroIndex.value+1)%heroBanners.value.length},4000);
+    }
+
+    async function claimCoupon(){
+      try{
+        await api('/coupons/claim',{method:'POST',body:JSON.stringify({code:'NEWUSER9'})});
+        couponClaimed.value=true;
+        loadAvailableCoupons();
+        showToast('优惠券已领取，预约时自动抵扣 🎉');
+      }catch(e){ showToast(e.message); }
+    }
+
+    function wantSameStyle(photo){
+      tab.value='packages';
+      showToast('来看看适合你的套餐吧 💕');
+    }
+
     const likedPhotos = ref(new Set(JSON.parse(localStorage.getItem('likedPhotos')||'[]')));
     const likedPkgs = ref(new Set(JSON.parse(localStorage.getItem('likedPkgs')||'[]')));
 
@@ -1616,6 +2062,17 @@ createApp({
     }
 
     const favPhotos = computed(()=>photos.value.filter(p=>likedPhotos.value.has(p.id)));
+
+    // Coupon discount computed
+    const couponDiscount = computed(()=>{
+      if(!selectedCouponId.value || !bookingPkg.value) return 0;
+      const uc = availableCoupons.value.find(c=>c.user_coupon_id === selectedCouponId.value);
+      if(!uc) return 0;
+      const price = bookingPkg.value.price;
+      if(uc.type === 'percent') return Math.round(price * uc.value / 100 * 100) / 100;
+      if(uc.type === 'fixed') return Math.min(uc.value, price);
+      return 0;
+    });
 
     // Multi-person logic
     const needsGuestInfo = computed(()=>{
@@ -1748,7 +2205,9 @@ createApp({
       bookingPkg.value=pkg;bookingStep.value=1;
       selectedDate.value='';selectedSlot.value='';
       customerName.value='';customerPhone.value='';
+      selectedCouponId.value=null;
       showValidation.value=false;
+      loadAvailableCoupons();
       // Init guests array based on package person_count
       const extraPersons = (pkg.person_count||1) - 1;
       guests.value = extraPersons > 0 ? Array.from({length:extraPersons},()=>({name:'',phone:''})) : [];
@@ -1767,6 +2226,7 @@ createApp({
           customer_name:customerName.value,
           customer_phone:customerPhone.value
         };
+        if(selectedCouponId.value) body.coupon_id = selectedCouponId.value;
         if(guests.value.length>0){
           body.guests = guests.value.map(g=>({name:g.name,phone:g.phone}));
         }
@@ -1817,7 +2277,11 @@ createApp({
     onMounted(async()=>{
       try{
         await initUser();
-        await Promise.all([loadPhotos(),loadCategories(),loadPackages()]);
+        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons()]);
+        // Start timers
+        updateCountdown();
+        setInterval(updateCountdown,1000);
+        startHeroRotation();
       }finally{loading.value=false}
     });
 
@@ -1838,7 +2302,12 @@ createApp({
       toggleLike,togglePkgFav,toggleLikePreview,
       validateAndSubmit,submitOrder,payOrder,payExistingOrder,cancelPendingOrder,
       showCancelModal,showPkgDetail,confirmCancel,cancelOrder,deleteOrder,
-      loadOrders
+      loadOrders,
+      // New features
+      couponClaimed,showMyCoupons,totalBookings,avgRating,
+      countdown,heroIndex,heroBanners,reviews,
+      claimCoupon,wantSameStyle,
+      publicStats,availableCoupons,selectedCouponId,couponDiscount
     };
   }
 }).mount('#app');

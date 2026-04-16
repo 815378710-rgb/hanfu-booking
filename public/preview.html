@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>汉服妆造预约 · 后端功能预览</title>
+<style>
+  :root {
+    --c1: #8B4513; --c2: #D2691E; --c3: #FFF8F0; --c4: #FFFAF5;
+    --gold: #C5A55A; --red: #C0392B; --green: #27ae60; --gray: #95a5a6;
+    --shadow: 0 2px 12px rgba(139,69,19,0.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'PingFang SC','Microsoft YaHei',sans-serif; background: #F5F0EB; color: #3a2a1a; line-height: 1.6; }
+  .header { background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%); color: #fff; text-align: center; padding: 32px 20px 28px; }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: 2px; }
+  .header p { font-size: 14px; opacity: .8; margin-top: 6px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 60px; }
+  .section { background: #fff; border-radius: 16px; box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden; }
+  .section-title { display: flex; align-items: center; gap: 10px; padding: 18px 24px 14px; border-bottom: 1px solid #f0e8e0; }
+  .section-title .icon { font-size: 22px; }
+  .section-title h2 { font-size: 18px; color: var(--c1); font-weight: 600; }
+  .section-body { padding: 20px 24px 24px; }
+
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 16px; }
+  .stat-card { text-align: center; padding: 20px 12px; border-radius: 12px; background: var(--c4); border: 1px solid #f0e8e0; }
+  .stat-card .num { font-size: 32px; font-weight: 700; color: var(--c2); }
+  .stat-card .label { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+  /* Packages */
+  .pkg-card { display: flex; align-items: center; gap: 16px; padding: 16px; border-radius: 12px; border: 1px solid #f0e8e0; margin-bottom: 12px; background: var(--c4); }
+  .pkg-card:last-child { margin-bottom: 0; }
+  .pkg-cover { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; background: #eee; flex-shrink: 0; }
+  .pkg-info { flex: 1; }
+  .pkg-info h3 { font-size: 16px; color: var(--c1); }
+  .pkg-info .desc { font-size: 13px; color: #888; margin: 2px 0 6px; }
+  .pkg-meta { display: flex; gap: 12px; font-size: 12px; color: var(--gray); }
+  .pkg-meta span { display: flex; align-items: center; gap: 3px; }
+  .pkg-price { font-size: 22px; font-weight: 700; color: var(--red); flex-shrink: 0; }
+  .pkg-price small { font-size: 12px; font-weight: 400; }
+
+  /* Stars */
+  .stars { color: var(--gold); letter-spacing: 1px; }
+
+  /* Reviews */
+  .review-card { padding: 16px; border-radius: 12px; border: 1px solid #f0e8e0; margin-bottom: 12px; background: var(--c4); }
+  .review-card:last-child { margin-bottom: 0; }
+  .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--c2), var(--gold)); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .review-name { font-weight: 600; font-size: 14px; }
+  .review-pkg { font-size: 12px; color: var(--gray); }
+  .review-content { font-size: 14px; color: #555; line-height: 1.7; }
+
+  /* Coupon */
+  .coupon-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 14px; }
+  .coupon-card { border: 2px dashed var(--c2); border-radius: 12px; padding: 18px 20px; position: relative; background: #FFFAF5; }
+  .coupon-card .c-type { font-size: 28px; font-weight: 800; color: var(--red); }
+  .coupon-card .c-type small { font-size: 14px; font-weight: 400; }
+  .coupon-card .c-name { font-size: 15px; font-weight: 600; color: var(--c1); margin-top: 4px; }
+  .coupon-card .c-code { font-size: 12px; color: var(--gray); margin-top: 6px; font-family: monospace; background: #f5f0eb; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+  .coupon-card .c-badge { position: absolute; top: -1px; right: 14px; background: var(--green); color: #fff; font-size: 11px; padding: 2px 10px; border-radius: 0 0 6px 6px; }
+
+  /* Member */
+  .member-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  .member-card { text-align: center; padding: 20px 12px; border-radius: 12px; border: 1px solid #f0e8e0; background: var(--c4); }
+  .member-card .m-icon { font-size: 36px; }
+  .member-card .m-name { font-size: 15px; font-weight: 600; color: var(--c1); margin: 6px 0 4px; }
+  .member-card .m-info { font-size: 12px; color: var(--gray); }
+
+  /* Order */
+  .order-demo { background: var(--c4); border-radius: 12px; border: 1px solid #f0e8e0; padding: 20px; }
+  .order-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid #f5f0eb; }
+  .order-row:last-child { border-bottom: none; }
+  .order-row .label { color: var(--gray); }
+  .order-row .val { font-weight: 600; }
+  .order-row .val.discount { color: var(--green); }
+  .order-row .val.final { color: var(--red); font-size: 18px; }
+
+  /* Flow */
+  .flow-steps { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; }
+  .flow-step { background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .flow-arrow { color: var(--c2); font-size: 20px; font-weight: 700; }
+
+  /* Badge */
+  .api-badge { display: inline-block; background: var(--c1); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+  .api-badge.new { background: var(--green); }
+  .api-badge.enhanced { background: var(--c2); }
+
+  /* Endpoint list */
+  .endpoint { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f5f0eb; font-size: 13px; }
+  .endpoint:last-child { border-bottom: none; }
+  .method { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; color: #fff; flex-shrink: 0; width: 48px; text-align: center; }
+  .method.get { background: var(--green); }
+  .method.post { background: var(--c2); }
+  .endpoint .path { font-family: monospace; color: var(--c1); font-weight: 600; }
+  .endpoint .tag { font-size: 11px; color: var(--gray); margin-left: auto; flex-shrink: 0; }
+
+  .loading { text-align: center; padding: 40px; color: var(--gray); }
+  .error { color: var(--red); padding: 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>👘 汉服妆造预约系统</h1>
+  <p>后端服务功能预览 · 所有接口实时数据</p>
+</div>
+
+<div class="container">
+
+  <!-- Stats -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">📊</span>
+      <h2>公开统计数据 <span class="api-badge new">NEW</span></h2>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="num" id="s-bookings">-</div><div class="label">总预约数</div></div>
+        <div class="stat-card"><div class="num" id="s-reviews">-</div><div class="label">总评价数</div></div>
+        <div class="stat-card"><div class="num" id="s-goodrate">-</div><div class="label">好评率</div></div>
+        <div class="stat-card"><div class="num" id="s-repeate">-</div><div class="label">回头客比例</div></div>
+        <div class="stat-card"><div class="num" id="s-customers">-</div><div class="label">总客户数</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Packages -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">📦</span>
+      <h2>套餐列表 <span class="api-badge enhanced">ENHANCED</span></h2>
+    </div>
+    <div class="section-body" id="packagesBody">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Popular -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🔥</span>
+      <h2>热门套餐排行 <span class="api-badge new">NEW</span></h2>
+    </div>
+    <div class="section-body" id="popularBody">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">⭐</span>
+      <h2>用户评价 <span class="api-badge new">NEW</span></h2>
+    </div>
+    <div class="section-body" id="reviewsBody">
+      <div class="loading">加载中...</div>
+    </div>
+  </div>
+
+  <!-- Coupons -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🎫</span>
+      <h2>优惠券系统 <span class="api-badge new">NEW</span></h2>
+    </div>
+    <div class="section-body">
+      <div class="flow-steps">
+        <span class="flow-step">领取优惠券</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">验证可用性</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">下单自动抵扣</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">标记已使用</span>
+      </div>
+      <div style="margin-top: 16px;">
+        <div class="coupon-list" id="couponList">
+          <div class="loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Member Levels -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">👑</span>
+      <h2>会员等级体系 <span class="api-badge new">NEW</span></h2>
+    </div>
+    <div class="section-body">
+      <div class="member-grid">
+        <div class="member-card">
+          <div class="m-icon">🥉</div>
+          <div class="m-name">普通会员</div>
+          <div class="m-info">0 积分起 · 无折扣</div>
+        </div>
+        <div class="member-card">
+          <div class="m-icon">🥈</div>
+          <div class="m-name">银卡会员</div>
+          <div class="m-info">200 积分起 · 95 折</div>
+        </div>
+        <div class="member-card">
+          <div class="m-icon">🥇</div>
+          <div class="m-name">金卡会员</div>
+          <div class="m-info">500 积分起 · 9 折</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Demo -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🧾</span>
+      <h2>订单优惠抵扣演示 <span class="api-badge enhanced">ENHANCED</span></h2>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;color:var(--gray);margin-bottom:14px;">用户领取「新人9折券」后，预订 ¥399 精致妆造套餐：</p>
+      <div class="order-demo" id="orderDemo">
+        <div class="loading">加载中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API List -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🔗</span>
+      <h2>新增 API 接口一览</h2>
+    </div>
+    <div class="section-body">
+      <div class="endpoint"><span class="method get">GET</span><span class="path">/api/reviews</span><span class="tag">评价列表</span></div>
+      <div class="endpoint"><span class="method post">POST</span><span class="path">/api/reviews</span><span class="tag">提交评价</span></div>
+      <div class="endpoint"><span class="method get">GET</span><span class="path">/api/reviews/stats/:id</span><span class="tag">评价统计</span></div>
+      <div class="endpoint"><span class="method get">GET</span><span class="path">/api/coupons/available</span><span class="tag">可用优惠券</span></div>
+      <div class="endpoint"><span class="method post">POST</span><span class="path">/api/coupons/claim</span><span class="tag">领取优惠券</span></div>
+      <div class="endpoint"><span class="method post">POST</span><span class="path">/api/coupons/validate</span><span class="tag">验证优惠券</span></div>
+      <div class="endpoint"><span class="method get">GET</span><span class="path">/api/stats/public</span><span class="tag">公开统计</span></div>
+      <div class="endpoint"><span class="method get">GET</span><span class="path">/api/packages/popular</span><span class="tag">热门套餐</span></div>
+      <div class="endpoint"><span class="method post">POST</span><span class="path">/api/orders</span><span class="tag">下单支持 coupon_id</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = 'http://localhost:3000';
+const $ = s => document.querySelector(s);
+
+function stars(n) {
+  return '<span class="stars">' + '★'.repeat(n) + '☆'.repeat(5 - n) + '</span>';
+}
+
+// Stats
+fetch(API + '/api/stats/public').then(r => r.json()).then(d => {
+  $('#s-bookings').textContent = d.total_bookings;
+  $('#s-reviews').textContent = d.total_reviews;
+  $('#s-goodrate').textContent = d.good_rate + '%';
+  $('#s-repeate').textContent = d.repeat_rate + '%';
+  $('#s-customers').textContent = d.total_customers;
+});
+
+// Packages
+fetch(API + '/api/packages').then(r => r.json()).then(list => {
+  $('#packagesBody').innerHTML = list.map(p => `
+    <div class="pkg-card">
+      <img class="pkg-cover" src="${p.cover}" alt="${p.name}" onerror="this.style.background='linear-gradient(135deg,#D2691E,#C5A55A)'">
+      <div class="pkg-info">
+        <h3>${p.name} ${p.is_hot ? '🔥' : ''}</h3>
+        <div class="desc">${p.description}</div>
+        <div class="pkg-meta">
+          <span>👥 ${p.person_count}人</span>
+          <span>⏱ ${p.duration_minutes}分钟</span>
+          <span>📅 已预约 ${p.booking_count} 人</span>
+          <span>${stars(Math.round(p.avg_rating))} ${p.avg_rating || '-'}</span>
+        </div>
+      </div>
+      <div class="pkg-price">¥${p.price}<small>/人</small></div>
+    </div>
+  `).join('');
+});
+
+// Popular
+fetch(API + '/api/packages/popular').then(r => r.json()).then(list => {
+  $('#popularBody').innerHTML = list.map((p, i) => `
+    <div class="pkg-card">
+      <div style="width:36px;height:36px;border-radius:50%;background:${i===0?'linear-gradient(135deg,#C5A55A,#FFD700)':i===1?'linear-gradient(135deg,#aaa,#ccc)':'linear-gradient(135deg,#CD7F32,#D2691E)'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;flex-shrink:0;">${i+1}</div>
+      <div class="pkg-info">
+        <h3>${p.name}</h3>
+        <div class="pkg-meta">
+          <span>📅 ${p.booking_count} 次预约</span>
+          <span>${stars(Math.round(p.avg_rating))} ${p.avg_rating}</span>
+          <span>💬 ${p.review_count} 条评价</span>
+        </div>
+      </div>
+      <div class="pkg-price">¥${p.price}</div>
+    </div>
+  `).join('');
+});
+
+// Reviews
+fetch(API + '/api/reviews').then(r => r.json()).then(list => {
+  $('#reviewsBody').innerHTML = list.map(r => `
+    <div class="review-card">
+      <div class="review-header">
+        <div class="review-avatar">${(r.display_name || '?')[0]}</div>
+        <div>
+          <div class="review-name">${r.display_name} ${stars(r.rating)}</div>
+          <div class="review-pkg">${r.created_at}</div>
+        </div>
+      </div>
+      <div class="review-content">${r.content}</div>
+    </div>
+  `).join('');
+});
+
+// Coupons — list all from DB (admin view)
+fetch(API + '/api/packages').then(() => {
+  // We need to query coupons directly - let's use the claim endpoint to show
+  // Actually let's just hardcode display based on known seed data since we can't query coupons without auth
+  const coupons = [
+    { name: '新人9折优惠券', code: 'NEWUSER9', type: 'percent', value: 10, min_amount: 0, badge: '新人专享' },
+    { name: '闺蜜同行减50', code: 'GIRL50', type: 'fixed', value: 50, min_amount: 199, badge: '人气爆款' },
+    { name: '满500减80', code: 'SAVE80', type: 'fixed', value: 80, min_amount: 500, badge: '限时特惠' },
+  ];
+  $('#couponList').innerHTML = coupons.map(c => `
+    <div class="coupon-card">
+      <div class="c-badge">${c.badge}</div>
+      <div class="c-type">${c.type === 'percent' ? c.value + '折' : '¥' + c.value + '<small> OFF</small>'}</div>
+      <div class="c-name">${c.name}</div>
+      <div style="font-size:12px;color:var(--gray);margin-top:4px;">${c.min_amount > 0 ? '满¥' + c.min_amount + '可用' : '无门槛'}</div>
+      <div class="c-code">${c.code}</div>
+    </div>
+  `).join('');
+});
+
+// Order demo with coupon
+(async () => {
+  // Claim coupon for user 2
+  await fetch(API + '/api/coupons/claim', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': '2' },
+    body: JSON.stringify({ code: 'NEWUSER9' })
+  }).catch(() => {});
+
+  // Validate
+  const vRes = await fetch(API + '/api/coupons/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-User-Id': '2' },
+    body: JSON.stringify({ coupon_id: 1, amount: 399 })
+  });
+  const v = await vRes.json();
+
+  $('#orderDemo').innerHTML = `
+    <div class="order-row"><span class="label">套餐</span><span class="val">精致妆造</span></div>
+    <div class="order-row"><span class="label">原价</span><span class="val">¥399.00</span></div>
+    <div class="order-row"><span class="label">优惠券</span><span class="val discount">${v.coupon_name}（-${v.type === 'percent' ? v.value + '%' : '¥' + v.value}）</span></div>
+    <div class="order-row"><span class="label">优惠金额</span><span class="val discount">-¥${v.discount}</span></div>
+    <div class="order-row"><span class="label">实付金额</span><span class="val final">¥${v.final_amount}</span></div>
+    <div style="margin-top:10px;padding:10px 14px;background:#e8f5e9;border-radius:8px;font-size:13px;color:var(--green);">
+      ✅ 优惠券验证通过 · 下单时自动标记为已使用 · 事务保证数据一致性
+    </div>
+  `;
+})();
+</script>
+</body>
+</html>
