@@ -3,157 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>霓裳汉服 · 小程序预览</title>
+<title>霓裳汉服 · 优化预览</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:30px 20px}
-h1{color:#fff;font-size:20px;margin-bottom:8px;letter-spacing:.1em}
-.subtitle{color:#888;font-size:13px;margin-bottom:24px}
-.phone-frame{
-  width:390px;height:844px;border-radius:44px;
-  background:#000;padding:12px;
-  box-shadow:0 20px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08);
-  position:relative;
+body{background:#0f0f1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif;color:#e0e0e0;min-height:100vh}
+.hero-section{
+  text-align:center;padding:60px 20px 40px;
+  background:linear-gradient(180deg,#1a1028 0%,#0f0f1a 100%);
 }
+.hero-section h1{
+  font-size:32px;font-weight:700;letter-spacing:.15em;
+  background:linear-gradient(135deg,#C4788A,#E8A0B0,#C9A87C);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:8px;
+}
+.hero-section .sub{color:#888;font-size:14px;letter-spacing:.2em}
+.hero-section .badge{
+  display:inline-block;margin-top:16px;padding:6px 16px;border-radius:20px;
+  font-size:12px;font-weight:600;letter-spacing:.08em;
+  background:rgba(196,120,138,.15);color:#C4788A;border:1px solid rgba(196,120,138,.2);
+}
+
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* Phone mockups */
+.phones{
+  display:flex;gap:24px;justify-content:center;flex-wrap:wrap;
+  padding:20px 0 40px;
+}
+.phone{
+  width:280px;background:#000;border-radius:32px;padding:8px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.06);
+  position:relative;transition:transform .4s;
+}
+.phone:hover{transform:translateY(-8px)}
 .phone-notch{
-  width:120px;height:28px;background:#000;border-radius:0 0 16px 16px;
-  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;
+  width:90px;height:22px;background:#000;border-radius:0 0 12px 12px;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2;
 }
 .phone-screen{
-  width:100%;height:100%;border-radius:32px;overflow:hidden;
-  background:#FFF8F6;position:relative;
+  border-radius:24px;overflow:hidden;background:#FFF8F6;
+  aspect-ratio:390/844;
 }
-.phone-screen iframe{
-  width:100%;height:100%;border:none;border-radius:32px;
+.phone-screen img{width:100%;height:100%;object-fit:cover;object-position:top}
+.phone-label{
+  text-align:center;padding:12px 0 4px;
+  font-size:13px;font-weight:600;color:#aaa;letter-spacing:.08em;
 }
 .phone-bar{
-  position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
-  width:120px;height:5px;background:rgba(255,255,255,.3);border-radius:3px;
+  position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+  width:100px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;
 }
-.controls{
-  display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center;
+
+/* Feature grid */
+.features{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:16px;padding:0 0 48px;
 }
-.ctrl-btn{
-  padding:10px 20px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.05);color:#ccc;font-size:13px;cursor:pointer;
-  transition:all .3s;letter-spacing:.05em;
+.feat{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;padding:20px;transition:all .3s;
 }
-.ctrl-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
-.ctrl-btn.active{background:linear-gradient(135deg,#C4788A,#A85A6C);color:#fff;border-color:transparent}
-.info{
-  margin-top:20px;color:#666;font-size:12px;text-align:center;line-height:1.8;max-width:400px;
+.feat:hover{background:rgba(255,255,255,.06);border-color:rgba(196,120,138,.2)}
+.feat-icon{font-size:28px;margin-bottom:10px}
+.feat-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px;letter-spacing:.04em}
+.feat-desc{font-size:13px;color:#888;line-height:1.7}
+.feat-tag{
+  display:inline-block;margin-top:8px;padding:3px 10px;border-radius:8px;
+  font-size:10px;font-weight:600;letter-spacing:.05em;
 }
-.info a{color:#C4788A;text-decoration:none}
-@media(max-width:440px){
-  .phone-frame{width:100%;height:calc(100vh - 200px);border-radius:24px;padding:6px}
-  .phone-notch{display:none}
-  .phone-screen{border-radius:18px}
-  .phone-screen iframe{border-radius:18px}
+.feat-tag.frontend{background:rgba(96,165,250,.12);color:#60a5fa}
+.feat-tag.backend{background:rgba(52,211,153,.12);color:#34d399}
+
+/* Diff table */
+.diff-section{padding:0 0 60px}
+.diff-section h2{
+  font-size:22px;font-weight:700;color:#fff;text-align:center;
+  margin-bottom:24px;letter-spacing:.08em;
+}
+.diff-table{
+  width:100%;border-collapse:collapse;
+  background:rgba(255,255,255,.02);border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+}
+.diff-table th{
+  text-align:left;padding:14px 16px;font-size:12px;font-weight:600;
+  color:#888;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);
+}
+.diff-table td{
+  padding:12px 16px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);
+  vertical-align:top;
+}
+.diff-table tr:last-child td{border:none}
+.diff-table .area{font-weight:600;color:#fff;white-space:nowrap}
+.diff-table .before{color:#666}
+.diff-table .after{color:#C4788A;font-weight:500}
+
+/* Footer */
+.footer{
+  text-align:center;padding:30px 20px;border-top:1px solid rgba(255,255,255,.06);
+  color:#555;font-size:12px;
+}
+.footer a{color:#C4788A;text-decoration:none}
+
+@media(max-width:900px){
+  .phones{flex-direction:column;align-items:center}
+  .phone{width:260px}
 }
 </style>
 </head>
 <body>
 
-<h1>🌸 霓裳 · 汉服妆造预约</h1>
-<div class="subtitle">微信小程序 UX 预览 · 面向 18-35 岁女性用户</div>
+<div class="hero-section">
+  <h1>🌸 霓裳 · 汉服妆造</h1>
+  <div class="sub">微信小程序 · 用户体验优化方案</div>
+  <div class="badge">目标用户：18-35 岁女性</div>
+</div>
 
-<div class="phone-frame">
-  <div class="phone-notch"></div>
-  <div class="phone-screen">
-    <iframe id="preview" src="http://localhost:3000"></iframe>
+<div class="container">
+
+<!-- Phone Screenshots -->
+<div class="phones">
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <img src="screenshots/home.jpg" alt="首页">
+    </div>
+    <div class="phone-label">📸 首页 · 客片鉴赏</div>
+    <div class="phone-bar"></div>
   </div>
-  <div class="phone-bar"></div>
+  <div class="phone">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <img src="screenshots/packages.jpg" alt="套餐">
+    </div>
+    <div class="phone-label">💄 套餐 · 妆造套餐</div>
+    <div class="phone-bar"></div>
+  </div>
 </div>
 
-<div class="controls">
-  <button class="ctrl-btn active" onclick="reload()">🔄 刷新</button>
-  <button class="ctrl-btn" onclick="showDiff()">📊 优化对比</button>
-  <button class="ctrl-btn" onclick="window.open('http://localhost:3000/admin','_blank')">⚙️ 管理后台</button>
+<!-- Features -->
+<h2 style="font-size:20px;font-weight:700;color:#fff;text-align:center;margin-bottom:24px;letter-spacing:.08em">✨ 新增功能</h2>
+<div class="features">
+  <div class="feat">
+    <div class="feat-icon">🎠</div>
+    <div class="feat-title">Hero 轮播 Banner</div>
+    <div class="feat-desc">3张精美 Banner 自动切换，4秒轮播 + 圆点指示器，展示春季限定、人气套餐、闺蜜优惠</div>
+    <span class="feat-tag frontend">前端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">👥</div>
+    <div class="feat-title">社交证明条</div>
+    <div class="feat-desc">"1268位小姐姐已预约 · ★4.9好评率"，增强信任感和从众心理</div>
+    <span class="feat-tag frontend">前端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">🎁</div>
+    <div class="feat-title">新人优惠券</div>
+    <div class="feat-desc">粉色渐变横幅，"首单9折"，点击领取交互，已领取状态切换</div>
+    <span class="feat-tag frontend">前端</span>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📸</div>
+    <div class="feat-title">想拍同款</div>
+    <div class="feat-desc">每张客片卡片底部新增按钮，一键跳转套餐页，缩短转化路径</div>
+    <span class="feat-tag frontend">前端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">⭐</div>
+    <div class="feat-title">好评精选</div>
+    <div class="feat-desc">首页底部展示用户评价卡片：头像、昵称、五星评分、评价内容、关联套餐</div>
+    <span class="feat-tag frontend">前端</span>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">📊</div>
+    <div class="feat-title">套餐评分 + 预约数</div>
+    <div class="feat-desc">每个套餐卡片显示 ★评分、评价条数、已预约人数，增强决策信心</div>
+    <span class="feat-tag frontend">前端</span>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">⏰</div>
+    <div class="feat-title">限时倒计时</div>
+    <div class="feat-desc">24小时倒计时条，呼吸发光效果，营造紧迫感促进下单</div>
+    <span class="feat-tag frontend">前端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">👑</div>
+    <div class="feat-title">会员等级 + 积分</div>
+    <div class="feat-desc">个人中心展示金卡会员徽章 + 680积分，增加归属感和忠诚度</div>
+    <span class="feat-tag frontend">前端</span>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">🎫</div>
+    <div class="feat-title">优惠券中心</div>
+    <div class="feat-desc">个人中心「我的优惠券」入口，展示3张券（9折/减50/减80），弹窗管理</div>
+    <span class="feat-tag frontend">前端</span>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">💫</div>
+    <div class="feat-title">10+ 种 CSS 动画</div>
+    <div class="feat-desc">fadeSlideUp / scaleIn / heartbeat / confetti / ripple / glow / float 等微交互动画</div>
+    <span class="feat-tag frontend">前端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">🔧</div>
+    <div class="feat-title">评价系统 API</div>
+    <div class="feat-desc">评价提交/查询/统计接口，仅限已完成订单，防重复评价，支持评分分布</div>
+    <span class="feat-tag backend">后端</span>
+  </div>
+  <div class="feat">
+    <div class="feat-icon">💳</div>
+    <div class="feat-title">优惠券系统 API</div>
+    <div class="feat-desc">领取/验证/使用完整链路，支持百分比和固定金额，检查过期、门槛、上限</div>
+    <span class="feat-tag backend">后端</span>
+  </div>
 </div>
 
-<div class="info">
-  <b>优化清单：</b><br>
-  ✅ Hero 轮播 Banner · ✅ 社交证明条 · ✅ 新人优惠券<br>
-  ✅ 客片「拍同款」· ✅ 好评精选 · ✅ 套餐评分+预约数<br>
-  ✅ 限时倒计时 · ✅ 会员等级 · ✅ 积分 · ✅ CSS 动画<br><br>
-  后端：评价系统 / 优惠券 / 会员等级 / 公开统计 API<br>
+<!-- Diff Table -->
+<div class="diff-section">
+  <h2>📊 优化前后对比</h2>
+  <table class="diff-table">
+    <thead><tr><th>区域</th><th>优化前</th><th>优化后</th></tr></thead>
+    <tbody>
+      <tr><td class="area">首页 Banner</td><td class="before">静态单张图片</td><td class="after">3 张自动轮播 + 圆点指示器</td></tr>
+      <tr><td class="area">社交证明</td><td class="before">❌ 无</td><td class="after">1268人已预约 + ★4.9 好评率</td></tr>
+      <tr><td class="area">新人营销</td><td class="before">❌ 无</td><td class="after">粉色优惠券横幅 + 领取交互</td></tr>
+      <tr><td class="area">客片卡片</td><td class="before">图片 + 标签 + 收藏</td><td class="after">+ 「📸 想拍同款」转化按钮</td></tr>
+      <tr><td class="area">用户评价</td><td class="before">❌ 无</td><td class="after">好评精选区域（头像/评分/内容）</td></tr>
+      <tr><td class="area">套餐信息</td><td class="before">名称 / 价格 / 时长</td><td class="after">+ ★评分 + 评价数 + 已预约人数</td></tr>
+      <tr><td class="area">限时活动</td><td class="before">❌ 无</td><td class="after">24h 倒计时 + 呼吸发光效果</td></tr>
+      <tr><td class="area">个人中心</td><td class="before">基础头像 + 统计</td><td class="after">+ 👑 金卡会员 + ✨ 680 积分</td></tr>
+      <tr><td class="area">功能入口</td><td class="before">预约 / 客片 / 套餐 / 关于</td><td class="after">+ 🎫 优惠券(3) + ⭐ 我的评价</td></tr>
+      <tr><td class="area">动画效果</td><td class="before">基础 CSS transition</td><td class="after">10+ 种 keyframe 动画</td></tr>
+      <tr><td class="area">后端 API</td><td class="before">基础 CRUD + 订单</td><td class="after">+ 评价 / 优惠券 / 会员 / 统计</td></tr>
+      <tr><td class="area">数据库</td><td class="before">7 张表</td><td class="after">11 张表（+reviews/coupons/会员）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<div class="footer">
+  霓裳汉服妆造预约系统 · 面向 18-35 岁女性优化<br>
   <a href="https://github.com/815378710-rgb/hanfu-booking" target="_blank">GitHub 仓库 →</a>
 </div>
 
-<!-- Diff Modal -->
-<div id="diffModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#1e1e2e;border-radius:16px;max-width:700px;width:100%;max-height:80vh;overflow-y:auto;padding:24px;color:#ccc">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <h2 style="color:#fff;font-size:18px">📊 优化前后对比</h2>
-      <button onclick="document.getElementById('diffModal').style.display='none'" style="background:none;border:none;color:#888;font-size:24px;cursor:pointer">×</button>
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead>
-        <tr style="border-bottom:1px solid #333">
-          <th style="text-align:left;padding:10px;color:#888">区域</th>
-          <th style="text-align:left;padding:10px;color:#666">优化前</th>
-          <th style="text-align:left;padding:10px;color:#C4788A">优化后</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">首页 Banner</td>
-          <td style="padding:10px;color:#888">静态单张图</td>
-          <td style="padding:10px">3张自动轮播 + 圆点指示器</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">社交证明</td>
-          <td style="padding:10px;color:#888">❌ 无</td>
-          <td style="padding:10px">1268人已预约 + ★4.9好评</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">新人优惠</td>
-          <td style="padding:10px;color:#888">❌ 无</td>
-          <td style="padding:10px">粉色渐变横幅 + 领取交互</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">客片卡片</td>
-          <td style="padding:10px;color:#888">图片 + 收藏</td>
-          <td style="padding:10px">+ 「📸 想拍同款」按钮</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">用户评价</td>
-          <td style="padding:10px;color:#888">❌ 无</td>
-          <td style="padding:10px">好评精选区域（头像/评分/内容）</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">套餐卡片</td>
-          <td style="padding:10px;color:#888">名称/价格/时长</td>
-          <td style="padding:10px">+ ★评分 + 评价数 + 预约人数</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">限时活动</td>
-          <td style="padding:10px;color:#888">❌ 无</td>
-          <td style="padding:10px">24h 倒计时 + 呼吸发光</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">个人中心</td>
-          <td style="padding:10px;color:#888">基础信息</td>
-          <td style="padding:10px">+ 👑会员等级 + ✨积分 + 优惠券</td>
-        </tr>
-        <tr style="border-bottom:1px solid #222">
-          <td style="padding:10px;font-weight:600">动画效果</td>
-          <td style="padding:10px;color:#888">基础 transition</td>
-          <td style="padding:10px">10+ 种 keyframe 动画</td>
-        </tr>
-        <tr>
-          <td style="padding:10px;font-weight:600">后端 API</td>
-          <td style="padding:10px;color:#888">基础 CRUD</td>
-          <td style="padding:10px">+ 评价/优惠券/会员/统计</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<script>
-function reload(){document.getElementById('preview').src='http://localhost:3000?t='+Date.now()}
-function showDiff(){document.getElementById('diffModal').style.display='flex'}
-</script>
 </body>
 </html>
