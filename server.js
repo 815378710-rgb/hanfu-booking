@@ -20,7 +20,15 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${crypto.randomBytes(4).toString('hex')}${ext}`);
   }
 });
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const ALLOWED_IMG_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_IMG_TYPES.includes(file.mimetype)) cb(null, true);
+    else cb(new Error('只允许上传 JPG/PNG/GIF/WEBP 图片'));
+  }
+});
 
 app.use(express.json());
 app.use('/uploads', express.static(uploadsDir));
@@ -30,6 +38,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const db = new Database(path.join(__dirname, 'hanfu.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
+db.pragma('busy_timeout = 5000');
 
 // ── Init tables ──
 db.exec(`
@@ -121,21 +130,6 @@ db.exec(`
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
   );
 
-  CREATE TABLE IF NOT EXISTS reviews (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    order_id INTEGER NOT NULL,
-    package_id INTEGER NOT NULL,
-    rating INTEGER NOT NULL,
-    content TEXT DEFAULT '',
-    images TEXT DEFAULT '[]',
-    is_anonymous INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now','localtime')),
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (order_id) REFERENCES orders(id),
-    FOREIGN KEY (package_id) REFERENCES packages(id)
-  );
-
   CREATE TABLE IF NOT EXISTS coupons (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT UNIQUE NOT NULL,
@@ -186,6 +180,7 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    salt TEXT DEFAULT '',
     shop_name TEXT DEFAULT '霓裳汉服',
     phone TEXT DEFAULT '',
     avatar TEXT DEFAULT '',
@@ -224,8 +219,9 @@ if (scCount === 0) {
 // Seed default merchant if empty
 const merchantCount = db.prepare('SELECT COUNT(*) as c FROM merchants').get().c;
 if (merchantCount === 0) {
-  const defaultPass = crypto.createHash('sha256').update('admin123').digest('hex');
-  db.prepare('INSERT INTO merchants (username, password, shop_name, phone) VALUES (?, ?, ?, ?)').run('admin', defaultPass, '霓裳汉服', '13800000000');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const defaultPass = crypto.createHash('sha256').update('admin123' + salt).digest('hex');
+  db.prepare('INSERT INTO merchants (username, password, salt, shop_name, phone) VALUES (?, ?, ?, ?, ?)').run('admin', defaultPass, salt, '霓裳汉服', '13800000000');
 }
 
 // ── Seed demo data if empty ──
@@ -295,7 +291,7 @@ if (couponCount === 0) {
   insCoupon.run('SAVE80', '满500减80', 'fixed', 80, 500, 300, '2026-01-01', '2026-12-31');
 }
 
-// ── Seed demo orders for reviews ──
+// ── Seed demo orders ──
 const demoOrderCount = db.prepare("SELECT COUNT(*) as c FROM orders WHERE user_id IN (SELECT id FROM users WHERE openid LIKE 'user%')").get().c;
 if (demoOrderCount === 0 && db.prepare('SELECT COUNT(*) as c FROM users WHERE openid LIKE ?').get('user%_openid').c > 0) {
   const demoUsers = db.prepare("SELECT id FROM users WHERE openid LIKE 'user%_openid'").all();
@@ -309,24 +305,10 @@ if (demoOrderCount === 0 && db.prepare('SELECT COUNT(*) as c FROM users WHERE op
     const phones = ['13900000001', '13900000002', '13900000003'];
 
     for (let i = 0; i < demoUsers.length && i < pkgs.length; i++) {
-      const no = genOrderNo();
-      insOrder.run(no, demoUsers[i].id, pkgs[i].id, '2026-04-01', '10:00-12:00', names[i], phones[i], pkgs[i].price, 'completed', pkgs[i].price);
+      const ts = new Date().toISOString().replace(/[-T:]/g,'').slice(0,14);
+      const rand = crypto.randomBytes(3).toString('hex').toUpperCase();
+      insOrder.run(`HF${ts}${rand}`, demoUsers[i].id, pkgs[i].id, '2026-04-01', '10:00-12:00', names[i], phones[i], pkgs[i].price, 'completed', pkgs[i].price);
     }
-  }
-}
-
-// ── Seed reviews ──
-const reviewCount = db.prepare('SELECT COUNT(*) as c FROM reviews').get().c;
-if (reviewCount === 0) {
-  const completedOrders = db.prepare(
-    "SELECT o.id as order_id, o.user_id, o.package_id FROM orders o WHERE o.status='completed' ORDER BY o.id LIMIT 3"
-  ).all();
-
-  if (completedOrders.length >= 3) {
-    const insReview = db.prepare('INSERT INTO reviews (user_id, order_id, package_id, rating, content, is_anonymous) VALUES (?,?,?,?,?,?)');
-    insReview.run(completedOrders[0].user_id, completedOrders[0].order_id, completedOrders[0].package_id, 5, '超级满意的体验！化妆师技术超好，发型做得特别精致，穿上汉服感觉自己穿越回了古代。照片拍得也很美，强烈推荐！下次还会再来～', 0);
-    insReview.run(completedOrders[1].user_id, completedOrders[1].order_id, completedOrders[1].package_id, 5, '和闺蜜一起来的，两个人的妆造都很用心。服装选择很多，每一件都好美。服务态度特别好，耐心帮我们搭配。拍出来的照片超级出片！❤️', 0);
-    insReview.run(completedOrders[2].user_id, completedOrders[2].order_id, completedOrders[2].package_id, 5, '第一次穿汉服拍照，本来很紧张，但店里的小姐姐特别温柔，妆容和发型都做得超级好看！选的宋制很适合我，已经推荐给朋友们了，一定会回购！', 0);
   }
 }
 
@@ -405,12 +387,13 @@ function requireMerchant(req, res, next) {
 app.post('/api/merchant/login', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ error: '请输入用户名和密码' });
-  const hash = crypto.createHash('sha256').update(password).digest('hex');
-  const merchant = db.prepare('SELECT * FROM merchants WHERE username = ? AND password = ?').get(username, hash);
+  const merchant = db.prepare('SELECT * FROM merchants WHERE username = ?').get(username);
   if (!merchant) return res.status(401).json({ error: '用户名或密码错误' });
+  const hash = crypto.createHash('sha256').update(password + (merchant.salt || '')).digest('hex');
+  if (hash !== merchant.password) return res.status(401).json({ error: '用户名或密码错误' });
   const token = crypto.randomBytes(24).toString('hex');
   merchantSessions.set(token, merchant.id);
-  const { password: _, ...safe } = merchant;
+  const { password: _, salt: __, ...safe } = merchant;
   res.json({ token, merchant: safe });
 });
 
@@ -430,10 +413,11 @@ app.post('/api/merchant/password', requireMerchant, (req, res) => {
   const { old_password, new_password } = req.body;
   if (!old_password || !new_password) return res.status(400).json({ error: '请填写完整' });
   if (new_password.length < 6) return res.status(400).json({ error: '密码至少6位' });
-  const oldHash = crypto.createHash('sha256').update(old_password).digest('hex');
+  const oldHash = crypto.createHash('sha256').update(old_password + (req.merchant.salt || '')).digest('hex');
   if (oldHash !== req.merchant.password) return res.status(400).json({ error: '原密码错误' });
-  const newHash = crypto.createHash('sha256').update(new_password).digest('hex');
-  db.prepare('UPDATE merchants SET password = ? WHERE id = ?').run(newHash, req.merchant.id);
+  const newSalt = crypto.randomBytes(16).toString('hex');
+  const newHash = crypto.createHash('sha256').update(new_password + newSalt).digest('hex');
+  db.prepare('UPDATE merchants SET password = ?, salt = ? WHERE id = ?').run(newHash, newSalt, req.merchant.id);
   res.json({ ok: true });
 });
 
@@ -504,7 +488,6 @@ app.get('/api/dashboard/stats', requireMerchant, (req, res) => {
   const totalOrders = db.prepare("SELECT COUNT(*) as c FROM orders").get().c;
   const totalRevenue = db.prepare("SELECT COALESCE(SUM(final_amount),0) as s FROM orders WHERE status IN ('booked','completed')").get().s;
   const totalUsers = db.prepare("SELECT COUNT(*) as c FROM users").get().c;
-  const totalReviews = db.prepare("SELECT COUNT(*) as c FROM reviews").get().c;
 
   // Recent orders (last 5)
   const recentOrders = db.prepare(`
@@ -534,7 +517,7 @@ app.get('/api/dashboard/stats', requireMerchant, (req, res) => {
   res.json({
     today: { orders: todayOrders, revenue: todayRevenue, booked_today: todayBooked, pending: todayPending },
     month: { orders: monthOrders, revenue: monthRevenue },
-    total: { orders: totalOrders, revenue: totalRevenue, users: totalUsers, reviews: totalReviews },
+    total: { orders: totalOrders, revenue: totalRevenue, users: totalUsers },
     recent_orders: recentOrders,
     trend,
     popular_packages: popularPkgs
@@ -597,12 +580,9 @@ app.get('/api/packages', (req, res) => {
   const baseWhere = all ? '' : 'WHERE p.is_active=1';
   const sql = `
     SELECT p.*,
-      COUNT(DISTINCT o.id) as booking_count,
-      COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating,
-      COUNT(DISTINCT r.id) as review_count
+      COUNT(DISTINCT o.id) as booking_count
     FROM packages p
     LEFT JOIN orders o ON o.package_id = p.id AND o.status IN ('booked','completed')
-    LEFT JOIN reviews r ON r.package_id = p.id
     ${baseWhere}
     GROUP BY p.id
     ORDER BY p.id
@@ -884,7 +864,6 @@ app.delete('/api/orders/:id', requireUser, (req, res) => {
   if (!['cancelled', 'completed'].includes(order.status)) return res.status(400).json({ error: '只能删除已取消或已完成的订单' });
   const deleteOrder = db.transaction(() => {
     db.prepare('DELETE FROM order_guests WHERE order_id=?').run(order.id);
-    db.prepare('DELETE FROM reviews WHERE order_id=?').run(order.id);
     db.prepare('DELETE FROM user_coupons WHERE order_id=?').run(order.id);
     db.prepare('DELETE FROM orders WHERE id=?').run(order.id);
   });
@@ -930,60 +909,6 @@ app.get('/api/orders/export', requireStaff, (req, res) => {
   // BOM for Excel
   res.write('\uFEFF' + header + '\n' + csvRows.join('\n'));
   res.end();
-});
-
-// ════════════════════════════════════════
-//  Reviews (评价系统)
-// ════════════════════════════════════════
-
-// Get reviews list (with optional package_id filter)
-app.get('/api/reviews', (req, res) => {
-  const { package_id } = req.query;
-  let sql = `
-    SELECT r.*, u.nickname, u.avatar,
-      CASE WHEN r.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END as display_name
-    FROM reviews r JOIN users u ON r.user_id = u.id
-  `;
-  const params = [];
-  if (package_id) { sql += ' WHERE r.package_id = ?'; params.push(package_id); }
-  sql += ' ORDER BY r.created_at DESC';
-  res.json(db.prepare(sql).all(...params));
-});
-
-// Submit review (must be completed order)
-app.post('/api/reviews', requireUser, (req, res) => {
-  const { order_id, rating, content, images, is_anonymous } = req.body;
-  if (!order_id || !rating) return res.status(400).json({ error: '请提供订单ID和评分' });
-  if (rating < 1 || rating > 5) return res.status(400).json({ error: '评分范围1-5' });
-
-  const order = db.prepare('SELECT * FROM orders WHERE id=? AND user_id=?').get(order_id, req.user.id);
-  if (!order) return res.status(404).json({ error: '订单不存在' });
-  if (order.status !== 'completed') return res.status(400).json({ error: '只能对已完成的订单进行评价' });
-
-  const existing = db.prepare('SELECT id FROM reviews WHERE order_id=?').get(order_id);
-  if (existing) return res.status(400).json({ error: '该订单已评价' });
-
-  const r = db.prepare(
-    'INSERT INTO reviews (user_id, order_id, package_id, rating, content, images, is_anonymous) VALUES (?,?,?,?,?,?,?)'
-  ).run(req.user.id, order_id, order.package_id, rating, content || '', JSON.stringify(images || []), is_anonymous ? 1 : 0);
-
-  res.json(db.prepare('SELECT * FROM reviews WHERE id=?').get(r.lastInsertRowid));
-});
-
-// Get review stats for a package
-app.get('/api/reviews/stats/:packageId', (req, res) => {
-  const pid = req.params.packageId;
-  const stats = db.prepare(`
-    SELECT COUNT(*) as total, ROUND(AVG(rating), 1) as avg_rating,
-      SUM(CASE WHEN rating=5 THEN 1 ELSE 0 END) as five_star,
-      SUM(CASE WHEN rating=4 THEN 1 ELSE 0 END) as four_star,
-      SUM(CASE WHEN rating=3 THEN 1 ELSE 0 END) as three_star,
-      SUM(CASE WHEN rating=2 THEN 1 ELSE 0 END) as two_star,
-      SUM(CASE WHEN rating=1 THEN 1 ELSE 0 END) as one_star
-    FROM reviews WHERE package_id=?
-  `).get(pid);
-  const goodRate = stats.total > 0 ? Math.round(((stats.five_star + stats.four_star) / stats.total) * 100) : 0;
-  res.json({ ...stats, good_rate: goodRate, package_id: Number(pid) });
 });
 
 // ════════════════════════════════════════
@@ -1082,10 +1007,7 @@ app.post('/api/coupons/validate', requireUser, (req, res) => {
 // Public stats for social proof
 app.get('/api/stats/public', (req, res) => {
   const totalBookings = db.prepare("SELECT COUNT(*) as c FROM orders WHERE status IN ('booked','completed')").get().c;
-  const reviewStats = db.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN rating>=4 THEN 1 ELSE 0 END) as good FROM reviews").get();
-  const goodRate = reviewStats.total > 0 ? Math.round((reviewStats.good / reviewStats.total) * 100) : 0;
 
-  // Return customers: users with 2+ completed/booked orders
   const repeatSql = `
     SELECT COUNT(*) as c FROM (
       SELECT user_id FROM orders WHERE status IN ('booked','completed')
@@ -1098,8 +1020,6 @@ app.get('/api/stats/public', (req, res) => {
 
   res.json({
     total_bookings: totalBookings,
-    total_reviews: reviewStats.total,
-    good_rate: goodRate,
     repeat_rate: repeatRate,
     total_customers: totalCustomers
   });
@@ -1109,15 +1029,12 @@ app.get('/api/stats/public', (req, res) => {
 app.get('/api/packages/popular', (req, res) => {
   const rows = db.prepare(`
     SELECT p.*,
-      COUNT(DISTINCT o.id) as booking_count,
-      COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating,
-      COUNT(DISTINCT r.id) as review_count
+      COUNT(DISTINCT o.id) as booking_count
     FROM packages p
     LEFT JOIN orders o ON o.package_id = p.id AND o.status IN ('booked','completed')
-    LEFT JOIN reviews r ON r.package_id = p.id
     WHERE p.is_active = 1
     GROUP BY p.id
-    ORDER BY booking_count DESC, avg_rating DESC
+    ORDER BY booking_count DESC
   `).all();
   res.json(rows);
 });

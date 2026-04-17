@@ -1177,8 +1177,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
       <span class="social-proof-num">{{totalBookings || '...'}}</span>位小姐姐已预约
     </div>
     <div class="social-proof-item">
-      <span style="color:#F5A623">★</span>
-      <span class="social-proof-num">{{publicStats.good_rate || 0}}%</span>好评率
+      <span class="social-proof-num">{{publicStats.repeat_rate || 0}}%</span>回头客
     </div>
   </div>
 
@@ -1280,32 +1279,6 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <span class="empty-cta" @click="tab='packages'">去看看套餐 →</span>
   </div>
 
-  <!-- Reviews Section -->
-  <div class="heading" v-if="reviews.length">
-    <div class="heading-row">
-      <div>
-        <div class="heading-en">Reviews</div>
-        <div class="heading-cn">好评精选</div>
-      </div>
-      <span class="heading-more">查看全部 →</span>
-    </div>
-    <div class="heading-line"></div>
-  </div>
-  <div class="reviews-preview" v-if="reviews.length">
-    <div class="review-card" v-for="(r,i) in reviews.slice(0,3)" :key="r.id" :style="{animationDelay:(i*.1)+'s'}">
-      <div class="review-header">
-        <div class="review-avatar">{{(r.display_name||'?')[0]}}</div>
-        <div class="review-info">
-          <div class="review-name">{{r.display_name || '匿名用户'}}</div>
-          <div class="review-meta">
-            <span class="review-stars">{{'★'.repeat(r.rating)}}{{'☆'.repeat(5-r.rating)}}</span>
-            <span>{{r.created_at?.split(' ')[0] || ''}}</span>
-          </div>
-        </div>
-      </div>
-      <div class="review-content">{{r.content}}</div>
-    </div>
-  </div>
   <div class="spacer-lg"></div>
 </div>
 
@@ -1364,12 +1337,6 @@ body{padding-bottom:env(safe-area-inset-bottom)}
           <span class="pkg-tag green">👤 {{p.person_count}}人</span>
           <span class="pkg-tag" v-if="p.price>=699">含摄影</span>
           <span class="pkg-tag gold" v-if="p.person_count>1">闺蜜同行</span>
-        </div>
-        <div class="pkg-rating">
-          <span class="pkg-rating-stars">{{'★'.repeat(Math.round(p.avg_rating||0))}}{{'☆'.repeat(5-Math.round(p.avg_rating||0))}}</span>
-          <span class="pkg-rating-score" v-if="p.avg_rating">{{p.avg_rating.toFixed(1)}}</span>
-          <span class="pkg-rating-count" v-if="p.review_count">{{p.review_count}}条评价</span>
-          <span class="pkg-rating-count" v-else>暂无评价</span>
         </div>
         <div class="pkg-booked-count">🔥 已有{{p.booking_count||0}}人预约</div>
       </div>
@@ -1721,9 +1688,6 @@ body{padding-bottom:env(safe-area-inset-bottom)}
     <div class="my-link" @click="showMyCoupons=true">
       <span><span class="my-link-icon">🎫</span>我的优惠券 <span style="color:var(--rose);font-size:12px">({{availableCoupons.length}})</span></span><span class="my-link-arrow">→</span>
     </div>
-    <div class="my-link">
-      <span><span class="my-link-icon">⭐</span>我的评价</span><span class="my-link-arrow">→</span>
-    </div>
     <div class="my-link" @click="tab='photos'">
       <span><span class="my-link-icon">📸</span>浏览客片</span><span class="my-link-arrow">→</span>
     </div>
@@ -1983,7 +1947,6 @@ createApp({
     const couponClaimed=ref(false);
     const showMyCoupons=ref(false);
     const totalBookings=ref(0);
-    const avgRating=ref('0.0');
     const publicStats=ref({});
     const availableCoupons=ref([]);
     const selectedCouponId=ref(null);
@@ -1995,20 +1958,20 @@ createApp({
       {tag:'GIRLFRIEND',title:'闺蜜同行 · 双倍快乐',sub:'两人同行套餐 ¥999，一起穿越千年',img:'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'},
     ]);
     const myCoupons = availableCoupons; // alias for backward compat
-    const reviews=ref([]);
-    async function loadReviews(){
-      try{ reviews.value = await api('/reviews'); }catch(e){}
-    }
     async function loadPublicStats(){
       try{
         const s = await api('/stats/public');
         publicStats.value = s;
         totalBookings.value = s.total_bookings;
-        avgRating.value = s.good_rate ? (4 + s.good_rate/100*1).toFixed(1) : '0.0';
       }catch(e){}
     }
     async function loadAvailableCoupons(){
-      try{ availableCoupons.value = await api('/coupons/available'); }catch(e){}
+      try{
+        availableCoupons.value = await api('/coupons/available');
+        if(availableCoupons.value.some(c => c.code === 'NEWUSER9')){
+          couponClaimed.value = true;
+        }
+      }catch(e){}
     }
     const announcements=ref([]);
     async function loadAnnouncements(){
@@ -2047,14 +2010,18 @@ createApp({
     });
 
     // Countdown timer
+    // Countdown timer - end of current month
+    const campaignEnd = new Date();
+    campaignEnd.setMonth(campaignEnd.getMonth() + 1, 0);
+    campaignEnd.setHours(23,59,59,999);
     function updateCountdown(){
       const now=new Date();
-      const end=new Date(now);end.setHours(23,59,59,999);
-      const diff=Math.max(0,end-now);
-      const h=String(Math.floor(diff/3600000)).padStart(2,'0');
+      const diff=Math.max(0,campaignEnd-now);
+      const d=Math.floor(diff/86400000);
+      const h=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
       const m=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
       const s=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-      countdown.value={h,m,s};
+      countdown.value={h: d > 0 ? d+'天'+h : h, m, s};
     }
 
     // Hero auto-rotation
@@ -2205,7 +2172,9 @@ createApp({
     }
     function jumpNextWeek(){
       const t=new Date();
-      t.setDate(t.getDate()+(7-t.getDay()+1));
+      const day=t.getDay();
+      const diff = day === 0 ? 1 : (8 - day);
+      t.setDate(t.getDate()+diff);
       calYear.value=t.getFullYear();calMonth.value=t.getMonth();
     }
 
@@ -2343,7 +2312,7 @@ createApp({
     onMounted(async()=>{
       try{
         await initUser();
-        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadReviews(),loadPublicStats(),loadAvailableCoupons(),loadAnnouncements(),loadShopInfo(),loadCancelRules(),loadOrders()]);
+        await Promise.all([loadPhotos(),loadCategories(),loadPackages(),loadPublicStats(),loadAvailableCoupons(),loadAnnouncements(),loadShopInfo(),loadCancelRules(),loadOrders()]);
         // Start timers
         updateCountdown();
         setInterval(updateCountdown,1000);
@@ -2370,8 +2339,8 @@ createApp({
       showCancelModal,showPkgDetail,confirmCancel,cancelOrder,deleteOrder,
       loadOrders,
       // New features
-      couponClaimed,showMyCoupons,totalBookings,avgRating,
-      countdown,heroIndex,heroBanners,reviews,
+      couponClaimed,showMyCoupons,totalBookings,
+      countdown,heroIndex,heroBanners,
       claimCoupon,wantSameStyle,
       publicStats,availableCoupons,selectedCouponId,couponDiscount,
       announcements,shopInfo,cancelRules,
